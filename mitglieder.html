@@ -40,12 +40,19 @@
             padding-bottom: 8px; border-bottom: 2px solid var(--primary);
         }
 
-        .search-box { position: relative; margin-bottom: 12px; }
-        .search-input {
+        .search-box { position: relative; margin-bottom: 8px; }
+        .search-input, .sort-select {
             width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1;
             border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+            background: white; font-family: inherit;
         }
-        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
+        .search-input:focus, .sort-select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
+
+        .sort-container {
+            display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px;
+            background: #e2e8f0; padding: 8px; border-radius: 6px;
+        }
+        .sort-label { font-size: 0.75rem; font-weight: 600; color: #475569; }
 
         .btn {
             width: 100%; color: white; border: none; padding: 9px; border-radius: 6px;
@@ -60,7 +67,7 @@
         .btn-danger:hover { background-color: #c82333; }
         .btn-secondary { background: #64748b; color: white; border: none; padding: 9px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem; width: 100%; margin-bottom: 8px; }
 
-        .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #e2e8f0; padding: 3px; border-radius: 6px; }
+        .filter-tabs { display: flex; gap: 5px; margin-bottom: 10px; background: #e2e8f0; padding: 3px; border-radius: 6px; }
         .filter-tab { flex: 1; text-align: center; padding: 5px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 4px; color: #64748b; }
         .filter-tab.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
@@ -131,7 +138,6 @@
         .group-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
         .group-manage-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
 
-        /* DRUCK STYLES FÜR DEN PDF-EXPORT */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
@@ -161,6 +167,23 @@
 
         <div class="search-box" style="margin-top: 10px;">
             <input type="text" class="search-input" placeholder="🔍 Mitglied suchen..." oninput="filterMemberList(this.value)">
+        </div>
+
+        <div class="sort-container">
+            <div>
+                <div class="sort-label">Sortieren nach:</div>
+                <select id="list-sort-by" class="sort-select" onchange="renderMemberList()">
+                    <option value="lastname">Alphabetisch (Nachname)</option>
+                    <option value="firstname">Alphabetisch (Vorname)</option>
+                    <option value="created">Neueste zuerst</option>
+                </select>
+            </div>
+            <div>
+                <div class="sort-label">Gruppe filtern:</div>
+                <select id="list-filter-group" class="sort-select" onchange="renderMemberList()">
+                    <option value="ALL">-- Alle Gruppen --</option>
+                </select>
+            </div>
         </div>
 
         <div class="filter-tabs">
@@ -570,11 +593,15 @@
         }
 
         function getFilteredMembers() {
+            const groupFilter = document.getElementById('list-filter-group')?.value || 'ALL';
+
             return portalData.members.filter(m => {
                 const matchesFilter = (m.status || 'active') === currentFilter;
                 const fullName = ((m.firstname || '') + ' ' + (m.lastname || '')).toLowerCase();
                 const matchesSearch = fullName.includes(currentSearchQuery.toLowerCase());
-                return matchesFilter && matchesSearch;
+                const matchesGroup = (groupFilter === 'ALL') || (m.group === groupFilter);
+
+                return matchesFilter && matchesSearch && matchesGroup;
             });
         }
 
@@ -649,17 +676,27 @@
 
         function renderGroupDropdown() {
             const select = document.getElementById('mb-group');
-            const currentValue = select.value;
+            const listGroupFilter = document.getElementById('list-filter-group');
+            const currentValSelect = select.value;
+            const currentValFilter = listGroupFilter.value;
+
             select.innerHTML = '<option value="">-- Bitte wählen --</option>';
+            listGroupFilter.innerHTML = '<option value="ALL">-- Alle Gruppen --</option>';
 
             portalData.groups.forEach(group => {
-                const opt = document.createElement('option');
-                opt.value = group;
-                opt.innerText = group;
-                select.appendChild(opt);
+                const opt1 = document.createElement('option');
+                opt1.value = group;
+                opt1.innerText = group;
+                select.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = group;
+                opt2.innerText = group;
+                listGroupFilter.appendChild(opt2);
             });
 
-            select.value = currentValue;
+            select.value = currentValSelect;
+            listGroupFilter.value = currentValFilter;
         }
 
         /* --- CSV EXPORT --- */
@@ -879,7 +916,16 @@
             const container = document.getElementById('member-list-container');
             container.innerHTML = '';
 
-            const filtered = getFilteredMembers();
+            let filtered = getFilteredMembers();
+            const sortBy = document.getElementById('list-sort-by')?.value || 'lastname';
+
+            if (sortBy === 'lastname') {
+                filtered.sort((a, b) => (a.lastname || '').localeCompare(b.lastname || '', 'de', { sensitivity: 'base' }));
+            } else if (sortBy === 'firstname') {
+                filtered.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || '', 'de', { sensitivity: 'base' }));
+            } else if (sortBy === 'created') {
+                filtered.reverse();
+            }
 
             filtered.forEach(m => {
                 const card = document.createElement('div');
