@@ -117,6 +117,40 @@
       "notes": [],
       "files": [],
       "status": "active"
+    },
+    {
+      "id": "mb_1789401196942",
+      "firstname": "Alina",
+      "lastname": "Migas",
+      "street": "",
+      "city": "",
+      "gender": "weiblich",
+      "birthdate": "",
+      "agegroup": "",
+      "email": "",
+      "phone": "",
+      "group": "Master | Gall",
+      "dsvid": "",
+      "notes": [],
+      "files": [],
+      "status": "active"
+    },
+    {
+      "id": "mb_1789401208013",
+      "firstname": "Dorit",
+      "lastname": "Möbius",
+      "street": "",
+      "city": "",
+      "gender": "weiblich",
+      "birthdate": "",
+      "agegroup": "",
+      "email": "",
+      "phone": "",
+      "group": "Trainer / Kampfrichter",
+      "dsvid": "",
+      "notes": [],
+      "files": [],
+      "status": "active"
     }
   ]
 }
