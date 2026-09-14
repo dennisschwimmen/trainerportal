@@ -352,7 +352,6 @@
             loadMembersFromGitHub();
         };
 
-        // 1. Daten von GitHub API laden
         async function loadMembersFromGitHub() {
             setStatus('Lade Daten von GitHub...', 'var(--primary)');
 
@@ -388,7 +387,6 @@
             }
         }
 
-        // 2. Daten auf GitHub speichern
         async function saveMembersToGitHub() {
             setStatus('Speichere auf GitHub...', 'var(--primary)');
             const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
@@ -693,8 +691,15 @@
             printWindow.document.close();
         }
 
-        function openNewMemberModal() { document.getElementById('new-member-modal').classList.add('active'); }
-        function closeNewMemberModal() { document.getElementById('new-member-modal').classList.remove('active'); }
+        function openNewMemberModal() {
+            document.getElementById('new-mb-firstname').value = '';
+            document.getElementById('new-mb-lastname').value = '';
+            document.getElementById('new-member-modal').classList.add('active'); 
+        }
+        
+        function closeNewMemberModal() { 
+            document.getElementById('new-member-modal').classList.remove('active'); 
+        }
 
         function createNewMember() {
             const fn = document.getElementById('new-mb-firstname').value.trim();
@@ -703,9 +708,20 @@
 
             const newId = 'mb_' + Date.now();
             const newMember = {
-                id: newId, firstname: fn, lastname: ln, gender: 'männlich',
-                dob: '', street: '', plzort: '', email: '', phone: '',
-                group: '', dsvid: '', number: '', status: currentFilter, notes: []
+                id: newId, 
+                firstname: fn, 
+                lastname: ln, 
+                gender: 'männlich',
+                dob: '', 
+                street: '', 
+                plzort: '', 
+                email: '', 
+                phone: '',
+                group: '', 
+                dsvid: '', 
+                number: '', 
+                status: currentFilter, 
+                notes: []
             };
 
             portalData.members.push(newMember);
