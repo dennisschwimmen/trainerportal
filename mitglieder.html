@@ -110,6 +110,40 @@
             padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; background: #ffffff; font-family: inherit;
         }
         .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--accent); }
+
+        .timeline { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+        .timeline-item { background: #f8fafc; border-left: 3px solid var(--accent); padding: 12px 15px; border-radius: 0 6px 6px 0; position: relative; border: 1px solid #e2e8f0; border-left-width: 3px; }
+        .timeline-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; }
+        .timeline-body { font-size: 0.88rem; color: #334155; white-space: pre-wrap; margin-bottom: 8px; }
+        .timeline-del { position: absolute; top: 8px; right: 8px; cursor: pointer; color: var(--danger); font-size: 0.8rem; font-weight: bold; }
+
+        .file-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; }
+        .file-card { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 5px; position: relative; }
+        .file-card-title { font-size: 0.85rem; font-weight: 600; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .file-card-date { font-size: 0.75rem; color: #64748b; }
+        .file-card-actions { display: flex; gap: 8px; margin-top: 5px; }
+        .file-card-actions a, .file-card-actions span { font-size: 0.75rem; cursor: pointer; text-decoration: none; color: var(--primary); font-weight: 600; }
+        .file-card-actions span.del { color: var(--danger); }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .group-manage-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; max-height: 250px; overflow-y: auto; }
+        .group-manage-item { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; }
+
+        /* DRUCK STYLES FÜR DEN PDF-EXPORT */
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { position: absolute; left: 0; top: 0; width: 100%; font-family: Arial, sans-serif; }
+            .print-card { display: flex; padding: 15px 0; border-bottom: 1px solid #000; page-break-inside: avoid; font-size: 13px; line-height: 1.5; }
+            .print-card:first-child { border-top: 1px solid #000; }
+            .print-num { width: 40px; font-weight: bold; font-size: 14px; }
+            .print-col1 { width: 45%; display: grid; grid-template-columns: 80px 1fr; }
+            .print-col2 { width: 45%; display: grid; grid-template-columns: 90px 1fr; }
+            .print-label { font-weight: normal; }
+            .print-val { font-weight: normal; }
+        }
     </style>
 </head>
 <body>
@@ -118,7 +152,9 @@
         <h2>Mitgliederverwaltung</h2>
 
         <button class="btn btn-primary" onclick="addNewMember()">➕ Neues Mitglied</button>
-        <button class="btn btn-secondary" onclick="addNewGroup()">⚙️ Neue Gruppe anlegen</button>
+        <button class="btn btn-secondary" onclick="openGroupManager()">⚙️ Gruppen verwalten</button>
+        <button class="btn btn-secondary" style="background:#e11d48;" onclick="openPdfModal()">📄 PDF Export</button>
+        <button class="btn btn-secondary" style="background:#0284c7;" onclick="exportToCSV()">📥 CSV Export</button>
         <button class="btn btn-success" onclick="saveMembersToGitHub()">💾 Auf GitHub Speichern</button>
         <button class="btn btn-primary" style="background:#64748b;" onclick="loadMembersFromGitHub()">🔄 Neu Laden</button>
 
@@ -169,6 +205,31 @@
                             <input type="text" id="mb-lastname" oninput="updateCurrentMember('lastname', this.value)">
                         </div>
                         <div class="field-group">
+                            <label>Straße</label>
+                            <input type="text" id="mb-street" oninput="updateCurrentMember('street', this.value)">
+                        </div>
+                        <div class="field-group">
+                            <label>PLZ / Ort</label>
+                            <input type="text" id="mb-city" oninput="updateCurrentMember('city', this.value)">
+                        </div>
+                        <div class="field-group">
+                            <label>Geschlecht</label>
+                            <select id="mb-gender" onchange="updateCurrentMember('gender', this.value)">
+                                <option value="">-- Bitte wählen --</option>
+                                <option value="männlich">männlich</option>
+                                <option value="weiblich">weiblich</option>
+                                <option value="divers">divers</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Geburtstag</label>
+                            <input type="text" id="mb-birthdate" placeholder="DD.MM.YYYY" oninput="updateCurrentMember('birthdate', this.value)">
+                        </div>
+                        <div class="field-group">
+                            <label>Altersklasse</label>
+                            <input type="text" id="mb-agegroup" oninput="updateCurrentMember('agegroup', this.value)">
+                        </div>
+                        <div class="field-group">
                             <label>E-Mail Adresse</label>
                             <input type="email" id="mb-email" oninput="updateCurrentMember('email', this.value)">
                         </div>
@@ -204,15 +265,76 @@
                 </div>
 
                 <div class="form-section">
-                    <h3>Notizen zur Person</h3>
-                    <div class="field-group">
-                        <textarea id="mb-notes" rows="4" placeholder="Hier Notizen eingeben..." oninput="updateCurrentMember('notes', this.value)"></textarea>
+                    <h3>📝 Chronologische Notizen</h3>
+                    <div class="field-group" style="margin-bottom: 10px;">
+                        <textarea id="note-text-input" rows="3" placeholder="Neue Notiz schreiben..."></textarea>
                     </div>
+                    <button class="btn btn-primary" style="width: auto; margin:0 0 15px 0;" onclick="addChronologicalNote()">Notiz speichern</button>
+                    <div class="timeline" id="member-timeline"></div>
+                </div>
+
+                <div class="form-section">
+                    <h3>📁 Dokumenten-Ablage</h3>
+                    <div class="field-group" style="margin-bottom: 10px;">
+                        <label>Neue Datei für dieses Mitglied hochladen</label>
+                        <input type="file" id="member-file-input" style="font-size:0.85rem;" onchange="uploadMemberFile(this)">
+                    </div>
+                    <div class="file-grid" id="member-files-container"></div>
                 </div>
             </div>
 
             <div id="member-akte-empty-state" style="padding:50px; text-align:center; color:#94a3b8; width: 100%;">
                 Bitte wählen Sie ein Mitglied aus der linken Liste aus oder legen Sie ein neues an.
+            </div>
+        </div>
+    </div>
+
+    <!-- UNSICHTBARER DRUCKBEREICH FÜR PDF EXPORT -->
+    <div id="print-area"></div>
+
+    <!-- MODAL GRUPPEN VERWALTEN -->
+    <div id="group-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">Gruppen verwalten</h3>
+            <div class="field-group" style="margin-bottom:15px;">
+                <label>Neue Gruppe hinzufügen</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="new-group-input" placeholder="Gruppenname...">
+                    <button class="btn btn-primary" style="width:auto; margin:0;" onclick="addNewGroup()">Hinzufügen</button>
+                </div>
+            </div>
+            <label style="font-size:0.8rem; font-weight:600; color:#475569;">Vorhandene Gruppen:</label>
+            <div class="group-manage-list" id="group-manage-list"></div>
+            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
+                <button class="btn btn-secondary" style="width:auto; margin:0;" onclick="closeGroupManager()">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PDF EXPORT OPTIONEN -->
+    <div id="pdf-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">📄 PDF Export Einstellungen</h3>
+            
+            <div class="field-group" style="margin-bottom:12px;">
+                <label>Gruppe filtern:</label>
+                <select id="pdf-filter-group">
+                    <option value="ALL">-- Alle Gruppen --</option>
+                </select>
+            </div>
+
+            <div class="field-group" style="margin-bottom:20px;">
+                <label>Sortierung:</label>
+                <select id="pdf-sort-by">
+                    <option value="lastname">Alphabetisch (Nachname)</option>
+                    <option value="firstname">Alphabetisch (Vorname)</option>
+                    <option value="none">Keine zusätzliche Sortierung</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="width:auto; margin:0;" onclick="closePdfModal()">Abbrechen</button>
+                <button class="btn btn-primary" style="width:auto; margin:0; background:#e11d48;" onclick="generatePDF()">📄 PDF Generieren</button>
             </div>
         </div>
     </div>
@@ -311,17 +433,153 @@
             }
         }
 
+        /* --- PDF EXPORT MIT GRUPPEN- & SORTIERUNGS-FILTER --- */
+        function openPdfModal() {
+            const selectGroup = document.getElementById('pdf-filter-group');
+            selectGroup.innerHTML = '<option value="ALL">-- Alle Gruppen --</option>';
+            portalData.groups.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.innerText = g;
+                selectGroup.appendChild(opt);
+            });
+            document.getElementById('pdf-modal').classList.add('active');
+        }
+
+        function closePdfModal() {
+            document.getElementById('pdf-modal').classList.remove('active');
+        }
+
+        function generatePDF() {
+            const selectedGroup = document.getElementById('pdf-filter-group').value;
+            const sortBy = document.getElementById('pdf-sort-by').value;
+
+            // Baseline: Aktuell gefilterte Mitglieder nach Status und Suche
+            let exportList = getFilteredMembers();
+
+            // Nach Gruppe filtern falls gewählt
+            if (selectedGroup !== 'ALL') {
+                exportList = exportList.filter(m => m.group === selectedGroup);
+            }
+
+            // Alphabetisch sortieren
+            if (sortBy === 'lastname') {
+                exportList.sort((a, b) => (a.lastname || '').localeCompare(b.lastname || '', 'de', { sensitivity: 'base' }));
+            } else if (sortBy === 'firstname') {
+                exportList.sort((a, b) => (a.firstname || '').localeCompare(b.firstname || '', 'de', { sensitivity: 'base' }));
+            }
+
+            if (exportList.length === 0) {
+                alert("Keine Mitglieder mit den gewählten Kriterien gefunden.");
+                return;
+            }
+
+            closePdfModal();
+
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = '';
+
+            exportList.forEach((m, index) => {
+                const card = document.createElement('div');
+                card.className = 'print-card';
+                card.innerHTML = `
+                    <div class="print-num">${index + 1}</div>
+                    <div class="print-col1">
+                        <span class="print-label">Name:</span><span class="print-val">${m.lastname || ''}, ${m.firstname || ''}</span>
+                        <span class="print-label">Straße:</span><span class="print-val">${m.street || ''}</span>
+                        <span class="print-label">PLZ / Ort:</span><span class="print-val">${m.city || ''}</span>
+                        <span class="print-label">E-Mail:</span><span class="print-val">${m.email || ''}</span>
+                        <span class="print-label">Telefon:</span><span class="print-val">${m.phone || ''}</span>
+                        <span class="print-label">Gruppe:</span><span class="print-val">${m.group || ''}</span>
+                    </div>
+                    <div class="print-col2">
+                        <span class="print-label">Geschlecht:</span><span class="print-val">${m.gender || ''}</span>
+                        <span class="print-label">Geburtstag:</span><span class="print-val">${m.birthdate || ''}</span>
+                        <span class="print-label">Altersklasse:</span><span class="print-val">${m.agegroup || ''}</span>
+                        <span class="print-label">DSV ID:</span><span class="print-val">${m.dsvid || ''}</span>
+                    </div>
+                `;
+                printArea.appendChild(card);
+            });
+
+            window.print();
+        }
+
+        function getFilteredMembers() {
+            return portalData.members.filter(m => {
+                const matchesFilter = (m.status || 'active') === currentFilter;
+                const fullName = ((m.firstname || '') + ' ' + (m.lastname || '')).toLowerCase();
+                const matchesSearch = fullName.includes(currentSearchQuery.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+        }
+
+        /* --- GRUPPEN VERWALTUNG & BEARBEITUNG --- */
+        function openGroupManager() {
+            renderGroupManagerList();
+            document.getElementById('group-modal').classList.add('active');
+        }
+
+        function closeGroupManager() {
+            document.getElementById('group-modal').classList.remove('active');
+        }
+
+        function renderGroupManagerList() {
+            const container = document.getElementById('group-manage-list');
+            container.innerHTML = '';
+            portalData.groups.forEach((group, index) => {
+                const item = document.createElement('div');
+                item.className = 'group-manage-item';
+                item.innerHTML = `
+                    <span style="font-weight:600; font-size:0.85rem;">${group}</span>
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn btn-secondary" style="padding:4px 8px; font-size:0.75rem; margin:0;" onclick="editGroup(${index})">✏️ Bearbeiten</button>
+                        <button class="btn btn-danger" style="padding:4px 8px; font-size:0.75rem; margin:0;" onclick="deleteGroup(${index})">🗑️ Löschen</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
         function addNewGroup() {
-            const groupName = prompt("Name der neuen Gruppe eingeben:");
-            if (groupName && groupName.trim() !== "") {
-                const cleanName = groupName.trim();
-                if (!portalData.groups.includes(cleanName)) {
-                    portalData.groups.push(cleanName);
-                    renderGroupDropdown();
-                    setStatus('Neue Gruppe hinzugefügt (noch nicht gespeichert)', '#e67e22');
-                } else {
-                    alert("Diese Gruppe existiert bereits.");
-                }
+            const input = document.getElementById('new-group-input');
+            const name = input.value.trim();
+            if (name && !portalData.groups.includes(name)) {
+                portalData.groups.push(name);
+                input.value = '';
+                renderGroupManagerList();
+                renderGroupDropdown();
+                setStatus('Gruppe hinzugefügt (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function editGroup(index) {
+            const oldName = portalData.groups[index];
+            const newName = prompt("Neuen Namen für die Gruppe eingeben:", oldName);
+            if (newName && newName.trim() !== "" && newName.trim() !== oldName) {
+                const cleanNewName = newName.trim();
+                portalData.groups[index] = cleanNewName;
+                portalData.members.forEach(m => {
+                    if (m.group === oldName) m.group = cleanNewName;
+                });
+                renderGroupManagerList();
+                renderGroupDropdown();
+                renderMemberList();
+                setStatus('Gruppe umbenannt (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function deleteGroup(index) {
+            const groupName = portalData.groups[index];
+            if (confirm(`Möchtest du die Gruppe "${groupName}" wirklich löschen?`)) {
+                portalData.groups.splice(index, 1);
+                portalData.members.forEach(m => {
+                    if (m.group === groupName) m.group = "";
+                });
+                renderGroupManagerList();
+                renderGroupDropdown();
+                renderMemberList();
+                setStatus('Gruppe gelöscht (noch nicht gespeichert)', '#e67e22');
             }
         }
 
@@ -340,17 +598,59 @@
             select.value = currentValue;
         }
 
+        /* --- CSV EXPORT --- */
+        function exportToCSV() {
+            if (!portalData.members || portalData.members.length === 0) {
+                alert("Keine Mitglieder zum Exportieren vorhanden.");
+                return;
+            }
+
+            const headers = ["ID", "Vorname", "Nachname", "Straße", "PLZ / Ort", "Geschlecht", "Geburtstag", "Altersklasse", "E-Mail", "Telefon", "Gruppe", "DSV-ID", "Status"];
+            const rows = portalData.members.map(m => [
+                m.id || "",
+                `"${m.firstname || ""}"`,
+                `"${m.lastname || ""}"`,
+                `"${m.street || ""}"`,
+                `"${m.city || ""}"`,
+                `"${m.gender || ""}"`,
+                `"${m.birthdate || ""}"`,
+                `"${m.agegroup || ""}"`,
+                `"${m.email || ""}"`,
+                `"${m.phone || ""}"`,
+                `"${m.group || ""}"`,
+                `"${m.dsvid || ""}"`,
+                `"${m.status || ""}"`
+            ]);
+
+            const csvContent = "\uFEFF" + [headers.join(";"), ...rows.map(e => e.join(";"))].join("\n");
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", `Mitglieder_Export_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        /* --- MITGLIEDER VERWALTUNG --- */
         function addNewMember() {
             const newId = 'mb_' + Date.now();
             const newMember = {
                 id: newId,
                 firstname: "Neues",
                 lastname: "Mitglied",
+                street: "",
+                city: "",
+                gender: "",
+                birthdate: "",
+                agegroup: "",
                 email: "",
                 phone: "",
                 group: portalData.groups[0] || "",
                 dsvid: "",
-                notes: "",
+                notes: [],
+                files: [],
                 status: currentFilter
             };
 
@@ -388,16 +688,134 @@
             setStatus('Änderungen ungespeichert', '#e67e22');
         }
 
+        /* --- NOTIZEN LOGIK --- */
+        function addChronologicalNote() {
+            const textInput = document.getElementById('note-text-input');
+            const text = textInput.value.trim();
+
+            if (!text) return alert("Bitte eine Notiz eingeben.");
+
+            const m = portalData.members.find(item => item.id === currentMemberId);
+            if (!m) return;
+
+            if (!Array.isArray(m.notes)) m.notes = [];
+
+            const newEntry = {
+                id: 'note_' + Date.now(),
+                timestamp: new Date().toLocaleString('de-DE'),
+                text: text
+            };
+
+            m.notes.unshift(newEntry);
+            textInput.value = '';
+
+            renderTimeline(m);
+            setStatus('Notiz hinzugefügt (noch nicht gespeichert)', '#e67e22');
+        }
+
+        function renderTimeline(member) {
+            const container = document.getElementById('member-timeline');
+            container.innerHTML = '';
+
+            if (!Array.isArray(member.notes) || member.notes.length === 0) {
+                container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem;">Keine Notizen vorhanden.</div>';
+                return;
+            }
+
+            member.notes.forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <span class="timeline-del" onclick="deleteNote('${n.id}')">🗑️</span>
+                    <div class="timeline-header">Eintrag vom ${n.timestamp}</div>
+                    <div class="timeline-body">${n.text}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function deleteNote(noteId) {
+            const m = portalData.members.find(item => item.id === currentMemberId);
+            if (m && Array.isArray(m.notes)) {
+                m.notes = m.notes.filter(n => n.id !== noteId);
+                renderTimeline(m);
+                setStatus('Notiz gelöscht (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        /* --- SEPARATE DOKUMENTEN-ABLAGE --- */
+        async function uploadMemberFile(input) {
+            const file = input.files[0];
+            if (!file || !currentMemberId) return;
+
+            const m = portalData.members.find(item => item.id === currentMemberId);
+            if (!m) return;
+
+            if (!Array.isArray(m.files)) m.files = [];
+
+            const base64Data = await convertFileToBase64(file);
+            const newFile = {
+                id: 'file_' + Date.now(),
+                name: file.name,
+                timestamp: new Date().toLocaleDateString('de-DE'),
+                data: base64Data
+            };
+
+            m.files.unshift(newFile);
+            input.value = '';
+
+            renderFiles(m);
+            setStatus('Datei hochgeladen (noch nicht gespeichert)', '#e67e22');
+        }
+
+        function renderFiles(member) {
+            const container = document.getElementById('member-files-container');
+            container.innerHTML = '';
+
+            if (!Array.isArray(member.files) || member.files.length === 0) {
+                container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; grid-column: 1/-1;">Keine Dokumente hochgeladen.</div>';
+                return;
+            }
+
+            member.files.forEach(f => {
+                const card = document.createElement('div');
+                card.className = 'file-card';
+                card.innerHTML = `
+                    <div class="file-card-title">📄 ${f.name}</div>
+                    <div class="file-card-date">Hochgeladen: ${f.timestamp}</div>
+                    <div class="file-card-actions">
+                        <a href="${f.data}" download="${f.name}">📥 Download</a>
+                        <span class="del" onclick="deleteMemberFile('${f.id}')">🗑️ Löschen</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function deleteMemberFile(fileId) {
+            const m = portalData.members.find(item => item.id === currentMemberId);
+            if (m && Array.isArray(m.files)) {
+                m.files = m.files.filter(f => f.id !== fileId);
+                renderFiles(m);
+                setStatus('Datei gelöscht (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function convertFileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        /* --- HILFSFUNKTIONEN & INITIALISIERUNG --- */
         function renderMemberList() {
             const container = document.getElementById('member-list-container');
             container.innerHTML = '';
 
-            const filtered = portalData.members.filter(m => {
-                const matchesFilter = (m.status || 'active') === currentFilter;
-                const fullName = ((m.firstname || '') + ' ' + (m.lastname || '')).toLowerCase();
-                const matchesSearch = fullName.includes(currentSearchQuery.toLowerCase());
-                return matchesFilter && matchesSearch;
-            });
+            const filtered = getFilteredMembers();
 
             filtered.forEach(m => {
                 const card = document.createElement('div');
@@ -429,13 +847,19 @@
 
             document.getElementById('mb-firstname').value = m.firstname || '';
             document.getElementById('mb-lastname').value = m.lastname || '';
+            document.getElementById('mb-street').value = m.street || '';
+            document.getElementById('mb-city').value = m.city || '';
+            document.getElementById('mb-gender').value = m.gender || '';
+            document.getElementById('mb-birthdate').value = m.birthdate || '';
+            document.getElementById('mb-agegroup').value = m.agegroup || '';
             document.getElementById('mb-email').value = m.email || '';
             document.getElementById('mb-phone').value = m.phone || '';
             document.getElementById('mb-group').value = m.group || '';
             document.getElementById('mb-dsvid').value = m.dsvid || '';
-            document.getElementById('mb-notes').value = m.notes || '';
             document.getElementById('mb-status').value = m.status || 'active';
 
+            renderTimeline(m);
+            renderFiles(m);
             renderMemberList();
         }
 
