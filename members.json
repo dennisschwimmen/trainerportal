@@ -1,32 +1,20 @@
-{
-  "groups": [
-    "Ballas / Schubert",
-    "Kinder Anfänger",
-    "Leistungsgruppe 1"
-  ],
-  "members": [
-    {
-      "id": "mb_1",
-      "firstname": "Noah",
-      "lastname": "Cortez Garcia",
-      "gender": "männlich",
-      "dob": "2018-01-30",
-      "street": "Lange Zeile 32",
-      "plzort": "06886 Wittenberg",
-      "email": "karolin.cortezgarcia@gmail.com",
-      "phone": "0176 32626468",
-      "group": "Ballas / Schubert",
-      "dsvid": "",
-      "number": "1001",
-      "status": "active",
-      "documents": [],
-      "notes": [
-        {
-          "id": "note_1",
-          "date": "14.09.2026, 12:00:00",
-          "text": "Mitglied erfolgreich im Portal angelegt."
-        }
-      ]
-    }
-  ]
-}
+[
+  {
+    "id": "mb_1",
+    "firstname": "Max",
+    "lastname": "Mustermann",
+    "status": "active",
+    "group": "Gruppe A",
+    "email": "max@example.com",
+    "phone": "0123 456789"
+  },
+  {
+    "id": "mb_2",
+    "firstname": "Erika",
+    "lastname": "Musterfrau",
+    "status": "active",
+    "group": "Gruppe B",
+    "email": "erika@example.com",
+    "phone": "0987 654321"
+  }
+]
