@@ -365,10 +365,18 @@
 
                 const data = await response.json();
                 const jsonText = decodeURIComponent(escape(atob(data.content)));
-                portalData = JSON.parse(jsonText);
+                const parsed = JSON.parse(jsonText);
 
-                if (!portalData.groups) portalData.groups = [];
-                if (!portalData.members) portalData.members = [];
+                if (Array.isArray(parsed)) {
+                    portalData.members = parsed;
+                    portalData.groups = portalData.groups || [];
+                } else if (parsed && typeof parsed === 'object') {
+                    portalData.groups = Array.isArray(parsed.groups) ? parsed.groups : [];
+                    portalData.members = Array.isArray(parsed.members) ? parsed.members : [];
+                } else {
+                    portalData.groups = [];
+                    portalData.members = [];
+                }
 
                 renderGroupDropdowns();
                 renderMemberList();
@@ -516,7 +524,6 @@
             document.getElementById('tab-mb-' + tabName).classList.add('active');
         }
 
-        // --- NOTIZEN ---
         function addMemberNote() {
             const textarea = document.getElementById('mb-new-note-text');
             const text = textarea.value.trim();
@@ -561,7 +568,6 @@
             }
         }
 
-        // --- GRUPPEN VERWALTUNG ---
         function openGroupManagerModal() { renderGroupTags(); document.getElementById('group-manager-modal').classList.add('active'); }
         function closeGroupManagerModal() { document.getElementById('group-manager-modal').classList.remove('active'); }
 
@@ -595,7 +601,6 @@
             setStatus('Gruppe entfernt (nicht gespeichert)', 'var(--warning)');
         }
 
-        // --- EXPORT ---
         function openExportModal() { document.getElementById('export-modal').classList.add('active'); }
         function closeExportModal() { document.getElementById('export-modal').classList.remove('active'); }
 
@@ -688,7 +693,6 @@
             printWindow.document.close();
         }
 
-        // --- UTILS ---
         function openNewMemberModal() { document.getElementById('new-member-modal').classList.add('active'); }
         function closeNewMemberModal() { document.getElementById('new-member-modal').classList.remove('active'); }
 
