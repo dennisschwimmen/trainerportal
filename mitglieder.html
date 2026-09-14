@@ -46,19 +46,12 @@
         }
         .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
 
-        .btn-new-item {
-            width: 100%; background-color: var(--success); color: white; border: none;
-            padding: 9px; border-radius: 6px; cursor: pointer; font-weight: bold;
-            font-size: 0.85rem; margin-bottom: 8px;
-        }
-        .btn-new-item:hover { background-color: #218838; }
-
-        .btn-export-list {
+        .btn-reload {
             width: 100%; background-color: var(--primary); color: white; border: none;
-            padding: 8px; border-radius: 6px; cursor: pointer; font-weight: 600;
-            font-size: 0.8rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 6px;
+            padding: 9px; border-radius: 6px; cursor: pointer; font-weight: bold;
+            font-size: 0.85rem; margin-bottom: 12px;
         }
-        .btn-export-list:hover { background-color: var(--primary-hover); }
+        .btn-reload:hover { background-color: var(--primary-hover); }
 
         .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #e2e8f0; padding: 3px; border-radius: 6px; }
         .filter-tab { flex: 1; text-align: center; padding: 5px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 4px; color: #64748b; }
@@ -79,13 +72,10 @@
         .list-name { font-size: 0.85rem; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .list-sub { font-size: 0.75rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); }
-        .btn-secondary { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 5px; }
-
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
         header {
-            padding: 10px 30px; border-bottom: 1px solid var(--border-color);
+            padding: 12px 30px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
@@ -102,23 +92,6 @@
             border: 2px solid var(--border-color);
         }
         .akte-title-area h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 4px; }
-        
-        .akte-actions { display: flex; gap: 8px; }
-        .btn-akte-action {
-            padding: 7px 12px; border: 1px solid var(--border-color); border-radius: 6px;
-            background: white; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-akte-action:hover { background: #f8fafc; }
-
-        .akte-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
-        .akte-tab {
-            padding: 10px 16px; font-weight: 600; font-size: 0.9rem; color: #64748b;
-            cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
-        }
-        .akte-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
 
         .form-section { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; }
         .form-section h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
@@ -126,34 +99,9 @@
 
         .field-group { display: flex; flex-direction: column; gap: 4px; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .field-group input, .field-group select, .field-group textarea {
-            padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
+        .field-group input {
+            padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; background: #f8fafc;
         }
-        .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--accent); }
-
-        .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
-        .doc-card {
-            border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: #f8fafc;
-            display: flex; flex-direction: column; justify-content: space-between; position: relative; height: 100px;
-        }
-        .doc-card .doc-title { font-weight: 600; font-size: 0.85rem; color: #1e293b; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .doc-card .doc-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
-        .doc-card a { color: var(--accent); font-size: 0.8rem; text-decoration: none; font-weight: 600; }
-        .doc-card .doc-del { cursor: pointer; color: var(--danger); font-size: 0.8rem; font-weight: bold; }
-
-        .timeline { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
-        .timeline-item { background: #f8fafc; border-left: 3px solid var(--accent); padding: 12px 15px; border-radius: 0 6px 6px 0; position: relative; }
-        .timeline-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; }
-        .timeline-body { font-size: 0.88rem; color: #334155; white-space: pre-wrap; }
-        .timeline-del { position: absolute; top: 8px; right: 8px; cursor: pointer; color: var(--danger); font-size: 0.75rem; }
-
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-overlay.active { display: flex; }
-        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        
-        .group-tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-        .group-tag { background: #e2e8f0; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; display: flex; align-items: center; gap: 6px; }
-        .group-tag .del-group { cursor: pointer; color: var(--danger); font-weight: bold; }
     </style>
 </head>
 <body>
@@ -161,37 +109,30 @@
     <div id="sidebar">
         <h2>Mitgliederverwaltung</h2>
 
-        <button class="btn-new-item" onclick="openNewMemberModal()">+ Neues Mitglied</button>
-        <button class="btn-export-list" onclick="openExportModal()">📋 Export Mitgliederliste</button>
-        <button class="btn-secondary" style="margin-bottom:12px;" onclick="openGroupManagerModal()">⚙️ Gruppen verwalten</button>
-        
+        <button class="btn-reload" onclick="loadMembersFromGitHub()">🔄 Liste Neu Laden</button>
+
         <div class="search-box">
             <input type="text" class="search-input" placeholder="🔍 Mitglied suchen..." oninput="filterMemberList(this.value)">
         </div>
+
         <div class="filter-tabs">
             <div class="filter-tab active" onclick="setMemberFilter('active', this)">Aktiv</div>
             <div class="filter-tab" onclick="setMemberFilter('passive', this)">Passiv</div>
             <div class="filter-tab" onclick="setMemberFilter('cancelled', this)">Gekündigt</div>
         </div>
-        <div class="item-list" id="member-list-container"></div>
 
-        <div class="sidebar-footer">
-            <button class="btn-secondary" onclick="exportBackup()">💾 Daten Sichern</button>
-            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Daten Laden</button>
-            <input type="file" id="import-file" style="display:none" onchange="importBackup(event)">
-        </div>
+        <div class="item-list" id="member-list-container"></div>
     </div>
 
     <div id="content-wrapper">
         <header>
             <div id="breadcrumb" class="breadcrumb">Portal / <b>Mitgliederverwaltung</b></div>
             <div>
-                <span id="save-status" style="color: #6c757d; font-size: 0.8rem; margin-right: 15px;">Gespeichert</span>
-                <button class="btn-akte-action" onclick="window.print()">🖨️ Akte Drucken</button>
+                <span id="save-status" style="color: #6c757d; font-size: 0.8rem;">GitHub Quelle</span>
             </div>
         </header>
 
-        <div id="view-member" class="view-panel" style="display: flex; flex: 1;">
+        <div id="view-member" style="display: flex; flex: 1;">
             <div class="akte-container" id="member-akte-container" style="display:none;">
                 <div class="akte-header">
                     <div class="akte-profile-summary">
@@ -200,233 +141,77 @@
                             <h1 id="mb-fullname">Vorname Nachname</h1>
                         </div>
                     </div>
-                    <div class="akte-actions">
-                        <button class="btn-akte-action" style="color:var(--danger);" onclick="deleteCurrentMember()">🗑️ Löschen</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>Persönliche Angaben</h3>
+                    <div class="form-grid">
+                        <div class="field-group"><label>Vorname</label><input type="text" id="mb-firstname" readonly></div>
+                        <div class="field-group"><label>Nachname</label><input type="text" id="mb-lastname" readonly></div>
+                        <div class="field-group"><label>E-Mail Adresse</label><input type="text" id="mb-email" readonly></div>
+                        <div class="field-group"><label>Telefon</label><input type="text" id="mb-phone" readonly></div>
                     </div>
                 </div>
 
-                <div class="akte-tabs">
-                    <div class="akte-tab active" onclick="switchMemberTab('stammdaten', this)">Stammdaten</div>
-                    <div class="akte-tab" onclick="switchMemberTab('mitgliedschaft', this)">Mitgliedschaft & Status</div>
-                    <div class="akte-tab" onclick="switchMemberTab('dokumente', this)">📁 Dokumente</div>
-                    <div class="akte-tab" onclick="switchMemberTab('notizen', this)">📝 Notizen</div>
-                </div>
-
-                <div id="tab-mb-stammdaten" class="tab-content active">
-                    <div class="form-section">
-                        <h3>Persönliche Angaben</h3>
-                        <div class="form-grid">
-                            <div class="field-group"><label>Vorname</label><input type="text" id="mb-firstname" onchange="updateMemberData()"></div>
-                            <div class="field-group"><label>Nachname</label><input type="text" id="mb-lastname" onchange="updateMemberData()"></div>
-                            <div class="field-group">
-                                <label>Geschlecht</label>
-                                <select id="mb-gender" onchange="updateMemberData()">
-                                    <option value="männlich">männlich</option>
-                                    <option value="weiblich">weiblich</option>
-                                    <option value="divers">divers</option>
-                                </select>
-                            </div>
-                            <div class="field-group"><label>Geburtstag</label><input type="date" id="mb-dob" onchange="updateMemberData()"></div>
-                            <div class="field-group"><label>Straße & Hausnr.</label><input type="text" id="mb-street" placeholder="Lange Zeile 32" onchange="updateMemberData()"></div>
-                            <div class="field-group"><label>PLZ & Ort</label><input type="text" id="mb-plzort" placeholder="06886 Wittenberg" onchange="updateMemberData()"></div>
-                            <div class="field-group"><label>E-Mail Adresse</label><input type="email" id="mb-email" onchange="updateMemberData()"></div>
-                            <div class="field-group"><label>Telefon</label><input type="text" id="mb-phone" onchange="updateMemberData()"></div>
-                        </div>
-                    </div>
-                    <div class="form-section">
-                        <h3>Sport- & Verbandsdaten</h3>
-                        <div class="form-grid">
-                            <div class="field-group">
-                                <label>Gruppe</label>
-                                <select id="mb-group" onchange="updateMemberData()">
-                                    <option value="">-- Keine Gruppe --</option>
-                                </select>
-                            </div>
-                            <div class="field-group"><label>DSV ID</label><input type="text" id="mb-dsvid" placeholder="z.B. 123456" onchange="updateMemberData()"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-mb-mitgliedschaft" class="tab-content">
-                    <div class="form-section">
-                        <h3>Vereinsdaten</h3>
-                        <div class="form-grid">
-                            <div class="field-group"><label>Mitgliedsnummer</label><input type="text" id="mb-number" onchange="updateMemberData()"></div>
-                            <div class="field-group">
-                                <label>Status</label>
-                                <select id="mb-status" onchange="updateMemberData()">
-                                    <option value="active">Aktiv</option>
-                                    <option value="passive">Passiv</option>
-                                    <option value="cancelled">Gekündigt</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="tab-mb-dokumente" class="tab-content">
-                    <div class="form-section">
-                        <h3>Dokumente hochladen</h3>
-                        <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
-                            <input type="file" id="mb-doc-upload-input" style="display:none" onchange="uploadMemberDocument(event)">
-                            <button class="btn-new-item" style="width:auto; margin:0;" onclick="document.getElementById('mb-doc-upload-input').click()">➕ Datei hochladen</button>
-                        </div>
-                        <div class="doc-grid" id="member-doc-grid"></div>
-                    </div>
-                </div>
-
-                <div id="tab-mb-notizen" class="tab-content">
-                    <div class="form-section">
-                        <h3>Neue Notiz eintragen</h3>
-                        <div class="field-group" style="margin-bottom: 10px;">
-                            <textarea id="mb-new-note-text" rows="3" placeholder="Notiz hier schreiben..."></textarea>
-                        </div>
-                        <button class="btn-new-item" style="width:auto;" onclick="addMemberNote()">Notiz speichern</button>
-                    </div>
-
-                    <div class="form-section">
-                        <h3>Chronik</h3>
-                        <div class="timeline" id="member-timeline"></div>
+                <div class="form-section">
+                    <h3>Vereinsangaben</h3>
+                    <div class="form-grid">
+                        <div class="field-group"><label>Gruppe</label><input type="text" id="mb-group" readonly></div>
+                        <div class="field-group"><label>Status</label><input type="text" id="mb-status" readonly></div>
                     </div>
                 </div>
             </div>
-            <div id="member-akte-empty-state" style="padding:50px; text-align:center; color:#94a3b8; width: 100%;">Bitte wählen Sie ein Mitglied links aus oder legen Sie ein neues an.</div>
-        </div>
-    </div>
 
-    <div id="new-member-modal" class="modal-overlay">
-        <div class="modal">
-            <h3 style="margin-bottom:15px; color:var(--primary);">Neues Mitglied Anlegen</h3>
-            <div class="field-group" style="margin-bottom:10px;">
-                <label>Vorname</label>
-                <input type="text" id="new-mb-firstname">
-            </div>
-            <div class="field-group" style="margin-bottom:15px;">
-                <label>Nachname</label>
-                <input type="text" id="new-mb-lastname">
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px;">
-                <button class="btn-secondary" style="width:auto;" onclick="closeNewMemberModal()">Abbrechen</button>
-                <button class="btn-new-item" style="width:auto;" onclick="createNewMember()">Anlegen</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="group-manager-modal" class="modal-overlay">
-        <div class="modal">
-            <h3 style="margin-bottom:15px; color:var(--primary);">Gruppen verwalten</h3>
-            <div class="field-group" style="margin-bottom:10px;">
-                <label>Neue Gruppe hinzufügen</label>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="new-group-name" placeholder="z. B. Ballas / Schubert">
-                    <button class="btn-new-item" style="width:auto; margin:0; white-space:nowrap;" onclick="addGroup()">Hinzufügen</button>
-                </div>
-            </div>
-            <label style="font-size:0.8rem; font-weight:600; color:#475569;">Bestehende Gruppen:</label>
-            <div class="group-tag-list" id="group-tag-container"></div>
-            <div style="display:flex; justify-content:flex-end; margin-top:20px;">
-                <button class="btn-secondary" style="width:auto;" onclick="closeGroupManagerModal()">Schließen</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="export-modal" class="modal-overlay">
-        <div class="modal">
-            <h3 style="margin-bottom:15px; color:var(--primary);">Mitgliederliste Exportieren</h3>
-            <div class="field-group" style="margin-bottom:12px;">
-                <label>Nach Gruppe filtern</label>
-                <select id="export-filter-group">
-                    <option value="ALL">-- Alle Gruppen --</option>
-                </select>
-            </div>
-            <div class="field-group" style="margin-bottom:20px;">
-                <label>Sortierung</label>
-                <select id="export-sort-by">
-                    <option value="lastname">Alphabetisch (Nachname)</option>
-                    <option value="firstname">Alphabetisch (Vorname)</option>
-                    <option value="age">Nach Altersklasse (Alter)</option>
-                </select>
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:8px;">
-                <button class="btn-secondary" style="width:auto;" onclick="closeExportModal()">Abbrechen</button>
-                <button class="btn-export-list" style="width:auto; margin:0;" onclick="exportMemberListPDF()">🖨️ Drucken / PDF</button>
+            <div id="member-akte-empty-state" style="padding:50px; text-align:center; color:#94a3b8; width: 100%;">
+                Bitte wählen Sie ein Mitglied aus der linken Liste aus.
             </div>
         </div>
     </div>
 
     <script>
-        let portalData = JSON.parse(localStorage.getItem('my_portal_data_v4')) || {
-            selectedMemberId: null,
-            memberFilter: 'active',
-            groups: ['Ballas / Schubert', 'Kinder Anfänger', 'Leistungsgruppe 1'],
-            members: [
-                {
-                    id: 'mb_1',
-                    firstname: 'Noah',
-                    lastname: 'Cortez Garcia',
-                    gender: 'männlich',
-                    dob: '2018-01-30',
-                    street: 'Lange Zeile 32',
-                    plzort: '06886 Wittenberg',
-                    email: 'karolin.cortezgarcia@gmail.com',
-                    phone: '0176 32626468',
-                    group: 'Ballas / Schubert',
-                    dsvid: '',
-                    status: 'active',
-                    documents: [],
-                    notes: []
-                }
-            ]
-        };
+        // Dein Raw-GitHub-Link mit Token für den direkten Zugriff auf die members.json
+        const GITHUB_JSON_URL = 'https://raw.githubusercontent.com/dennisschwimmen/trainerportal/refs/heads/main/members.json?token=GHSAT0AAAAAAEI6I24AKZLZTSU2DXS62HHQ2VHXCUQ';
 
-        if (portalData.members) {
-            portalData.members.forEach(m => {
-                if (m.status === 'archived') m.status = 'cancelled';
-            });
-        }
-        if (portalData.memberFilter === 'archived') portalData.memberFilter = 'cancelled';
-
-        if (!portalData.groups) portalData.groups = ['Ballas / Schubert'];
-
-        let currentMemberId = portalData.selectedMemberId;
+        let membersData = [];
+        let currentFilter = 'active';
+        let currentSearchQuery = '';
+        let currentMemberId = null;
 
         window.onload = function() {
-            renderGroupDropdowns();
-            renderMemberList();
-            if (currentMemberId && portalData.members.some(m => m.id === currentMemberId)) {
-                loadMemberAkte(currentMemberId);
-            }
+            loadMembersFromGitHub();
         };
 
-        function renderGroupDropdowns() {
-            const memberGroupSelect = document.getElementById('mb-group');
-            const exportGroupSelect = document.getElementById('export-filter-group');
-            
-            const currentVal = memberGroupSelect.value;
-            memberGroupSelect.innerHTML = '<option value="">-- Keine Gruppe --</option>';
-            exportGroupSelect.innerHTML = '<option value="ALL">-- Alle Gruppen --</option>';
+        // Mitglieder direkt von GitHub laden
+        async function loadMembersFromGitHub() {
+            document.getElementById('save-status').innerText = 'Lade Daten von GitHub...';
 
-            portalData.groups.forEach(g => {
-                const opt1 = document.createElement('option');
-                opt1.value = g; opt1.innerText = g;
-                memberGroupSelect.appendChild(opt1);
+            try {
+                // Verhindert Browser-Caching über den Zeitstempel (?t=)
+                const response = await fetch(`${GITHUB_JSON_URL}&t=${Date.now()}`);
 
-                const opt2 = document.createElement('option');
-                opt2.value = g; opt2.innerText = g;
-                exportGroupSelect.appendChild(opt2);
-            });
+                if (!response.ok) {
+                    throw new Error(`HTTP-Fehler! Status: ${response.status}`);
+                }
 
-            memberGroupSelect.value = currentVal;
+                membersData = await response.json();
+                renderMemberList();
+                document.getElementById('save-status').innerText = `Synchronisiert (${membersData.length} Mitglieder)`;
+
+            } catch (error) {
+                console.error("Fehler beim Laden von GitHub:", error);
+                document.getElementById('save-status').innerText = 'Fehler beim Laden!';
+            }
         }
 
-        function renderMemberList(searchQuery = '') {
+        // Rendert die Mitgliederliste in der Sidebar
+        function renderMemberList() {
             const container = document.getElementById('member-list-container');
             container.innerHTML = '';
 
-            const filtered = (portalData.members || []).filter(m => {
-                const matchesFilter = portalData.memberFilter === m.status;
+            const filtered = membersData.filter(m => {
+                const matchesFilter = (m.status || 'active') === currentFilter;
                 const fullName = ((m.firstname || '') + ' ' + (m.lastname || '')).toLowerCase();
-                const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+                const matchesSearch = fullName.includes(currentSearchQuery.toLowerCase());
                 return matchesFilter && matchesSearch;
             });
 
@@ -447,19 +232,10 @@
             });
         }
 
-        function setMemberFilter(filter, tabEl) {
-            portalData.memberFilter = filter;
-            document.querySelectorAll('#sidebar .filter-tab').forEach(e => e.classList.remove('active'));
-            tabEl.classList.add('active');
-            renderMemberList();
-        }
-
-        function filterMemberList(q) { renderMemberList(q); }
-
+        // Details eines gewählten Mitglieds anzeigen
         function loadMemberAkte(id) {
             currentMemberId = id;
-            portalData.selectedMemberId = id;
-            const m = portalData.members.find(item => item.id === id);
+            const m = membersData.find(item => item.id === id);
             if (!m) return;
 
             document.getElementById('member-akte-container').style.display = 'block';
@@ -470,339 +246,24 @@
 
             document.getElementById('mb-firstname').value = m.firstname || '';
             document.getElementById('mb-lastname').value = m.lastname || '';
-            document.getElementById('mb-gender').value = m.gender || 'männlich';
-            document.getElementById('mb-dob').value = m.dob || '';
-            document.getElementById('mb-street').value = m.street || '';
-            document.getElementById('mb-plzort').value = m.plzort || '';
             document.getElementById('mb-email').value = m.email || '';
             document.getElementById('mb-phone').value = m.phone || '';
             document.getElementById('mb-group').value = m.group || '';
-            document.getElementById('mb-dsvid').value = m.dsvid || '';
-            document.getElementById('mb-number').value = m.number || '';
             document.getElementById('mb-status').value = m.status || 'active';
 
-            renderMemberDocuments(m);
-            renderMemberNotes(m);
-
             renderMemberList();
-            saveDataToStorage();
         }
 
-        function updateMemberData() {
-            if (!currentMemberId) return;
-            const m = portalData.members.find(item => item.id === currentMemberId);
-            if (!m) return;
-
-            m.firstname = document.getElementById('mb-firstname').value;
-            m.lastname = document.getElementById('mb-lastname').value;
-            m.gender = document.getElementById('mb-gender').value;
-            m.dob = document.getElementById('mb-dob').value;
-            m.street = document.getElementById('mb-street').value;
-            m.plzort = document.getElementById('mb-plzort').value;
-            m.email = document.getElementById('mb-email').value;
-            m.phone = document.getElementById('mb-phone').value;
-            m.group = document.getElementById('mb-group').value;
-            m.dsvid = document.getElementById('mb-dsvid').value;
-            m.number = document.getElementById('mb-number').value;
-            m.status = document.getElementById('mb-status').value;
-
-            loadMemberAkte(currentMemberId);
-        }
-
-        function switchMemberTab(tabName, tabEl) {
-            document.querySelectorAll('#view-member .akte-tab').forEach(e => e.classList.remove('active'));
-            document.querySelectorAll('#view-member .tab-content').forEach(e => e.classList.remove('active'));
+        function setMemberFilter(filter, tabEl) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(e => e.classList.remove('active'));
             tabEl.classList.add('active');
-            document.getElementById('tab-mb-' + tabName).classList.add('active');
+            renderMemberList();
         }
 
-        function openGroupManagerModal() {
-            renderGroupTags();
-            document.getElementById('group-manager-modal').classList.add('active');
-        }
-        function closeGroupManagerModal() { document.getElementById('group-manager-modal').classList.remove('active'); }
-
-        function renderGroupTags() {
-            const container = document.getElementById('group-tag-container');
-            container.innerHTML = '';
-            portalData.groups.forEach((g, idx) => {
-                const tag = document.createElement('div');
-                tag.className = 'group-tag';
-                tag.innerHTML = `${g} <span class="del-group" onclick="removeGroup(${idx})">×</span>`;
-                container.appendChild(tag);
-            });
-        }
-
-        function addGroup() {
-            const input = document.getElementById('new-group-name');
-            const val = input.value.trim();
-            if (val && !portalData.groups.includes(val)) {
-                portalData.groups.push(val);
-                input.value = '';
-                renderGroupTags();
-                renderGroupDropdowns();
-                saveDataToStorage();
-            }
-        }
-
-        function removeGroup(index) {
-            portalData.groups.splice(index, 1);
-            renderGroupTags();
-            renderGroupDropdowns();
-            saveDataToStorage();
-        }
-
-        function uploadMemberDocument(event) {
-            const file = event.target.files[0];
-            if (!file || !currentMemberId) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const m = portalData.members.find(item => item.id === currentMemberId);
-                if (!m) return;
-                if (!m.documents) m.documents = [];
-
-                m.documents.push({
-                    id: 'doc_' + Date.now(),
-                    name: file.name,
-                    data: e.target.result
-                });
-
-                renderMemberDocuments(m);
-                saveDataToStorage();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function renderMemberDocuments(member) {
-            const grid = document.getElementById('member-doc-grid');
-            grid.innerHTML = '';
-            (member.documents || []).forEach((doc) => {
-                const card = document.createElement('div');
-                card.className = 'doc-card';
-                card.innerHTML = `
-                    <div class="doc-title">📄 ${doc.name}</div>
-                    <div class="doc-actions">
-                        <a href="${doc.data}" download="${doc.name}">Download</a>
-                        <span class="doc-del" onclick="deleteMemberDocument('${doc.id}')">Löschen</span>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function deleteMemberDocument(docId) {
-            const m = portalData.members.find(item => item.id === currentMemberId);
-            if (m && m.documents) {
-                m.documents = m.documents.filter(d => d.id !== docId);
-                renderMemberDocuments(m);
-                saveDataToStorage();
-            }
-        }
-
-        function addMemberNote() {
-            const textarea = document.getElementById('mb-new-note-text');
-            const text = textarea.value.trim();
-            if (!text || !currentMemberId) return;
-
-            const m = portalData.members.find(item => item.id === currentMemberId);
-            if (!m) return;
-            if (!m.notes) m.notes = [];
-
-            m.notes.unshift({
-                id: 'note_' + Date.now(),
-                date: new Date().toLocaleString('de-DE'),
-                text: text
-            });
-
-            textarea.value = '';
-            renderMemberNotes(m);
-            saveDataToStorage();
-        }
-
-        function renderMemberNotes(member) {
-            const timeline = document.getElementById('member-timeline');
-            timeline.innerHTML = '';
-            (member.notes || []).forEach(note => {
-                const item = document.createElement('div');
-                item.className = 'timeline-item';
-                item.innerHTML = `
-                    <span class="timeline-del" onclick="deleteMemberNote('${note.id}')">🗑️</span>
-                    <div class="timeline-header"><span>Eintrag vom ${note.date}</span></div>
-                    <div class="timeline-body">${note.text}</div>
-                `;
-                timeline.appendChild(item);
-            });
-        }
-
-        function deleteMemberNote(noteId) {
-            const m = portalData.members.find(item => item.id === currentMemberId);
-            if (m && m.notes) {
-                m.notes = m.notes.filter(n => n.id !== noteId);
-                renderMemberNotes(m);
-                saveDataToStorage();
-            }
-        }
-
-        function openExportModal() { document.getElementById('export-modal').classList.add('active'); }
-        function closeExportModal() { document.getElementById('export-modal').classList.remove('active'); }
-
-        function exportMemberListPDF() {
-            const groupFilter = document.getElementById('export-filter-group').value;
-            const sortBy = document.getElementById('export-sort-by').value;
-
-            let filteredMembers = (portalData.members || []).filter(m => portalData.memberFilter === m.status);
-
-            if (groupFilter !== 'ALL') {
-                filteredMembers = filteredMembers.filter(m => m.group === groupFilter);
-            }
-
-            if (filteredMembers.length === 0) {
-                alert("Keine Mitglieder für diese Kriterien gefunden.");
-                return;
-            }
-
-            filteredMembers.sort((a, b) => {
-                if (sortBy === 'lastname') {
-                    return (a.lastname || '').localeCompare(b.lastname || '');
-                } else if (sortBy === 'firstname') {
-                    return (a.firstname || '').localeCompare(b.firstname || '');
-                } else if (sortBy === 'age') {
-                    return (b.dob || '').localeCompare(a.dob || '');
-                }
-                return 0;
-            });
-
-            closeExportModal();
-
-            let printWindow = window.open('', '_blank');
-            let htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Mitgliederliste Export</title>
-                <style>
-                    body { font-family: Arial, sans-serif; font-size: 13px; color: #000; margin: 20px; }
-                    .header-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; }
-                    .header-sub { font-size: 12px; color: #555; margin-bottom: 15px; }
-                    .member-block { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 12px 0; margin-bottom: -1px; display: flex; align-items: flex-start; }
-                    .member-index { width: 40px; font-weight: bold; font-size: 14px; padding-top: 2px; }
-                    .member-col-left { width: 50%; }
-                    .member-col-right { width: 40%; }
-                    .info-row { display: flex; margin-bottom: 4px; }
-                    .info-label { width: 80px; color: #000; }
-                    .info-value { font-weight: normal; color: #000; }
-                    @media print { .member-block { page-break-inside: avoid; } }
-                </style>
-            </head>
-            <body>
-                <div class="header-title">Mitgliederliste ${groupFilter !== 'ALL' ? '- Gruppe: ' + groupFilter : ''}</div>
-                <div class="header-sub">Erstellt am ${new Date().toLocaleDateString('de-DE')} | Anzahl: ${filteredMembers.length}</div>
-            `;
-
-            filteredMembers.forEach((m, idx) => {
-                let formattedDob = '';
-                let ageClass = '';
-
-                if (m.dob) {
-                    const parts = m.dob.split('-');
-                    if(parts.length === 3) {
-                        formattedDob = `${parts[2]}.${parts[1]}.${parts[0]}`;
-                        const birthYear = parseInt(parts[0], 10);
-                        const currentYear = new Date().getFullYear();
-                        ageClass = (currentYear - birthYear).toString();
-                    }
-                }
-
-                htmlContent += `
-                <div class="member-block">
-                    <div class="member-index">${idx + 1}</div>
-                    <div class="member-col-left">
-                        <div class="info-row"><span class="info-label">Name:</span><span class="info-value">${m.lastname || ''}, ${m.firstname || ''}</span></div>
-                        <div class="info-row"><span class="info-label">Straße:</span><span class="info-value">${m.street || ''}</span></div>
-                        <div class="info-row"><span class="info-label">PLZ / Ort:</span><span class="info-value">${m.plzort || ''}</span></div>
-                        <div class="info-row"><span class="info-label">E-Mail:</span><span class="info-value">${m.email || ''}</span></div>
-                        <div class="info-row"><span class="info-label">Telefon:</span><span class="info-value">${m.phone || ''}</span></div>
-                        <div class="info-row"><span class="info-label">Gruppe:</span><span class="info-value">${m.group || ''}</span></div>
-                    </div>
-                    <div class="member-col-right">
-                        <div class="info-row"><span class="info-label">Geschlecht:</span><span class="info-value">${m.gender || ''}</span></div>
-                        <div class="info-row"><span class="info-label">Geburtstag:</span><span class="info-value">${formattedDob}</span></div>
-                        <div class="info-row"><span class="info-label">Altersklasse:</span><span class="info-value">${ageClass}</span></div>
-                        <div class="info-row"><span class="info-label">DSV ID:</span><span class="info-value">${m.dsvid || ''}</span></div>
-                    </div>
-                </div>
-                `;
-            });
-
-            htmlContent += `
-                <script>
-                    window.onload = function() { window.print(); };
-                <\/script>
-            </body>
-            </html>
-            `;
-
-            printWindow.document.write(htmlContent);
-            printWindow.document.close();
-        }
-
-        function openNewMemberModal() { document.getElementById('new-member-modal').classList.add('active'); }
-        function closeNewMemberModal() { document.getElementById('new-member-modal').classList.remove('active'); }
-
-        function createNewMember() {
-            const fn = document.getElementById('new-mb-firstname').value.trim();
-            const ln = document.getElementById('new-mb-lastname').value.trim();
-            if (!fn || !ln) return alert("Bitte Vor- und Nachnamen eingeben.");
-
-            const newId = 'mb_' + Date.now();
-            const newMember = { id: newId, firstname: fn, lastname: ln, status: 'active', documents: [], notes: [] };
-            portalData.members.push(newMember);
-
-            closeNewMemberModal();
-            loadMemberAkte(newId);
-        }
-
-        function deleteCurrentMember() {
-            if (!currentMemberId) return;
-            if (confirm("Möchten Sie dieses Mitglied wirklich löschen?")) {
-                portalData.members = portalData.members.filter(m => m.id !== currentMemberId);
-                currentMemberId = null;
-                document.getElementById('member-akte-container').style.display = 'none';
-                document.getElementById('member-akte-empty-state').style.display = 'block';
-                renderMemberList();
-                saveDataToStorage();
-            }
-        }
-
-        function saveDataToStorage() {
-            localStorage.setItem('my_portal_data_v4', JSON.stringify(portalData));
-            document.getElementById('save-status').innerText = 'Gespeichert um ' + new Date().toLocaleTimeString();
-        }
-
-        function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(portalData));
-            const anchor = document.createElement('a');
-            anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `vereinsportal_backup.json`);
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-        }
-
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    portalData = JSON.parse(e.target.result);
-                    if (!portalData.groups) portalData.groups = [];
-                    renderGroupDropdowns();
-                    saveDataToStorage();
-                    location.reload();
-                };
-                reader.readAsText(file);
-            }
+        function filterMemberList(query) {
+            currentSearchQuery = query;
+            renderMemberList();
         }
     </script>
 </body>
