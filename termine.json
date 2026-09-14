@@ -1,0 +1,12 @@
+{
+  "events": [
+    {
+      "id": "evt_1",
+      "title": "Wöchentliches Training",
+      "startDate": "2026-10-05",
+      "endDate": "2026-10-05",
+      "color": "#28a745",
+      "desc": "Hallentraining"
+    }
+  ]
+}
