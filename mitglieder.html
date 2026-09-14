@@ -364,7 +364,14 @@
 
                 const data = await response.json();
                 const jsonText = decodeURIComponent(escape(atob(data.content)));
-                const parsed = JSON.parse(jsonText);
+
+                let parsed;
+                try {
+                    parsed = JSON.parse(jsonText);
+                } catch (e) {
+                    console.warn("JSON ungültig, erstelle leere Struktur");
+                    parsed = { groups: [], members: [] };
+                }
 
                 if (Array.isArray(parsed)) {
                     portalData.members = parsed;
@@ -383,7 +390,11 @@
 
             } catch (error) {
                 console.error(error);
-                setStatus('Fehler beim Laden!', 'var(--danger)');
+                portalData.groups = portalData.groups || [];
+                portalData.members = portalData.members || [];
+                renderGroupDropdowns();
+                renderMemberList();
+                setStatus('Fehler beim Laden! Leere Liste geladen.', 'var(--danger)');
             }
         }
 
@@ -395,11 +406,21 @@
                 const getRes = await fetch(apiUrl, {
                     headers: { "Authorization": `token ${GITHUB_TOKEN}` }
                 });
-                const fileData = await getRes.json();
-                const currentSha = fileData.sha;
+                
+                let currentSha = "";
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    currentSha = fileData.sha;
+                }
 
                 const jsonString = JSON.stringify(portalData, null, 2);
                 const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+                const bodyPayload = {
+                    message: "Mitgliederportal Daten aktualisiert",
+                    content: contentBase64
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
 
                 const putRes = await fetch(apiUrl, {
                     method: "PUT",
@@ -407,11 +428,7 @@
                         "Authorization": `token ${GITHUB_TOKEN}`,
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({
-                        message: "Mitgliederportal Daten aktualisiert",
-                        content: contentBase64,
-                        sha: currentSha
-                    })
+                    body: JSON.stringify(bodyPayload)
                 });
 
                 if (putRes.ok) {
@@ -433,7 +450,7 @@
             memberGroupSelect.innerHTML = '<option value="">-- Keine Gruppe --</option>';
             exportGroupSelect.innerHTML = '<option value="ALL">-- Alle Gruppen --</option>';
 
-            portalData.groups.forEach(g => {
+            (portalData.groups || []).forEach(g => {
                 const opt1 = document.createElement('option'); opt1.value = g; opt1.innerText = g;
                 memberGroupSelect.appendChild(opt1);
 
@@ -448,7 +465,9 @@
             const container = document.getElementById('member-list-container');
             container.innerHTML = '';
 
-            const filtered = portalData.members.filter(m => {
+            const membersList = Array.isArray(portalData.members) ? portalData.members : [];
+
+            const filtered = membersList.filter(m => {
                 const matchesFilter = (m.status || 'active') === currentFilter;
                 const fullName = ((m.firstname || '') + ' ' + (m.lastname || '')).toLowerCase();
                 const matchesSearch = fullName.includes(currentSearchQuery.toLowerCase());
@@ -572,7 +591,7 @@
         function renderGroupTags() {
             const container = document.getElementById('group-tag-container');
             container.innerHTML = '';
-            portalData.groups.forEach((g, idx) => {
+            (portalData.groups || []).forEach((g, idx) => {
                 const tag = document.createElement('div');
                 tag.className = 'group-tag';
                 tag.innerHTML = `${g} <span class="del-group" onclick="removeGroup(${idx})">×</span>`;
@@ -723,6 +742,10 @@
                 status: currentFilter, 
                 notes: []
             };
+
+            if (!Array.isArray(portalData.members)) {
+                portalData.members = [];
+            }
 
             portalData.members.push(newMember);
             closeNewMemberModal();
