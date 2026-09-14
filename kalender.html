@@ -194,28 +194,39 @@
 
     <script>
         let currentDate = new Date();
-        
-        let calendarData = JSON.parse(localStorage.getItem('my_portal_calendar_v4')) || {
-            events: [
-                { id: 'evt_1', title: 'Wöchentliches Training', startDate: '2026-10-05', endDate: '2026-10-05', color: '#28a745', desc: 'Training in der Halle' }
-            ]
-        };
+        const PORTAL_KEY = 'my_portal_data_v4';
 
         window.onload = function() {
             renderCalendar();
             renderUpcomingEvents();
         };
 
-        function loadMemberData() {
-            const rawData = JSON.parse(localStorage.getItem('my_portal_data_v4'));
-            return (rawData && rawData.members) ? rawData.members : [];
+        // Identische Lade-Logik wie in der Mitgliederverwaltung
+        function getPortalData() {
+            const raw = localStorage.getItem(PORTAL_KEY);
+            if (!raw) {
+                return { members: [], events: [] };
+            }
+            try {
+                const data = JSON.parse(raw);
+                if (!data.events) data.events = [];
+                if (!data.members) data.members = [];
+                return data;
+            } catch (e) {
+                return { members: [], events: [] };
+            }
+        }
+
+        // Identische Speicher-Logik wie in der Mitgliederverwaltung
+        function savePortalData(data) {
+            localStorage.setItem(PORTAL_KEY, JSON.stringify(data));
         }
 
         function getActiveMemberBirthdays(year) {
-            const members = loadMemberData();
+            const portalData = getPortalData();
             const birthdayEvents = [];
 
-            members.forEach(member => {
+            portalData.members.forEach(member => {
                 if (member.status === 'active' && member.dob) {
                     const birthDateParts = member.dob.split('-');
                     
@@ -245,8 +256,9 @@
         }
 
         function getAllEventsForYear(year) {
+            const portalData = getPortalData();
             const bdays = getActiveMemberBirthdays(year);
-            return [...calendarData.events, ...bdays];
+            return [...portalData.events, ...bdays];
         }
 
         window.addEventListener('focus', function() {
@@ -254,8 +266,9 @@
             renderUpcomingEvents();
         });
 
+        // Automatische Aktualisierung, wenn Daten in einem anderen Tab oder von Mitgliedern geändert werden
         window.addEventListener('storage', function(e) {
-            if (e.key === 'my_portal_data_v4') {
+            if (e.key === PORTAL_KEY) {
                 renderCalendar();
                 renderUpcomingEvents();
             }
@@ -403,9 +416,10 @@
             const modal = document.getElementById('event-modal');
             const deleteBtn = document.getElementById('btn-delete-evt');
             const repeatRow = document.getElementById('repeat-config-row');
+            const portalData = getPortalData();
 
             if (eventId) {
-                const evt = calendarData.events.find(e => e.id === eventId);
+                const evt = portalData.events.find(e => e.id === eventId);
                 if (!evt) return;
 
                 document.getElementById('modal-title').innerText = "Termin bearbeiten";
@@ -460,8 +474,10 @@
                 endDate = startDate;
             }
 
+            const portalData = getPortalData();
+
             if (id) {
-                const evt = calendarData.events.find(e => e.id === id);
+                const evt = portalData.events.find(e => e.id === id);
                 if (evt) {
                     evt.title = title;
                     evt.startDate = startDate;
@@ -480,7 +496,7 @@
                         const startIso = curStart.toISOString().split('T')[0];
                         const endIso = new Date(curStart.getTime() + durationDiff).toISOString().split('T')[0];
 
-                        calendarData.events.push({
+                        portalData.events.push({
                             id: 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
                             title, startDate: startIso, endDate: endIso, color, desc
                         });
@@ -494,14 +510,14 @@
                         }
                     }
                 } else {
-                    calendarData.events.push({
+                    portalData.events.push({
                         id: 'evt_' + Date.now(),
                         title, startDate, endDate, color, desc
                     });
                 }
             }
 
-            localStorage.setItem('my_portal_calendar_v4', JSON.stringify(calendarData));
+            savePortalData(portalData);
             closeEventModal();
             renderCalendar();
             renderUpcomingEvents();
@@ -512,8 +528,9 @@
             if (!id) return;
 
             if (confirm("Möchten Sie diesen Termin wirklich löschen?")) {
-                calendarData.events = calendarData.events.filter(e => e.id !== id);
-                localStorage.setItem('my_portal_calendar_v4', JSON.stringify(calendarData));
+                const portalData = getPortalData();
+                portalData.events = portalData.events.filter(e => e.id !== id);
+                savePortalData(portalData);
                 closeEventModal();
                 renderCalendar();
                 renderUpcomingEvents();
