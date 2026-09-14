@@ -7,6 +7,14 @@
       "endDate": "2026-10-05",
       "color": "#28a745",
       "desc": "Hallentraining"
+    },
+    {
+      "id": "evt_1789418952200",
+      "title": "des",
+      "startDate": "2026-09-13",
+      "endDate": "2026-09-13",
+      "color": "#2b5c8f",
+      "desc": ""
     }
   ]
 }
