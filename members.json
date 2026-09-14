@@ -16,5 +16,14 @@
     "group": "Gruppe B",
     "email": "erika@example.com",
     "phone": "0987 654321"
+  },
+  {
+    "id": "mb_1789382052233",
+    "firstname": "Neues",
+    "lastname": "Mitglied",
+    "email": "",
+    "phone": "",
+    "group": "Gruppe A",
+    "status": "active"
   }
 ]
