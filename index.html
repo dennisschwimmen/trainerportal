@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vereins-Portal - Übersicht</title>
+    <style>
+        :root { --primary: #2b5c8f; --accent: #4a90e2; --bg: #f4f6f9; --border: #e0e4e8; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
+        header { background: white; padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        h1 { color: var(--primary); font-size: 1.5rem; }
+        .dashboard { flex: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1000px; width: 100%; }
+        .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 30px; text-align: center; text-decoration: none; color: inherit; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+        .card .icon { font-size: 3rem; margin-bottom: 15px; }
+        .btn-sec { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🏆 Vereins- & Trainer-Portal</h1>
+        <div>
+            <button class="btn-sec" onclick="exportBackup()">💾 Datensicherung</button>
+            <button class="btn-sec" onclick="document.getElementById('imp').click()">📂 Daten Importieren</button>
+            <input type="file" id="imp" style="display:none" onchange="importBackup(event)">
+        </div>
+    </header>
+    <div class="dashboard">
+        <div class="grid">
+            <a href="mitglieder.html" class="card"><div class="icon">👥</div><h3>Mitgliederverwaltung</h3><p>Mitgliederakten, Filter & Export</p></a>
+            <a href="kalender.html" class="card"><div class="icon">📅</div><h3>Vereinskalender</h3><p>Termine, Wettkämpfe & Training</p></a>
+            <a href="wiki.html" class="card"><div class="icon">📖</div><h3>Vereins-Wiki</h3><p>Wissen & Dokumentation</p></a>
+            <a href="trainer.html" class="card"><div class="icon">🪪</div><h3>Trainerarchiv</h3><p>Qualifikationen & Akten</p></a>
+        </div>
+    </div>
+    <script>
+        function exportBackup() {
+            const data = localStorage.getItem('vereins_portal_db') || '{}';
+            const a = document.createElement('a');
+            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(data);
+            a.download = `vereinsportal_backup.json`;
+            a.click();
+        }
+        function importBackup(e) {
+            const reader = new FileReader();
+            reader.onload = (ev) => { localStorage.setItem('vereins_portal_db', ev.target.result); alert('Daten importiert!'); location.reload(); };
+            reader.readAsText(e.target.files[0]);
+        }
+    </script>
+</body>
+</html>

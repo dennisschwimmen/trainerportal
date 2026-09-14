@@ -1,0 +1,20 @@
+[
+  {
+    "id": "mb_1",
+    "firstname": "Max",
+    "lastname": "Mustermann",
+    "status": "active",
+    "group": "Gruppe A",
+    "email": "max@example.com",
+    "phone": "0123 456789"
+  },
+  {
+    "id": "mb_2",
+    "firstname": "Erika",
+    "lastname": "Musterfrau",
+    "status": "active",
+    "group": "Gruppe B",
+    "email": "erika@example.com",
+    "phone": "0987 654321"
+  }
+]

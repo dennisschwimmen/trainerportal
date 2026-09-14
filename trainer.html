@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digitales Trainerportal</title>
+
+    <style>
+        :root {
+            --primary: #2b5c8f;
+            --primary-hover: #1d4067;
+            --accent: #4a90e2;
+            --bg-sidebar: #f4f6f9;
+            --bg-content: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e4e8;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-content);
+            overflow: hidden;
+        }
+
+        #sidebar {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        #sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .search-box { position: relative; margin-bottom: 12px; }
+        .search-input {
+            width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+        }
+        .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
+
+        .btn-new-trainer {
+            width: 100%; background-color: var(--success); color: white; border: none;
+            padding: 9px; border-radius: 6px; cursor: pointer; font-weight: bold;
+            font-size: 0.85rem; margin-bottom: 12px;
+        }
+        .btn-new-trainer:hover { background-color: #218838; }
+
+        .filter-tabs { display: flex; gap: 5px; margin-bottom: 15px; background: #e2e8f0; padding: 3px; border-radius: 6px; }
+        .filter-tab { flex: 1; text-align: center; padding: 5px; font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 4px; color: #64748b; }
+        .filter-tab.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        .trainer-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; }
+        .trainer-card {
+            background: white; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 10px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 10px;
+        }
+        .trainer-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .trainer-card.active { border-left: 4px solid var(--primary); background: #f0f7ff; }
+        .trainer-avatar {
+            width: 38px; height: 38px; border-radius: 50%; background: #cbd5e1; color: #334155;
+            display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
+        }
+        .trainer-info { flex: 1; overflow: hidden; }
+        .trainer-name { font-size: 0.85rem; font-weight: 600; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .trainer-sub { font-size: 0.75rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); }
+        .btn-secondary { background: #6c757d; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 5px; }
+
+        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+
+        header {
+            padding: 10px 30px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
+        }
+        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+
+        .akte-container { padding: 25px 35px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; }
+        .akte-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding-bottom: 20px; border-bottom: 1px solid var(--border-color); margin-bottom: 20px;
+        }
+        .akte-profile-summary { display: flex; gap: 20px; align-items: center; }
+        .akte-avatar-large {
+            width: 80px; height: 80px; border-radius: 50%; background: #cbd5e1;
+            display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #475569;
+            border: 2px solid var(--border-color);
+        }
+        .akte-title-area h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 4px; }
+        .akte-badges { display: flex; gap: 8px; margin-top: 6px; }
+        .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
+        .badge-active { background: #dcfce7; color: #15803d; }
+        .badge-archived { background: #f1f5f9; color: #64748b; }
+        .badge-license { background: #dbeafe; color: #1d4ed8; }
+
+        .akte-actions { display: flex; gap: 8px; }
+        .btn-akte-action {
+            padding: 7px 12px; border: 1px solid var(--border-color); border-radius: 6px;
+            background: white; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-akte-action:hover { background: #f8fafc; }
+
+        .akte-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+        .akte-tab {
+            padding: 10px 16px; font-weight: 600; font-size: 0.9rem; color: #64748b;
+            cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+        }
+        .akte-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .form-section { background: white; border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
+        .form-section h3 { font-size: 1.05rem; color: var(--primary); margin-bottom: 15px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+
+        .field-group { display: flex; flex-direction: column; gap: 4px; }
+        .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .field-group input, .field-group select, .field-group textarea {
+            padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
+        }
+        .field-group input:focus, .field-group select:focus, .field-group textarea:focus { border-color: var(--accent); }
+
+        .doc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-top: 15px; }
+        .doc-card {
+            border: 1px solid var(--border-color); border-radius: 6px; padding: 12px; background: #f8fafc;
+            display: flex; flex-direction: column; justify-content: space-between; height: 110px; position: relative;
+        }
+        .doc-card .doc-title { font-weight: 600; font-size: 0.85rem; color: #1e293b; word-break: break-word; }
+        .doc-card .doc-meta { font-size: 0.75rem; color: #64748b; }
+        .doc-card .doc-del { position: absolute; top: 8px; right: 8px; cursor: pointer; color: var(--danger); font-size: 0.8rem; }
+
+        .timeline { display: flex; flex-direction: column; gap: 15px; margin-top: 15px; }
+        .timeline-item { background: #f8fafc; border-left: 3px solid var(--accent); padding: 12px 15px; border-radius: 0 6px 6px 0; }
+        .timeline-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; }
+        .timeline-body { font-size: 0.9rem; color: #334155; line-height: 1.4; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+
+        @media print {
+            #sidebar, header, .akte-actions, .akte-tabs, .btn-secondary, .btn-new-trainer { display: none !important; }
+            body, #content-wrapper, main { background: white; height: auto !important; overflow: visible !important; }
+            .tab-content { display: block !important; }
+            .form-section { border: 1px solid #ccc !important; break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Trainerportal</h2>
+
+        <button class="btn-new-trainer" onclick="openNewTrainerModal()">+ Neuer Trainer</button>
+        <div class="search-box">
+            <input type="text" class="search-input" placeholder="🔍 Trainer suchen..." oninput="filterTrainerList(this.value)">
+        </div>
+        <div class="filter-tabs">
+            <div class="filter-tab active" onclick="setTrainerFilter('active', this)">Aktiv</div>
+            <div class="filter-tab" onclick="setTrainerFilter('archived', this)">Archiv</div>
+        </div>
+        <div class="trainer-list" id="trainer-list-container"></div>
+
+        <div class="sidebar-footer">
+            <button class="btn-secondary" onclick="exportBackup()">💾 Daten Sichern</button>
+            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Daten Laden</button>
+            <input type="file" id="import-file" style="display:none" onchange="importBackup(event)">
+        </div>
+    </div>
+
+    <div id="content-wrapper">
+        <header>
+            <div id="breadcrumb" class="breadcrumb">Trainerportal / <b>Verwaltung</b></div>
+            <div>
+                <span id="save-status" style="color: #6c757d; font-size: 0.8rem; margin-right: 15px;">Gespeichert</span>
+                <button class="btn-akte-action" onclick="window.print()">🖨️ Drucken / PDF</button>
+            </div>
+        </header>
+
+        <div class="akte-container" id="akte-view-container" style="display:none;">
+            
+            <div class="akte-header">
+                <div class="akte-profile-summary">
+                    <div class="akte-avatar-large" id="akte-avatar">👤</div>
+                    <div class="akte-title-area">
+                        <h1 id="akte-fullname">Vorname Nachname</h1>
+                        <div class="akte-badges">
+                            <span class="badge badge-active" id="akte-status-badge">Aktiv</span>
+                            <span class="badge badge-license" id="akte-license-badge">Keine Lizenz</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="akte-actions">
+                    <button class="btn-akte-action" onclick="exportSingleTrainerCSV()">📊 CSV Export</button>
+                    <button class="btn-akte-action" onclick="exportTrainerPDF()">🖨️ Akte Drucken</button>
+                    <button class="btn-akte-action" style="color:var(--danger);" onclick="toggleArchiveCurrentTrainer()" id="btn-archive-toggle">📦 Ins Archiv</button>
+                </div>
+            </div>
+
+            <div class="akte-tabs">
+                <div class="akte-tab active" onclick="switchAkteTab('stammdaten', this)">Stammdaten & Rolle</div>
+                <div class="akte-tab" onclick="switchAkteTab('lizenzen', this)">Lizenzen & Qualifikationen</div>
+                <div class="akte-tab" onclick="switchAkteTab('dokumente', this)">Dokumente & Verträge</div>
+                <div class="akte-tab" onclick="switchAkteTab('notizen', this)">Fortlaufende Notizen</div>
+            </div>
+
+            <div id="tab-stammdaten" class="tab-content active">
+                <div class="form-section">
+                    <h3>Persönliche Informationen</h3>
+                    <div class="form-grid">
+                        <div class="field-group"><label>Vorname</label><input type="text" id="tr-firstname" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Nachname</label><input type="text" id="tr-lastname" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Geburtsdatum</label><input type="date" id="tr-dob" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>E-Mail Adresse</label><input type="email" id="tr-email" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Telefon / Mobil</label><input type="text" id="tr-phone" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Adresse</label><input type="text" id="tr-address" onchange="updateTrainerData()"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Vereinsfunktion & Zuständigkeit</h3>
+                    <div class="form-grid">
+                        <div class="field-group"><label>Abteilung / Sparte</label><input type="text" id="tr-department" placeholder="z.B. Schwimmen" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Zuständige Gruppen / Teams</label><input type="text" id="tr-teams" placeholder="z.B. U14 Wettkampf, Breitensport" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Eintrittsdatum</label><input type="date" id="tr-joindate" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Konfektionsgröße (Kleidung)</label><input type="text" id="tr-size" placeholder="z.B. M, L" onchange="updateTrainerData()"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-lizenzen" class="tab-content">
+                <div class="form-section">
+                    <h3>Übungsleiter- / Trainerlizenz</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label>Lizenz vorhanden?</label>
+                            <select id="tr-has-license" onchange="updateTrainerData()">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
+                        <div class="field-group"><label>Lizenzstufe / Bezeichnung</label><input type="text" id="tr-license-type" placeholder="z.B. DOSB C-Lizenz Schwimmen" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Gültig bis</label><input type="date" id="tr-license-exp" onchange="updateTrainerData()"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Rettungsschwimmer</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label>Rettungsschwimmer vorhanden?</label>
+                            <select id="tr-has-lifeguard" onchange="updateTrainerData()">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Stufe</label>
+                            <select id="tr-lifeguard-level" onchange="updateTrainerData()">
+                                <option value="Bronze">Bronze</option>
+                                <option value="Silber">Silber</option>
+                                <option value="Gold">Gold</option>
+                            </select>
+                        </div>
+                        <div class="field-group"><label>Gültig bis / Auffrischung</label><input type="date" id="tr-lifeguard-exp" onchange="updateTrainerData()"></div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Kampfrichterlizenz</h3>
+                    <div class="form-grid">
+                        <div class="field-group">
+                            <label>Kampfrichter vorhanden?</label>
+                            <select id="tr-has-referee" onchange="updateTrainerData()">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
+                        <div class="field-group"><label>Bezeichnung / Stufe</label><input type="text" id="tr-referee-type" placeholder="z.B. Wettkampfrichter Gruppe 1" onchange="updateTrainerData()"></div>
+                        <div class="field-group"><label>Gültig bis</label><input type="date" id="tr-referee-exp" onchange="updateTrainerData()"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-dokumente" class="tab-content">
+                <div class="form-section">
+                    <h3>Dokumenten-Upload (Verträge, Urkunden, Führungszeugnis)</h3>
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
+                        <input type="file" id="doc-upload-input" style="display:none" onchange="uploadTrainerDocument(event)">
+                        <button class="btn-new-trainer" style="width:auto; margin:0;" onclick="document.getElementById('doc-upload-input').click()">➕ Dokument hochladen</button>
+                    </div>
+                    <div class="doc-grid" id="trainer-doc-grid"></div>
+                </div>
+            </div>
+
+            <div id="tab-notizen" class="tab-content">
+                <div class="form-section">
+                    <h3>Neue Notiz hinzufügen</h3>
+                    <div class="field-group" style="margin-bottom: 10px;">
+                        <textarea id="new-note-text" rows="3" placeholder="Notiz oder Besprechungsprotokoll eintragen..."></textarea>
+                    </div>
+                    <button class="btn-new-trainer" style="width:auto;" onclick="addTrainerNote()">Notiz Speichern</button>
+                </div>
+
+                <div class="form-section">
+                    <h3>Fortlaufende Chronik</h3>
+                    <div class="timeline" id="trainer-timeline"></div>
+                </div>
+            </div>
+
+        </div>
+        <div id="akte-empty-state" style="padding:50px; text-align:center; color:#94a3b8;">Bitte wählen Sie einen Trainer links aus oder legen Sie einen neuen an.</div>
+    </div>
+
+    <div id="new-trainer-modal" class="modal-overlay">
+        <div class="modal">
+            <h3>Neuen Trainer Anlegen</h3>
+            <div class="field-group" style="margin-bottom:10px;">
+                <label>Vorname</label>
+                <input type="text" id="new-tr-firstname">
+            </div>
+            <div class="field-group" style="margin-bottom:15px;">
+                <label>Nachname</label>
+                <input type="text" id="new-tr-lastname">
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:8px;">
+                <button class="btn-secondary" style="width:auto;" onclick="closeNewTrainerModal()">Abbrechen</button>
+                <button class="btn-new-trainer" style="width:auto;" onclick="createNewTrainer()">Anlegen</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let trainerData = JSON.parse(localStorage.getItem('trainer_portal_data')) || {
+            selectedTrainerId: null,
+            trainerFilter: 'active',
+            trainers: [
+                {
+                    id: 'tr_1',
+                    firstname: 'Max',
+                    lastname: 'Mustermann',
+                    status: 'active',
+                    email: 'max@verein.de',
+                    phone: '0171 1234567',
+                    department: 'Schwimmen',
+                    teams: 'U14 Wettkampf',
+                    hasLicense: 'ja',
+                    licenseType: 'DOSB C-Lizenz Schwimmen',
+                    licenseExp: '2026-12-31',
+                    hasLifeguard: 'ja',
+                    lifeguardLevel: 'Silber',
+                    lifeguardExp: '2025-06-30',
+                    hasReferee: 'nein',
+                    documents: [],
+                    notes: [
+                        { date: '10.09.2026, 14:30', text: 'Übungsleitervertrag für Saison 2026/2027 unterschrieben abgelegt.' }
+                    ]
+                }
+            ]
+        };
+
+        let currentTrainerId = trainerData.selectedTrainerId;
+
+        window.onload = function() {
+            renderTrainerList();
+            if (currentTrainerId) {
+                loadTrainerAkte(currentTrainerId);
+            } else if (trainerData.trainers.length > 0) {
+                loadTrainerAkte(trainerData.trainers[0].id);
+            }
+        };
+
+        function renderTrainerList(searchQuery = '') {
+            const container = document.getElementById('trainer-list-container');
+            container.innerHTML = '';
+
+            const filtered = trainerData.trainers.filter(t => {
+                const matchesFilter = (trainerData.trainerFilter === 'active' && t.status !== 'archived') ||
+                                      (trainerData.trainerFilter === 'archived' && t.status === 'archived');
+                const fullName = (t.firstname + ' ' + t.lastname).toLowerCase();
+                const matchesSearch = fullName.includes(searchQuery.toLowerCase());
+                return matchesFilter && matchesSearch;
+            });
+
+            filtered.forEach(t => {
+                const card = document.createElement('div');
+                card.className = 'trainer-card' + (t.id === currentTrainerId ? ' active' : '');
+                card.onclick = () => loadTrainerAkte(t.id);
+
+                const initials = (t.firstname[0] || '') + (t.lastname[0] || '');
+                card.innerHTML = `
+                    <div class="trainer-avatar">${initials}</div>
+                    <div class="trainer-info">
+                        <div class="trainer-name">${t.firstname} ${t.lastname}</div>
+                        <div class="trainer-sub">${t.licenseType || 'Keine Lizenz'}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function setTrainerFilter(filter, tabEl) {
+            trainerData.trainerFilter = filter;
+            document.querySelectorAll('.filter-tab').forEach(e => e.classList.remove('active'));
+            tabEl.classList.add('active');
+            renderTrainerList();
+        }
+
+        function filterTrainerList(query) {
+            renderTrainerList(query);
+        }
+
+        function loadTrainerAkte(id) {
+            currentTrainerId = id;
+            trainerData.selectedTrainerId = id;
+            const t = trainerData.trainers.find(item => item.id === id);
+            if (!t) return;
+
+            document.getElementById('akte-view-container').style.display = 'block';
+            document.getElementById('akte-empty-state').style.display = 'none';
+
+            document.getElementById('akte-fullname').innerText = `${t.firstname} ${t.lastname}`;
+            document.getElementById('akte-avatar').innerText = (t.firstname[0] || '') + (t.lastname[0] || '');
+
+            const statusBadge = document.getElementById('akte-status-badge');
+            statusBadge.innerText = t.status === 'archived' ? 'Archiviert' : 'Aktiv';
+            statusBadge.className = 'badge ' + (t.status === 'archived' ? 'badge-archived' : 'badge-active');
+
+            document.getElementById('akte-license-badge').innerText = t.hasLicense === 'ja' ? (t.licenseType || 'Lizenz vorhanden') : 'Keine Lizenz';
+            document.getElementById('btn-archive-toggle').innerText = t.status === 'archived' ? '📂 Reaktivieren' : '📦 Ins Archiv';
+
+            document.getElementById('tr-firstname').value = t.firstname || '';
+            document.getElementById('tr-lastname').value = t.lastname || '';
+            document.getElementById('tr-dob').value = t.dob || '';
+            document.getElementById('tr-email').value = t.email || '';
+            document.getElementById('tr-phone').value = t.phone || '';
+            document.getElementById('tr-address').value = t.address || '';
+            document.getElementById('tr-department').value = t.department || '';
+            document.getElementById('tr-teams').value = t.teams || '';
+            document.getElementById('tr-joindate').value = t.joindate || '';
+            document.getElementById('tr-size').value = t.size || '';
+
+            document.getElementById('tr-has-license').value = t.hasLicense || 'nein';
+            document.getElementById('tr-license-type').value = t.licenseType || '';
+            document.getElementById('tr-license-exp').value = t.licenseExp || '';
+
+            document.getElementById('tr-has-lifeguard').value = t.hasLifeguard || 'nein';
+            document.getElementById('tr-lifeguard-level').value = t.lifeguardLevel || 'Bronze';
+            document.getElementById('tr-lifeguard-exp').value = t.lifeguardExp || '';
+
+            document.getElementById('tr-has-referee').value = t.hasReferee || 'nein';
+            document.getElementById('tr-referee-type').value = t.refereeType || '';
+            document.getElementById('tr-referee-exp').value = t.refereeExp || '';
+
+            renderTrainerDocs(t);
+            renderTrainerNotes(t);
+            renderTrainerList();
+            saveDataToStorage();
+        }
+
+        function updateTrainerData() {
+            if (!currentTrainerId) return;
+            const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+            if (!t) return;
+
+            t.firstname = document.getElementById('tr-firstname').value;
+            t.lastname = document.getElementById('tr-lastname').value;
+            t.dob = document.getElementById('tr-dob').value;
+            t.email = document.getElementById('tr-email').value;
+            t.phone = document.getElementById('tr-phone').value;
+            t.address = document.getElementById('tr-address').value;
+            t.department = document.getElementById('tr-department').value;
+            t.teams = document.getElementById('tr-teams').value;
+            t.joindate = document.getElementById('tr-joindate').value;
+            t.size = document.getElementById('tr-size').value;
+
+            t.hasLicense = document.getElementById('tr-has-license').value;
+            t.licenseType = document.getElementById('tr-license-type').value;
+            t.licenseExp = document.getElementById('tr-license-exp').value;
+
+            t.hasLifeguard = document.getElementById('tr-has-lifeguard').value;
+            t.lifeguardLevel = document.getElementById('tr-lifeguard-level').value;
+            t.lifeguardExp = document.getElementById('tr-lifeguard-exp').value;
+
+            t.hasReferee = document.getElementById('tr-has-referee').value;
+            t.refereeType = document.getElementById('tr-referee-type').value;
+            t.refereeExp = document.getElementById('tr-referee-exp').value;
+
+            document.getElementById('akte-fullname').innerText = `${t.firstname} ${t.lastname}`;
+            renderTrainerList();
+            saveDataToStorage();
+        }
+
+        function switchAkteTab(tabName, tabEl) {
+            document.querySelectorAll('.akte-tab').forEach(e => e.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(e => e.classList.remove('active'));
+            tabEl.classList.add('active');
+            document.getElementById('tab-' + tabName).classList.add('active');
+        }
+
+        function openNewTrainerModal() { document.getElementById('new-trainer-modal').classList.add('active'); }
+        function closeNewTrainerModal() { document.getElementById('new-trainer-modal').classList.remove('active'); }
+
+        function createNewTrainer() {
+            const fn = document.getElementById('new-tr-firstname').value.trim();
+            const ln = document.getElementById('new-tr-lastname').value.trim();
+            if (!fn || !ln) return alert("Bitte Vor- und Nachnamen eingeben.");
+
+            const newId = 'tr_' + Date.now();
+            const newTrainer = { id: newId, firstname: fn, lastname: ln, status: 'active', documents: [], notes: [] };
+            trainerData.trainers.push(newTrainer);
+
+            closeNewTrainerModal();
+            loadTrainerAkte(newId);
+        }
+
+        function toggleArchiveCurrentTrainer() {
+            if (!currentTrainerId) return;
+            const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+            if (!t) return;
+
+            t.status = t.status === 'archived' ? 'active' : 'archived';
+            loadTrainerAkte(currentTrainerId);
+        }
+
+        function uploadTrainerDocument(event) {
+            const file = event.target.files[0];
+            if (!file || !currentTrainerId) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+                if (!t.documents) t.documents = [];
+                t.documents.push({ name: file.name, date: new Date().toLocaleDateString('de-DE'), data: e.target.result });
+                saveDataToStorage();
+                renderTrainerDocs(t);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderTrainerDocs(t) {
+            const grid = document.getElementById('trainer-doc-grid');
+            grid.innerHTML = '';
+            (t.documents || []).forEach((doc, idx) => {
+                const card = document.createElement('div');
+                card.className = 'doc-card';
+                card.innerHTML = `
+                    <span class="doc-del" onclick="deleteTrainerDoc(${idx})">✕</span>
+                    <div class="doc-title">📄 ${doc.name}</div>
+                    <div class="doc-meta">${doc.date}</div>
+                    <a href="${doc.data}" download="${doc.name}" style="font-size:0.75rem; color:var(--accent);">Download</a>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function deleteTrainerDoc(idx) {
+            const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+            if (t && t.documents) {
+                t.documents.splice(idx, 1);
+                saveDataToStorage();
+                renderTrainerDocs(t);
+            }
+        }
+
+        function addTrainerNote() {
+            const text = document.getElementById('new-note-text').value.trim();
+            if (!text || !currentTrainerId) return;
+
+            const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+            if (!t.notes) t.notes = [];
+
+            const now = new Date().toLocaleString('de-DE', { dateStyle: 'medium', timeStyle: 'short' });
+            t.notes.unshift({ date: now, text: text });
+
+            document.getElementById('new-note-text').value = '';
+            saveDataToStorage();
+            renderTrainerNotes(t);
+        }
+
+        function renderTrainerNotes(t) {
+            const timeline = document.getElementById('trainer-timeline');
+            timeline.innerHTML = '';
+            (t.notes || []).forEach(n => {
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.innerHTML = `
+                    <div class="timeline-header"><span>📌 Notiz</span><span>${n.date}</span></div>
+                    <div class="timeline-body">${n.text}</div>
+                `;
+                timeline.appendChild(item);
+            });
+        }
+
+        function exportSingleTrainerCSV() {
+            if (!currentTrainerId) return;
+            const t = trainerData.trainers.find(item => item.id === currentTrainerId);
+            if (!t) return;
+
+            let csvContent = "data:text/csv;charset=utf-8,Feld;Wert\n";
+            csvContent += `Vorname;${t.firstname}\n`;
+            csvContent += `Nachname;${t.lastname}\n`;
+            csvContent += `E-Mail;${t.email || ''}\n`;
+            csvContent += `Telefon;${t.phone || ''}\n`;
+            csvContent += `Abteilung;${t.department || ''}\n`;
+            csvContent += `Teams;${t.teams || ''}\n`;
+            csvContent += `Lizenz;${t.licenseType || 'Keine'}\n`;
+            csvContent += `Lizenz Gültig Bis;${t.licenseExp || ''}\n`;
+            csvContent += `Rettungsschwimmer;${t.hasLifeguard === 'ja' ? t.lifeguardLevel : 'Nein'}\n`;
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `trainerakte_${t.lastname}_${t.firstname}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        }
+
+        function exportTrainerPDF() {
+            window.print();
+        }
+
+        function saveDataToStorage() {
+            localStorage.setItem('trainer_portal_data', JSON.stringify(trainerData));
+            document.getElementById('save-status').innerText = 'Gespeichert um ' + new Date().toLocaleTimeString();
+        }
+
+        function exportBackup() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(trainerData));
+            const anchor = document.createElement('a');
+            anchor.setAttribute("href", dataStr);
+            anchor.setAttribute("download", `trainerportal_backup.json`);
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    trainerData = JSON.parse(e.target.result);
+                    saveDataToStorage();
+                    location.reload();
+                };
+                reader.readAsText(file);
+            }
+        }
+    </script>
+</body>
+</html>
