@@ -1,37 +1,13 @@
 {
   "groups": [
-    "Gruppe A",
-    "Gruppe B1",
-    "dennis"
+    "Anfänger | Braune / Lehmann",
+    "AG I | Ballas / Schubert",
+    "AG II | Schemmel / Winter",
+    "LG II | Möbius / Rudolph",
+    "LG I | Kehlitz / Thormann",
+    "Master | Gall"
   ],
   "members": [
-    {
-      "id": "mb_1",
-      "firstname": "Max",
-      "lastname": "Mustermann",
-      "status": "active",
-      "group": "Gruppe A",
-      "email": "max@example.com",
-      "phone": "0123 456789"
-    },
-    {
-      "id": "mb_2",
-      "firstname": "Erika",
-      "lastname": "Musterfrau",
-      "status": "active",
-      "group": "Gruppe B1",
-      "email": "erika@example.com",
-      "phone": "0987 654321"
-    },
-    {
-      "id": "mb_1789383570683",
-      "firstname": "Neues",
-      "lastname": "Mitglied",
-      "email": "",
-      "phone": "",
-      "group": "Gruppe A",
-      "status": "active"
-    },
     {
       "id": "mb_1789389945997",
       "firstname": "Dennis",
@@ -43,7 +19,7 @@
       "agegroup": "",
       "email": "",
       "phone": "",
-      "group": "dennis",
+      "group": "Master | Gall",
       "dsvid": "",
       "notes": [
         {
@@ -73,7 +49,24 @@
       "agegroup": "",
       "email": "",
       "phone": "",
-      "group": "dennis",
+      "group": "Master | Gall",
+      "dsvid": "",
+      "notes": [],
+      "files": [],
+      "status": "active"
+    },
+    {
+      "id": "mb_1789401001106",
+      "firstname": "Tim",
+      "lastname": "Sperling",
+      "street": "",
+      "city": "",
+      "gender": "",
+      "birthdate": "",
+      "agegroup": "",
+      "email": "",
+      "phone": "",
+      "group": "LG I | Kehlitz / Thormann",
       "dsvid": "",
       "notes": [],
       "files": [],
