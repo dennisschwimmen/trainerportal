@@ -194,39 +194,51 @@
 
     <script>
         let currentDate = new Date();
-        const PORTAL_KEY = 'my_portal_data_v4';
+        let globalPortalData = { events: [], members: [] };
 
-        window.onload = function() {
-            renderCalendar();
-            renderUpcomingEvents();
+        window.onload = async function() {
+            await reloadAllData();
         };
 
-        // Identische Lade-Logik wie in der Mitgliederverwaltung
-        function getPortalData() {
-            const raw = localStorage.getItem(PORTAL_KEY);
-            if (!raw) {
-                return { members: [], events: [] };
-            }
-            try {
-                const data = JSON.parse(raw);
-                if (!data.events) data.events = [];
-                if (!data.members) data.members = [];
-                return data;
-            } catch (e) {
-                return { members: [], events: [] };
-            }
+        async function reloadAllData() {
+            globalPortalData = await fetchGitHubData();
+            renderCalendar();
+            renderUpcomingEvents();
         }
 
-        // Identische Speicher-Logik wie in der Mitgliederverwaltung
-        function savePortalData(data) {
-            localStorage.setItem(PORTAL_KEY, JSON.stringify(data));
+        async function fetchGitHubData() {
+            let events = [];
+            let members = [];
+
+            // 1. Termine aus termine.json laden
+            try {
+                const res = await fetch('termine.json?cache=' + Date.now());
+                if (res.ok) {
+                    const data = await res.json();
+                    events = data.events || [];
+                }
+            } catch (e) {
+                console.warn("Konnte termine.json nicht laden:", e);
+            }
+
+            // 2. Mitglieder aus members.json laden (für Geburtstage)
+            try {
+                const resMem = await fetch('members.json?cache=' + Date.now());
+                if (resMem.ok) {
+                    const memData = await resMem.json();
+                    members = memData.members || memData || [];
+                }
+            } catch (e) {
+                console.warn("Konnte members.json nicht laden:", e);
+            }
+
+            return { events, members };
         }
 
         function getActiveMemberBirthdays(year) {
-            const portalData = getPortalData();
             const birthdayEvents = [];
 
-            portalData.members.forEach(member => {
+            globalPortalData.members.forEach(member => {
                 if (member.status === 'active' && member.dob) {
                     const birthDateParts = member.dob.split('-');
                     
@@ -256,22 +268,12 @@
         }
 
         function getAllEventsForYear(year) {
-            const portalData = getPortalData();
             const bdays = getActiveMemberBirthdays(year);
-            return [...portalData.events, ...bdays];
+            return [...globalPortalData.events, ...bdays];
         }
 
         window.addEventListener('focus', function() {
-            renderCalendar();
-            renderUpcomingEvents();
-        });
-
-        // Automatische Aktualisierung, wenn Daten in einem anderen Tab oder von Mitgliedern geändert werden
-        window.addEventListener('storage', function(e) {
-            if (e.key === PORTAL_KEY) {
-                renderCalendar();
-                renderUpcomingEvents();
-            }
+            reloadAllData();
         });
 
         function toggleRepeatUntilField() {
@@ -416,10 +418,9 @@
             const modal = document.getElementById('event-modal');
             const deleteBtn = document.getElementById('btn-delete-evt');
             const repeatRow = document.getElementById('repeat-config-row');
-            const portalData = getPortalData();
 
             if (eventId) {
-                const evt = portalData.events.find(e => e.id === eventId);
+                const evt = globalPortalData.events.find(e => e.id === eventId);
                 if (!evt) return;
 
                 document.getElementById('modal-title').innerText = "Termin bearbeiten";
@@ -456,85 +457,13 @@
         }
 
         function saveEvent() {
-            const id = document.getElementById('evt-id').value;
-            const title = document.getElementById('evt-title').value.trim();
-            const startDate = document.getElementById('evt-start').value;
-            let endDate = document.getElementById('evt-end').value;
-            const repeat = document.getElementById('evt-repeat').value;
-            const repeatUntil = document.getElementById('evt-repeat-until').value;
-            const color = document.getElementById('evt-color').value;
-            const desc = document.getElementById('evt-desc').value.trim();
-
-            if (!title || !startDate) {
-                alert("Bitte mindestens einen Titel und ein Startdatum angeben.");
-                return;
-            }
-
-            if (!endDate || endDate < startDate) {
-                endDate = startDate;
-            }
-
-            const portalData = getPortalData();
-
-            if (id) {
-                const evt = portalData.events.find(e => e.id === id);
-                if (evt) {
-                    evt.title = title;
-                    evt.startDate = startDate;
-                    evt.endDate = endDate;
-                    evt.color = color;
-                    evt.desc = desc;
-                }
-            } else {
-                if (repeat !== 'none' && repeatUntil) {
-                    let curStart = new Date(startDate);
-                    let curEnd = new Date(endDate);
-                    const durationDiff = curEnd.getTime() - curStart.getTime();
-                    const untilDate = new Date(repeatUntil);
-
-                    while (curStart <= untilDate) {
-                        const startIso = curStart.toISOString().split('T')[0];
-                        const endIso = new Date(curStart.getTime() + durationDiff).toISOString().split('T')[0];
-
-                        portalData.events.push({
-                            id: 'evt_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
-                            title, startDate: startIso, endDate: endIso, color, desc
-                        });
-
-                        if (repeat === 'weekly') {
-                            curStart.setDate(curStart.getDate() + 7);
-                        } else if (repeat === 'biweekly') {
-                            curStart.setDate(curStart.getDate() + 14);
-                        } else if (repeat === 'monthly') {
-                            curStart.setMonth(curStart.getMonth() + 1);
-                        }
-                    }
-                } else {
-                    portalData.events.push({
-                        id: 'evt_' + Date.now(),
-                        title, startDate, endDate, color, desc
-                    });
-                }
-            }
-
-            savePortalData(portalData);
+            alert("Hinweis: Da die Webseite über GitHub Pages gehostet wird, müssen neue Termine in der 'termine.json' im GitHub-Repository eingetragen und gecommittet werden.");
             closeEventModal();
-            renderCalendar();
-            renderUpcomingEvents();
         }
 
         function deleteEvent() {
-            const id = document.getElementById('evt-id').value;
-            if (!id) return;
-
-            if (confirm("Möchten Sie diesen Termin wirklich löschen?")) {
-                const portalData = getPortalData();
-                portalData.events = portalData.events.filter(e => e.id !== id);
-                savePortalData(portalData);
-                closeEventModal();
-                renderCalendar();
-                renderUpcomingEvents();
-            }
+            alert("Hinweis: Da die Webseite über GitHub Pages gehostet wird, müssen Termine direkt in der 'termine.json' im GitHub-Repository gelöscht werden.");
+            closeEventModal();
         }
     </script>
 </body>
