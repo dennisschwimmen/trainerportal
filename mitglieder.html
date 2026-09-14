@@ -62,7 +62,7 @@
             width: 100%; color: white; border: none; padding: 7px 6px; border-radius: 6px;
             cursor: pointer; font-weight: bold; font-size: 0.78rem; margin-bottom: 0;
             display: flex; align-items: center; justify-content: center; gap: 4px;
-            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none;
         }
         .btn-primary { background-color: var(--primary); }
         .btn-primary:hover { background-color: var(--primary-hover); }
@@ -97,6 +97,15 @@
             padding: 12px 30px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .home-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; transition: all 0.2s;
+        }
+        .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
+
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
 
         .akte-container { padding: 25px 35px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; }
@@ -213,7 +222,10 @@
 
     <div id="content-wrapper">
         <header>
-            <div id="breadcrumb" class="breadcrumb">Portal / <b>Mitgliederverwaltung</b></div>
+            <div class="header-left">
+                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+                <div id="breadcrumb" class="breadcrumb">Portal / <b>Mitgliederverwaltung</b></div>
+            </div>
             <div>
                 <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.85rem;">Status: Bereit</span>
             </div>
