@@ -124,11 +124,28 @@
             border: 2px solid var(--border-color);
         }
         .akte-title-area h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 4px; }
-        .akte-badges { display: flex; gap: 8px; margin-top: 6px; }
+        .akte-badges { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
         .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.75rem; font-weight: 600; }
         .badge-active { background: #dcfce7; color: #15803d; }
         .badge-archived { background: #f1f5f9; color: #64748b; }
         .badge-license { background: #dbeafe; color: #1d4ed8; }
+
+        /* Status-Badges für abgelaufene/bald ablaufende Lizenzen */
+        .badge-expired { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
+        .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+
+        .license-alert {
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .license-alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+        .license-alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
 
         .akte-actions { display: flex; gap: 8px; }
         .btn-akte-action {
@@ -226,7 +243,7 @@
                     <div class="akte-avatar-large" id="akte-avatar">👤</div>
                     <div class="akte-title-area">
                         <h1 id="akte-fullname">Vorname Nachname</h1>
-                        <div class="akte-badges">
+                        <div class="akte-badges" id="akte-badges-container">
                             <span class="badge badge-active" id="akte-status-badge">Aktiv</span>
                             <span class="badge badge-license" id="akte-license-badge">Keine Lizenz</span>
                         </div>
@@ -273,6 +290,7 @@
             <div id="tab-lizenzen" class="tab-content">
                 <div class="form-section">
                     <h3>Übungsleiter- / Trainerlizenz</h3>
+                    <div id="alert-container-license"></div>
                     <div class="form-grid">
                         <div class="field-group">
                             <label>Lizenz vorhanden?</label>
@@ -288,6 +306,7 @@
 
                 <div class="form-section">
                     <h3>Rettungsschwimmer</h3>
+                    <div id="alert-container-lifeguard"></div>
                     <div class="form-grid">
                         <div class="field-group">
                             <label>Rettungsschwimmer vorhanden?</label>
@@ -310,6 +329,7 @@
 
                 <div class="form-section">
                     <h3>Kampfrichterlizenz</h3>
+                    <div id="alert-container-referee"></div>
                     <div class="form-grid">
                         <div class="field-group">
                             <label>Kampfrichter vorhanden?</label>
@@ -565,6 +585,49 @@
             }
         }
 
+        // Hilfsfunktion zur Prüfung des Lizenzstatus
+        function getLicenseStatus(dateString) {
+            if (!dateString) return 'ok';
+            const expDate = new Date(dateString);
+            const now = new Date();
+            // Uhrzeit zurücksetzen für genauen Tagesvergleich
+            now.setHours(0,0,0,0);
+            
+            if (expDate < now) {
+                return 'expired';
+            }
+
+            const sixMonthsFromNow = new Date();
+            sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+            
+            if (expDate <= sixMonthsFromNow) {
+                return 'warning';
+            }
+
+            return 'ok';
+        }
+
+        function checkOverallTrainerAlert(t) {
+            let hasExpired = false;
+            let hasWarning = false;
+
+            const check = (has, exp) => {
+                if (has === 'ja' && exp) {
+                    const st = getLicenseStatus(exp);
+                    if (st === 'expired') hasExpired = true;
+                    if (st === 'warning') hasWarning = true;
+                }
+            };
+
+            check(t.hasLicense, t.licenseExp);
+            check(t.hasLifeguard, t.lifeguardExp);
+            check(t.hasReferee, t.refereeExp);
+
+            if (hasExpired) return '🚨';
+            if (hasWarning) return '⚠️';
+            return '';
+        }
+
         function renderTrainerList(searchQuery = '') {
             const container = document.getElementById('trainer-list-container');
             container.innerHTML = '';
@@ -582,11 +645,12 @@
                 card.className = 'trainer-card' + (t.id === currentTrainerId ? ' active' : '');
                 card.onclick = () => loadTrainerAkte(t.id);
 
+                const alertIcon = checkOverallTrainerAlert(t);
                 const initials = (t.firstname[0] || '') + (t.lastname[0] || '');
                 card.innerHTML = `
                     <div class="trainer-avatar">${initials}</div>
                     <div class="trainer-info">
-                        <div class="trainer-name">${t.firstname} ${t.lastname}</div>
+                        <div class="trainer-name">${t.firstname} ${t.lastname} ${alertIcon}</div>
                         <div class="trainer-sub">${t.licenseType || 'Keine Lizenz'}</div>
                     </div>
                 `;
@@ -621,7 +685,6 @@
             statusBadge.innerText = t.status === 'archived' ? 'Archiviert' : 'Aktiv';
             statusBadge.className = 'badge ' + (t.status === 'archived' ? 'badge-archived' : 'badge-active');
 
-            document.getElementById('akte-license-badge').innerText = t.hasLicense === 'ja' ? (t.licenseType || 'Lizenz vorhanden') : 'Keine Lizenz';
             document.getElementById('btn-archive-toggle').innerText = t.status === 'archived' ? '📂 Reaktivieren' : '📦 Ins Archiv';
 
             document.getElementById('tr-firstname').value = t.firstname || '';
@@ -647,9 +710,55 @@
             document.getElementById('tr-referee-type').value = t.refereeType || '';
             document.getElementById('tr-referee-exp').value = t.refereeExp || '';
 
+            updateLicenseBadgesAndAlerts(t);
             renderTrainerDocs(t);
             renderTrainerNotes(t);
             renderTrainerList();
+        }
+
+        function updateLicenseBadgesAndAlerts(t) {
+            const badgesContainer = document.getElementById('akte-badges-container');
+            
+            // Standard-Badges zurücksetzen
+            badgesContainer.innerHTML = `
+                <span class="badge ${t.status === 'archived' ? 'badge-archived' : 'badge-active'}">${t.status === 'archived' ? 'Archiviert' : 'Aktiv'}</span>
+            `;
+
+            const checkCategory = (has, exp, name, alertContainerId) => {
+                const container = document.getElementById(alertContainerId);
+                container.innerHTML = '';
+
+                if (has !== 'ja' || !exp) return;
+
+                const status = getLicenseStatus(exp);
+                const formattedDate = new Date(exp).toLocaleDateString('de-DE');
+
+                if (status === 'expired') {
+                    container.innerHTML = `
+                        <div class="license-alert license-alert-danger">
+                            🚨 <b>Achtung:</b> Die ${name} ist am ${formattedDate} abgelaufen!
+                        </div>
+                    `;
+                    badgesContainer.innerHTML += `<span class="badge badge-expired">🚨 ${name} abgelaufen</span>`;
+                } else if (status === 'warning') {
+                    container.innerHTML = `
+                        <div class="license-alert license-alert-warning">
+                            ⚠️ <b>Hinweis:</b> Die ${name} läuft am ${formattedDate} ab (innerhalb der nächsten 6 Monate).
+                        </div>
+                    `;
+                    badgesContainer.innerHTML += `<span class="badge badge-warning">⚠️ ${name} läuft bald ab</span>`;
+                }
+            };
+
+            checkCategory(t.hasLicense, t.licenseExp, 'Trainerlizenz', 'alert-container-license');
+            checkCategory(t.hasLifeguard, t.lifeguardExp, 'Rettungsschwimmer-Qualifikation', 'alert-container-lifeguard');
+            checkCategory(t.hasReferee, t.refereeExp, 'Kampfrichterlizenz', 'alert-container-referee');
+
+            if (t.hasLicense === 'ja' && getLicenseStatus(t.licenseExp) === 'ok') {
+                badgesContainer.innerHTML += `<span class="badge badge-license">${t.licenseType || 'Lizenz vorhanden'}</span>`;
+            } else if (t.hasLicense !== 'ja') {
+                badgesContainer.innerHTML += `<span class="badge badge-license">Keine Lizenz</span>`;
+            }
         }
 
         function updateTrainerData() {
@@ -681,6 +790,7 @@
             t.refereeExp = document.getElementById('tr-referee-exp').value;
 
             document.getElementById('akte-fullname').innerText = `${t.firstname} ${t.lastname}`;
+            updateLicenseBadgesAndAlerts(t);
             renderTrainerList();
             setStatus('Ungespeicherte Änderungen vorhanden', '#e67e22');
         }
