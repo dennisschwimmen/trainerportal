@@ -1,5 +1,5 @@
 {
-  "activePageId": "page_1789475300014",
+  "activePageId": "home",
   "pages": {
     "home": {
       "id": "home",
@@ -15,5 +15,9 @@
       "parentId": null,
       "children": []
     }
-  }
+  },
+  "pageOrder": [
+    "home",
+    "page_1789475300014"
+  ]
 }
