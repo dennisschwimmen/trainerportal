@@ -305,6 +305,7 @@
 
         let wikiData = {
             activePageId: 'home',
+            pageOrder: ['home'],
             pages: {
                 'home': { id: 'home', title: 'Startseite', content: '<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>', parentId: null, children: [] }
             }
@@ -379,6 +380,7 @@
                     const parsed = JSON.parse(jsonText);
                     if (parsed && parsed.pages) {
                         wikiData = parsed;
+                        ensurePageOrderStructure();
                     }
                 }
 
@@ -451,12 +453,32 @@
             }
         }
 
+        function ensurePageOrderStructure() {
+            if (!wikiData.pageOrder) wikiData.pageOrder = [];
+            
+            // Hauptseiten in pageOrder anordnen
+            const rootPages = Object.keys(wikiData.pages).filter(id => !wikiData.pages[id].parentId);
+            rootPages.forEach(id => {
+                if (!wikiData.pageOrder.includes(id)) wikiData.pageOrder.push(id);
+            });
+            wikiData.pageOrder = wikiData.pageOrder.filter(id => wikiData.pages[id] && !wikiData.pages[id].parentId);
+
+            // Unterseiten-Arrays prüfen
+            Object.values(wikiData.pages).forEach(p => {
+                if (!p.children) p.children = [];
+            });
+        }
+
         function renderTree() {
+            ensurePageOrderStructure();
             const root = document.getElementById('tree-root');
             root.innerHTML = '';
             
-            const mainPages = Object.values(wikiData.pages).filter(p => !p.parentId);
-            mainPages.forEach(p => root.appendChild(createTreeNode(p)));
+            wikiData.pageOrder.forEach(id => {
+                if (wikiData.pages[id]) {
+                    root.appendChild(createTreeNode(wikiData.pages[id]));
+                }
+            });
         }
 
         function createTreeNode(page) {
@@ -470,7 +492,10 @@
             item.innerHTML = `
                 <span class="tree-title">${page.title}</span>
                 <div class="tree-actions">
-                    <button class="btn-icon" onclick="event.stopPropagation(); deletePage('${page.id}')">🗑️</button>
+                    <button class="btn-icon" title="Nach oben" onclick="event.stopPropagation(); movePageUp('${page.id}')">⬆️</button>
+                    <button class="btn-icon" title="Nach unten" onclick="event.stopPropagation(); movePageDown('${page.id}')">⬇️</button>
+                    <button class="btn-icon" title="Ebene ändern" onclick="event.stopPropagation(); changePageParent('${page.id}')">📂</button>
+                    <button class="btn-icon" title="Löschen" onclick="event.stopPropagation(); deletePage('${page.id}')">🗑️</button>
                 </div>
             `;
 
@@ -488,6 +513,70 @@
             }
 
             return li;
+        }
+
+        function movePageUp(id) {
+            const page = wikiData.pages[id];
+            if (!page) return;
+
+            let list = page.parentId ? wikiData.pages[page.parentId].children : wikiData.pageOrder;
+            let index = list.indexOf(id);
+            if (index > 0) {
+                list.splice(index, 1);
+                list.splice(index - 1, 0, id);
+                renderTree();
+                setStatus('Reihenfolge geändert (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function movePageDown(id) {
+            const page = wikiData.pages[id];
+            if (!page) return;
+
+            let list = page.parentId ? wikiData.pages[page.parentId].children : wikiData.pageOrder;
+            let index = list.indexOf(id);
+            if (index >= 0 && index < list.length - 1) {
+                list.splice(index, 1);
+                list.splice(index + 1, 0, id);
+                renderTree();
+                setStatus('Reihenfolge geändert (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function changePageParent(id) {
+            if (id === 'home') return alert("Die Startseite kann nicht verschoben werden.");
+            const page = wikiData.pages[id];
+            
+            const availableParents = Object.values(wikiData.pages).filter(p => p.id !== id && p.parentId !== id);
+            let optionsStr = "0: [Keine Elternseite - als Hauptseite festlegen]\n";
+            optionsStr += availableParents.map((p, i) => `${i + 1}: ${p.title}`).join("\n");
+
+            let choice = prompt(`Wählen Sie die neue Überseite für "${page.title}":\n\n${optionsStr}`);
+            if (choice === null) return;
+
+            let num = parseInt(choice);
+            if (isNaN(num) || num < 0 || num > availableParents.length) return;
+
+            // Aus alter Liste entfernen
+            if (page.parentId && wikiData.pages[page.parentId]) {
+                wikiData.pages[page.parentId].children = wikiData.pages[page.parentId].children.filter(cId => cId !== id);
+            } else {
+                wikiData.pageOrder = wikiData.pageOrder.filter(cId => cId !== id);
+            }
+
+            // In neue Liste einfügen
+            if (num === 0) {
+                page.parentId = null;
+                wikiData.pageOrder.push(id);
+            } else {
+                let newParent = availableParents[num - 1];
+                page.parentId = newParent.id;
+                if (!newParent.children) newParent.children = [];
+                newParent.children.push(id);
+            }
+
+            renderTree();
+            setStatus('Hierarchie geändert (noch nicht gespeichert)', '#e67e22');
         }
 
         function loadPage(id) {
@@ -595,6 +684,9 @@
 
             const id = 'page_' + Date.now();
             wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt hier eingeben...</p>`, parentId: null, children: [] };
+            if (!wikiData.pageOrder) wikiData.pageOrder = [];
+            wikiData.pageOrder.push(id);
+
             loadPage(id);
             setStatus('Neue Seite erstellt (noch nicht gespeichert)', '#e67e22');
         }
@@ -621,6 +713,8 @@
                 const page = wikiData.pages[id];
                 if (page.parentId && wikiData.pages[page.parentId]) {
                     wikiData.pages[page.parentId].children = wikiData.pages[page.parentId].children.filter(cId => cId !== id);
+                } else if (wikiData.pageOrder) {
+                    wikiData.pageOrder = wikiData.pageOrder.filter(cId => cId !== id);
                 }
                 delete wikiData.pages[id];
                 loadPage('home');
