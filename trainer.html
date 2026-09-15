@@ -130,7 +130,6 @@
         .badge-archived { background: #f1f5f9; color: #64748b; }
         .badge-license { background: #dbeafe; color: #1d4ed8; }
 
-        /* Status-Badges für abgelaufene/bald ablaufende Lizenzen */
         .badge-expired { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
         .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
 
@@ -245,7 +244,6 @@
                         <h1 id="akte-fullname">Vorname Nachname</h1>
                         <div class="akte-badges" id="akte-badges-container">
                             <span class="badge badge-active" id="akte-status-badge">Aktiv</span>
-                            <span class="badge badge-license" id="akte-license-badge">Keine Lizenz</span>
                         </div>
                     </div>
                 </div>
@@ -392,7 +390,6 @@
         </div>
     </div>
 
-    <!-- MODAL GITHUB TOKEN EINGABE -->
     <div id="token-modal" class="modal-overlay">
         <div class="modal">
             <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Token eingeben</h3>
@@ -418,29 +415,7 @@
         let trainerData = {
             selectedTrainerId: null,
             trainerFilter: 'active',
-            trainers: [
-                {
-                    id: 'tr_1',
-                    firstname: 'Max',
-                    lastname: 'Mustermann',
-                    status: 'active',
-                    email: 'max@verein.de',
-                    phone: '0171 1234567',
-                    department: 'Schwimmen',
-                    teams: 'U14 Wettkampf',
-                    hasLicense: 'ja',
-                    licenseType: 'DOSB C-Lizenz Schwimmen',
-                    licenseExp: '2026-12-31',
-                    hasLifeguard: 'ja',
-                    lifeguardLevel: 'Silber',
-                    lifeguardExp: '2025-06-30',
-                    hasReferee: 'nein',
-                    documents: [],
-                    notes: [
-                        { date: '10.09.2026, 14:30', text: 'Übungsleitervertrag für Saison 2026/2027 unterschrieben abgelegt.' }
-                    ]
-                }
-            ]
+            trainers: []
         };
 
         let currentTrainerId = null;
@@ -460,8 +435,10 @@
 
         function setStatus(text, color) {
             const el = document.getElementById('save-status');
-            el.innerText = text;
-            el.style.color = color;
+            if (el) {
+                el.innerText = text;
+                el.style.color = color;
+            }
         }
 
         function openTokenModal() {
@@ -482,6 +459,15 @@
             } else {
                 alert("Bitte einen gültigen Token eingeben.");
             }
+        }
+
+        // Sicheres UTF-8 UTF-16 Encoding für GitHub Base64
+        function utf8_to_b64(str) {
+            return window.btoa(unescape(encodeURIComponent(str)));
+        }
+
+        function b64_to_utf8(str) {
+            return decodeURIComponent(escape(window.atob(str)));
         }
 
         async function loadTrainerFromGitHub() {
@@ -507,9 +493,9 @@
 
                 if (response.ok) {
                     const data = await response.json();
-                    const jsonText = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ''))));
+                    const jsonText = b64_to_utf8(data.content.replace(/\n/g, ''));
                     const parsed = JSON.parse(jsonText);
-                    if (parsed && parsed.trainers) {
+                    if (parsed && Array.isArray(parsed.trainers)) {
                         trainerData = parsed;
                     }
                 }
@@ -557,7 +543,7 @@
                 }
 
                 const jsonString = JSON.stringify(trainerData, null, 2);
-                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+                const contentBase64 = utf8_to_b64(jsonString);
 
                 const bodyPayload = {
                     message: "Trainerdaten via Web-App aktualisiert",
@@ -585,12 +571,10 @@
             }
         }
 
-        // Hilfsfunktion zur Prüfung des Lizenzstatus
         function getLicenseStatus(dateString) {
             if (!dateString) return 'ok';
             const expDate = new Date(dateString);
             const now = new Date();
-            // Uhrzeit zurücksetzen für genauen Tagesvergleich
             now.setHours(0,0,0,0);
             
             if (expDate < now) {
@@ -635,7 +619,7 @@
             const filtered = trainerData.trainers.filter(t => {
                 const matchesFilter = (trainerData.trainerFilter === 'active' && t.status !== 'archived') ||
                                       (trainerData.trainerFilter === 'archived' && t.status === 'archived');
-                const fullName = (t.firstname + ' ' + t.lastname).toLowerCase();
+                const fullName = ((t.firstname || '') + ' ' + (t.lastname || '')).toLowerCase();
                 const matchesSearch = fullName.includes(searchQuery.toLowerCase());
                 return matchesFilter && matchesSearch;
             });
@@ -646,11 +630,14 @@
                 card.onclick = () => loadTrainerAkte(t.id);
 
                 const alertIcon = checkOverallTrainerAlert(t);
-                const initials = (t.firstname[0] || '') + (t.lastname[0] || '');
+                const fn = t.firstname || '';
+                const ln = t.lastname || '';
+                const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase();
+                
                 card.innerHTML = `
-                    <div class="trainer-avatar">${initials}</div>
+                    <div class="trainer-avatar">${initials || '👤'}</div>
                     <div class="trainer-info">
-                        <div class="trainer-name">${t.firstname} ${t.lastname} ${alertIcon}</div>
+                        <div class="trainer-name">${fn} ${ln} ${alertIcon}</div>
                         <div class="trainer-sub">${t.licenseType || 'Keine Lizenz'}</div>
                     </div>
                 `;
@@ -678,12 +665,9 @@
             document.getElementById('akte-view-container').style.display = 'block';
             document.getElementById('akte-empty-state').style.display = 'none';
 
-            document.getElementById('akte-fullname').innerText = `${t.firstname} ${t.lastname}`;
-            document.getElementById('akte-avatar').innerText = (t.firstname[0] || '') + (t.lastname[0] || '');
-
-            const statusBadge = document.getElementById('akte-status-badge');
-            statusBadge.innerText = t.status === 'archived' ? 'Archiviert' : 'Aktiv';
-            statusBadge.className = 'badge ' + (t.status === 'archived' ? 'badge-archived' : 'badge-active');
+            document.getElementById('akte-fullname').innerText = `${t.firstname || ''} ${t.lastname || ''}`;
+            const initials = ((t.firstname?.[0] || '') + (t.lastname?.[0] || '')).toUpperCase();
+            document.getElementById('akte-avatar').innerText = initials || '👤';
 
             document.getElementById('btn-archive-toggle').innerText = t.status === 'archived' ? '📂 Reaktivieren' : '📦 Ins Archiv';
 
@@ -718,15 +702,15 @@
 
         function updateLicenseBadgesAndAlerts(t) {
             const badgesContainer = document.getElementById('akte-badges-container');
-            
-            // Standard-Badges zurücksetzen
+            if (!badgesContainer) return;
+
             badgesContainer.innerHTML = `
                 <span class="badge ${t.status === 'archived' ? 'badge-archived' : 'badge-active'}">${t.status === 'archived' ? 'Archiviert' : 'Aktiv'}</span>
             `;
 
             const checkCategory = (has, exp, name, alertContainerId) => {
                 const container = document.getElementById(alertContainerId);
-                container.innerHTML = '';
+                if (container) container.innerHTML = '';
 
                 if (has !== 'ja' || !exp) return;
 
@@ -734,18 +718,22 @@
                 const formattedDate = new Date(exp).toLocaleDateString('de-DE');
 
                 if (status === 'expired') {
-                    container.innerHTML = `
-                        <div class="license-alert license-alert-danger">
-                            🚨 <b>Achtung:</b> Die ${name} ist am ${formattedDate} abgelaufen!
-                        </div>
-                    `;
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="license-alert license-alert-danger">
+                                🚨 <b>Achtung:</b> Die ${name} ist am ${formattedDate} abgelaufen!
+                            </div>
+                        `;
+                    }
                     badgesContainer.innerHTML += `<span class="badge badge-expired">🚨 ${name} abgelaufen</span>`;
                 } else if (status === 'warning') {
-                    container.innerHTML = `
-                        <div class="license-alert license-alert-warning">
-                            ⚠️ <b>Hinweis:</b> Die ${name} läuft am ${formattedDate} ab (innerhalb der nächsten 6 Monate).
-                        </div>
-                    `;
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="license-alert license-alert-warning">
+                                ⚠️ <b>Hinweis:</b> Die ${name} läuft am ${formattedDate} ab (innerhalb der nächsten 6 Monate).
+                            </div>
+                        `;
+                    }
                     badgesContainer.innerHTML += `<span class="badge badge-warning">⚠️ ${name} läuft bald ab</span>`;
                 }
             };
@@ -802,8 +790,15 @@
             document.getElementById('tab-' + tabName).classList.add('active');
         }
 
-        function openNewTrainerModal() { document.getElementById('new-trainer-modal').classList.add('active'); }
-        function closeNewTrainerModal() { document.getElementById('new-trainer-modal').classList.remove('active'); }
+        function openNewTrainerModal() { 
+            document.getElementById('new-tr-firstname').value = '';
+            document.getElementById('new-tr-lastname').value = '';
+            document.getElementById('new-trainer-modal').classList.add('active'); 
+        }
+        
+        function closeNewTrainerModal() { 
+            document.getElementById('new-trainer-modal').classList.remove('active'); 
+        }
 
         function createNewTrainer() {
             const fn = document.getElementById('new-tr-firstname').value.trim();
@@ -811,7 +806,15 @@
             if (!fn || !ln) return alert("Bitte Vor- und Nachnamen eingeben.");
 
             const newId = 'tr_' + Date.now();
-            const newTrainer = { id: newId, firstname: fn, lastname: ln, status: 'active', documents: [], notes: [] };
+            const newTrainer = { 
+                id: newId, 
+                firstname: fn, 
+                lastname: ln, 
+                status: 'active', 
+                documents: [], 
+                notes: [] 
+            };
+            
             trainerData.trainers.push(newTrainer);
 
             closeNewTrainerModal();
@@ -846,6 +849,7 @@
 
         function renderTrainerDocs(t) {
             const grid = document.getElementById('trainer-doc-grid');
+            if (!grid) return;
             grid.innerHTML = '';
             (t.documents || []).forEach((doc, idx) => {
                 const card = document.createElement('div');
@@ -886,6 +890,7 @@
 
         function renderTrainerNotes(t) {
             const timeline = document.getElementById('trainer-timeline');
+            if (!timeline) return;
             timeline.innerHTML = '';
             (t.notes || []).forEach(n => {
                 const item = document.createElement('div');
@@ -904,8 +909,8 @@
             if (!t) return;
 
             let csvContent = "data:text/csv;charset=utf-8,Feld;Wert\n";
-            csvContent += `Vorname;${t.firstname}\n`;
-            csvContent += `Nachname;${t.lastname}\n`;
+            csvContent += `Vorname;${t.firstname || ''}\n`;
+            csvContent += `Nachname;${t.lastname || ''}\n`;
             csvContent += `E-Mail;${t.email || ''}\n`;
             csvContent += `Telefon;${t.phone || ''}\n`;
             csvContent += `Abteilung;${t.department || ''}\n`;
@@ -917,7 +922,7 @@
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `trainerakte_${t.lastname}_${t.firstname}.csv`);
+            link.setAttribute("download", `trainerakte_${t.lastname || 'trainer'}_${t.firstname || ''}.csv`);
             document.body.appendChild(link);
             link.click();
             link.remove();
