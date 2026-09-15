@@ -110,21 +110,24 @@
 
         header {
             padding: 10px 30px; border-bottom: 1px solid var(--border-color);
-            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background-color: #fafbfc;
+            display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
-        .header-left { display: flex; align-items: center; }
-        .header-center { display: flex; justify-content: center; }
+        .header-left { display: flex; align-items: center; gap: 15px; }
         .header-right { display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
 
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
-        .btn-home-icon {
-            display: inline-flex; align-items: center; justify-content: center;
-            width: 36px; height: 36px; border-radius: 50%; background: #ffffff;
-            border: 1px solid var(--border-color); font-size: 1.1rem; text-decoration: none;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s;
+        /* Rechteckiger Wiki-Style Home-Button (Links positioniert) */
+        .btn-home-wiki {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 12px; border-radius: 6px; background: #ffffff;
+            border: 1px solid var(--border-color); font-size: 0.85rem; font-weight: 600;
+            color: #334155; text-decoration: none;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: all 0.2s;
         }
-        .btn-home-icon:hover { background: #f1f5f9; border-color: var(--accent); transform: translateY(-1px); }
+        .btn-home-wiki:hover {
+            background: #f1f5f9; border-color: var(--accent); color: var(--primary);
+        }
 
         .akte-container { padding: 25px 35px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; }
         .akte-header {
@@ -246,13 +249,14 @@
     <div id="content-wrapper">
         <header>
             <div class="header-left">
+                <!-- Wiki-Style Home Button links platziert -->
+                <a href="index.html" class="btn-home-wiki" title="Zurück zur Hauptseite">
+                    🏠 <span>Home</span>
+                </a>
                 <div id="breadcrumb" class="breadcrumb">
-                    <span>Trainerportal /</span>
+                    <span>/ Trainerportal /</span>
                     <span id="breadcrumb-title"><b>Verwaltung</b></span>
                 </div>
-            </div>
-            <div class="header-center">
-                <a href="index.html" class="btn-home-icon" title="Zurück zu index.html">🏠</a>
             </div>
             <div class="header-right">
                 <span id="save-status" style="color: #6c757d; font-size: 0.85rem; font-weight: 600;">Status: Bereit</span>
