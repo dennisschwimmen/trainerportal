@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Interaktives Lokales Wiki</title>
+    <title>Mein Interaktives Wiki</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 
@@ -46,7 +46,7 @@
             border-bottom: 2px solid var(--primary);
         }
 
-        /* OBERER CONTROL-BEREICH (TOKEN, SPEICHERN, AKTUALISIEREN) */
+        /* SYNC CONTROL-BEREICH OBEN LINKS */
         .top-controls {
             background: #ffffff;
             border: 1px solid var(--border-color);
@@ -57,12 +57,17 @@
         .top-controls label { font-size: 0.75rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
         .token-input {
             width: 100%; padding: 6px; border: 1px solid #cbd5e1;
-            border-radius: 4px; font-size: 0.8rem; margin-bottom: 8px;
+            border-radius: 4px; font-size: 0.8rem; margin-bottom: 6px;
+        }
+        .config-input {
+            width: 100%; padding: 4px 6px; border: 1px solid #e2e8f0;
+            border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px;
         }
         .btn-action-group { display: flex; gap: 6px; }
         .btn-action {
             flex: 1; padding: 7px; border: none; border-radius: 4px;
             font-size: 0.8rem; font-weight: bold; cursor: pointer; color: white;
+            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
         }
         .btn-save { background-color: var(--primary); }
         .btn-save:hover { background-color: var(--primary-hover); }
@@ -103,8 +108,7 @@
         .tree-item {
             display: flex; align-items: center; padding: 5px 6px;
             border-radius: 4px; font-size: 0.9rem; color: #444; cursor: grab;
-            transition: background-color 0.1s;
-            position: relative;
+            transition: background-color 0.1s; position: relative;
         }
         .tree-item:active { cursor: grabbing; }
         .tree-item:hover { background-color: #e2e8f0; }
@@ -209,10 +213,14 @@
     <div id="sidebar">
         <h2>Mein Wiki</h2>
 
-        <!-- TOKEN & AKTIONEN OBEN LINKS -->
+        <!-- TOKEN & GITHUB SYNC BEREICH -->
         <div class="top-controls">
-            <label for="api-token">🔑 Token:</label>
-            <input type="password" id="api-token" class="token-input" placeholder="Token eingeben..." onchange="saveToken(this.value)">
+            <label for="api-token">🔑 Personal Access Token:</label>
+            <input type="password" id="api-token" class="token-input" placeholder="ghp_xxxxxxxxxxxx" onchange="updateConfig('token', this.value)">
+            
+            <label for="repo-path">📁 Repo Path (User/Repo/file.json):</label>
+            <input type="text" id="repo-path" class="config-input" placeholder="Benutzer/Repo/wiki.json" onchange="updateConfig('repoPath', this.value)">
+
             <div class="btn-action-group">
                 <button class="btn-action btn-save" onclick="syncSave()">💾 Speichern</button>
                 <button class="btn-action btn-refresh" onclick="syncRefresh()">🔄 Aktualisieren</button>
@@ -298,6 +306,8 @@
     <script>
         let wikiData = JSON.parse(localStorage.getItem('my_wiki_data_v3')) || {
             token: '',
+            repoPath: '',
+            fileSha: '',
             activePageId: 'home',
             collapsedNodes: {},
             pageOrder: ['home'],
@@ -305,7 +315,7 @@
                 'home': {
                     title: 'Willkommen im Wiki',
                     parentId: null,
-                    content: '<h1>Willkommen!</h1><p>Du kannst Daten oben links speichern und aktualisieren.</p>'
+                    content: '<h1>Willkommen!</h1><p>Du kannst Daten per GitHub Token oben links synchronisieren.</p>'
                 }
             }
         };
@@ -322,36 +332,135 @@
             if (!wikiData.pages[currentPageId]) {
                 currentPageId = Object.keys(wikiData.pages)[0] || 'home';
             }
-            if(wikiData.token) {
-                document.getElementById('api-token').value = wikiData.token;
-            }
+            if(wikiData.token) document.getElementById('api-token').value = wikiData.token;
+            if(wikiData.repoPath) document.getElementById('repo-path').value = wikiData.repoPath;
+            
             renderTree();
             loadPage(currentPageId);
         };
 
-        /* TOKEN & SYNC BUTTONS LOGIK */
-        function saveToken(val) {
-            wikiData.token = val;
+        function updateConfig(key, value) {
+            wikiData[key] = value.trim();
             saveCurrentPageToStorage();
         }
 
-        function syncSave() {
-            saveCurrentPage();
-            const token = document.getElementById('api-token').value;
-            if (!token) {
-                alert("Bitte gib zuerst einen Token ein.");
-                return;
-            }
-            alert("Speichervorgang per Token gestartet!");
+        /* GITHUB API SYNCHRONISATION (SPEICHERN & AKTUALISIEREN) */
+        function utf8ToBase64(str) {
+            return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+                return String.fromCharCode('0x' + p1);
+            }));
         }
 
-        function syncRefresh() {
-            const token = document.getElementById('api-token').value;
-            if (!token) {
-                alert("Bitte gib zuerst einen Token ein.");
+        function base64ToUtf8(str) {
+            return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        }
+
+        async function syncSave() {
+            saveCurrentPage();
+            const token = document.getElementById('api-token').value.trim();
+            const repoPath = document.getElementById('repo-path').value.trim();
+
+            if (!token || !repoPath) {
+                alert("Bitte gib einen Token und einen Repo-Pfad an (z. B. nutzer/repo/wiki.json).");
                 return;
             }
-            alert("Daten werden per Token aktualisiert!");
+
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = 'Speichere auf GitHub...';
+
+            try {
+                // Vorab SHA der Datei abrufen, falls vorhanden
+                let sha = wikiData.fileSha;
+                const getRes = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                if (getRes.ok) {
+                    const fileInfo = await getRes.json();
+                    sha = fileInfo.sha;
+                    wikiData.fileSha = sha;
+                }
+
+                const jsonContent = JSON.stringify(wikiData, null, 2);
+                const contentBase64 = utf8ToBase64(jsonContent);
+
+                const bodyData = {
+                    message: "Wiki aktualisiert am " + new Date().toLocaleString(),
+                    content: contentBase64
+                };
+                if (sha) bodyData.sha = sha;
+
+                const putRes = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(bodyData)
+                });
+
+                if (putRes.ok) {
+                    const resData = await putRes.json();
+                    wikiData.fileSha = resData.content.sha;
+                    saveCurrentPageToStorage();
+                    statusEl.innerText = 'Erfolgreich auf GitHub gespeichert!';
+                    alert("Erfolgreich auf GitHub gespeichert!");
+                } else {
+                    const err = await putRes.json();
+                    alert("Fehler beim Speichern auf GitHub: " + (err.message || putRes.statusText));
+                    statusEl.innerText = 'Fehler beim Speichern';
+                }
+            } catch (e) {
+                alert("Netzwerkfehler beim Synchronisieren: " + e.message);
+                statusEl.innerText = 'Fehler beim Speichern';
+            }
+        }
+
+        async function syncRefresh() {
+            const token = document.getElementById('api-token').value.trim();
+            const repoPath = document.getElementById('repo-path').value.trim();
+
+            if (!token || !repoPath) {
+                alert("Bitte gib einen Token und einen Repo-Pfad an (z. B. nutzer/repo/wiki.json).");
+                return;
+            }
+
+            const statusEl = document.getElementById('save-status');
+            statusEl.innerText = 'Lade von GitHub...';
+
+            try {
+                const res = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                if (res.ok) {
+                    const fileData = await res.json();
+                    const rawJson = base64ToUtf8(fileData.content.replace(/\n/g, ''));
+                    const importedWiki = JSON.parse(rawJson);
+
+                    wikiData = importedWiki;
+                    wikiData.fileSha = fileData.sha;
+                    wikiData.token = token;
+                    wikiData.repoPath = repoPath;
+
+                    saveCurrentPageToStorage();
+                    renderTree();
+                    loadPage(wikiData.activePageId || Object.keys(wikiData.pages)[0]);
+                    
+                    statusEl.innerText = 'Erfolgreich geladen!';
+                    alert("Wiki erfolgreich von GitHub aktualisiert!");
+                } else {
+                    const err = await res.json();
+                    alert("Fehler beim Laden von GitHub: " + (err.message || res.statusText));
+                    statusEl.innerText = 'Fehler beim Laden';
+                }
+            } catch (e) {
+                alert("Netzwerkfehler beim Laden: " + e.message);
+                statusEl.innerText = 'Fehler beim Laden';
+            }
         }
 
         /* MOVE & TREE LOGIC */
