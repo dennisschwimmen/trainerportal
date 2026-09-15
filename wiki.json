@@ -1,5 +1,5 @@
 {
-  "activePageId": "page_1789504912322",
+  "activePageId": "home",
   "pages": {
     "home": {
       "id": "home",
@@ -17,16 +17,6 @@
       "children": [],
       "collapsed": false
     },
-    "page_1789504602116": {
-      "id": "page_1789504602116",
-      "title": "Neue Seite",
-      "content": "<h2>Neue Seite</h2><p>Inhalt hier eingeben...</p>",
-      "parentId": null,
-      "children": [
-        "page_1789475300014"
-      ],
-      "collapsed": false
-    },
     "page_1789504624783": {
       "id": "page_1789504624783",
       "title": "neue unterunterseite",
@@ -34,29 +24,9 @@
       "parentId": "page_1789504616923",
       "children": [],
       "collapsed": false
-    },
-    "page_1789504900516": {
-      "id": "page_1789504900516",
-      "title": "Neue Seite",
-      "content": "<h2>Neue Seite</h2><p>Inhalt hier eingeben...</p>",
-      "parentId": null,
-      "children": [
-        "page_1789504912322"
-      ],
-      "collapsed": false
-    },
-    "page_1789504912322": {
-      "id": "page_1789504912322",
-      "title": "Neue Unterseite",
-      "content": "<h2>Neue Unterseite</h2><p>Inhalt der Unterseite...</p><p><br></p><p></p><ul><li>Dennis</li><li>Name 2</li></ul><div>schwimm</div><div><ol><li>Erster</li><li>Zweiter</li></ol><div><br></div></div><div><br></div><p></p>",
-      "parentId": "page_1789504900516",
-      "children": [],
-      "collapsed": false
     }
   },
   "pageOrder": [
-    "home",
-    "page_1789504602116",
-    "page_1789504900516"
+    "home"
   ]
 }
