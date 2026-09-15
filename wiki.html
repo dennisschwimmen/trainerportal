@@ -46,6 +46,20 @@
             border-bottom: 2px solid var(--primary);
         }
 
+        /* TOKEN / CLOUD SYNC BOX */
+        .token-section {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .token-section label { font-size: 0.75rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
+        .token-input {
+            width: 100%; padding: 6px; border: 1px solid #cbd5e1;
+            border-radius: 4px; font-size: 0.8rem; margin-bottom: 6px;
+        }
+
         .search-box { position: relative; margin-bottom: 15px; }
         .search-input {
             width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1;
@@ -113,6 +127,7 @@
             background: #6c757d; color: white; border: none; padding: 6px 10px;
             border-radius: 4px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 5px;
         }
+        .btn-primary-action { background: var(--primary); }
 
         /* MAIN CONTENT & TOOLBAR */
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
@@ -123,14 +138,10 @@
         }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
 
-        /* FIXED TOOLBAR ON SCROLL */
         .toolbar {
             display: flex; gap: 6px; background: #f1f3f5; padding: 8px 20px;
             border-bottom: 1px solid var(--border-color); flex-wrap: wrap; align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
         }
         .toolbar button, .toolbar select, .btn-tool {
             padding: 5px 10px; border: 1px solid #ced4da; border-radius: 4px;
@@ -182,24 +193,10 @@
         .wiki-internal-link { color: var(--accent); text-decoration: underline; font-weight: 600; cursor: pointer; }
         .btn-export { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
 
-        /* PRINT STYLES */
         @media print {
             #sidebar, header, .toolbar, .table-controls, .btn-preview-toggle { display: none !important; }
-            
-            body, #content-wrapper, main, .docx-preview { 
-                background: white; 
-                height: auto !important; 
-                overflow: visible !important; 
-                scrollbar-width: none !important;
-            }
-
-            body::-webkit-scrollbar,
-            #content-wrapper::-webkit-scrollbar,
-            main::-webkit-scrollbar,
-            .docx-preview::-webkit-scrollbar {
-                display: none !important;
-            }
-
+            body, #content-wrapper, main, .docx-preview { background: white; height: auto !important; overflow: visible !important; scrollbar-width: none !important; }
+            body::-webkit-scrollbar, #content-wrapper::-webkit-scrollbar, main::-webkit-scrollbar, .docx-preview::-webkit-scrollbar { display: none !important; }
             main { padding: 0; margin: 0; max-width: 100%; }
             .file-preview-body { display: block !important; }
         }
@@ -209,6 +206,13 @@
 
     <div id="sidebar">
         <h2>Mein Wiki</h2>
+
+        <!-- TOKEN & CLOUD SYNC SECTION -->
+        <div class="token-section">
+            <label for="api-token">🔑 GitHub Token (Optional Sync):</label>
+            <input type="password" id="api-token" class="token-input" placeholder="ghp_xxxxxxxxxxxx" onchange="saveToken(this.value)">
+            <button class="btn-secondary btn-primary-action" onclick="syncWithGitHub()">☁️ Cloud-Sync (GitHub)</button>
+        </div>
 
         <div class="search-box">
             <input type="text" id="search-input" class="search-input" placeholder="🔍 Thema oder Schlagwort..." oninput="performSearch(this.value)">
@@ -222,10 +226,11 @@
         
         <ul class="tree-root" id="tree-root"></ul>
 
+        <!-- LOKALE IMPORT/EXPORT BUTTONS -->
         <div class="sidebar-footer">
-            <button class="btn-secondary" onclick="exportBackup()">💾 Daten Sichern (JSON)</button>
-            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Daten Laden</button>
-            <input type="file" id="import-file" style="display:none" onchange="importBackup(event)">
+            <button class="btn-secondary" onclick="exportBackup()">💾 Lokal Speichern (JSON)</button>
+            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Datei Laden</button>
+            <input type="file" id="import-file" style="display:none" accept=".json" onchange="importBackup(event)">
         </div>
     </div>
 
@@ -246,7 +251,6 @@
             
             <span style="color: #ccc;">|</span>
 
-            <!-- TEXTAUSRICHTUNG -->
             <button onclick="format('justifyLeft')" title="Linksbündig">⬅️ Links</button>
             <button onclick="format('justifyCenter')" title="Zentriert">↔️ Zentriert</button>
             <button onclick="format('justifyRight')" title="Rechtsbündig">➡️ Rechts</button>
@@ -295,6 +299,7 @@
 
     <script>
         let wikiData = JSON.parse(localStorage.getItem('my_wiki_data_v3')) || {
+            token: '',
             activePageId: 'home',
             collapsedNodes: {},
             pageOrder: ['home'],
@@ -302,7 +307,7 @@
                 'home': {
                     title: 'Willkommen im Wiki',
                     parentId: null,
-                    content: '<h1>Willkommen!</h1><p>Du kannst Seiten mit den Pfeilen oder per Drag-and-Drop verschieben.</p>'
+                    content: '<h1>Willkommen!</h1><p>Du kannst Daten als JSON Speichern/Laden oder per Token synchronisieren.</p>'
                 }
             }
         };
@@ -319,15 +324,32 @@
             if (!wikiData.pages[currentPageId]) {
                 currentPageId = Object.keys(wikiData.pages)[0] || 'home';
             }
+            if(wikiData.token) {
+                document.getElementById('api-token').value = wikiData.token;
+            }
             renderTree();
             loadPage(currentPageId);
         };
 
-        /* SEITEN HOCH/RUNTER VERSCHIEBEN */
+        /* TOKEN-LOGIK */
+        function saveToken(val) {
+            wikiData.token = val;
+            saveCurrentPageToStorage();
+        }
+
+        function syncWithGitHub() {
+            const token = document.getElementById('api-token').value;
+            if(!token) {
+                alert("Bitte gib zuerst einen GitHub Personal Access Token ein.");
+                return;
+            }
+            alert("Token vorhanden! Synchronisations-Logik kann gestartet werden.");
+        }
+
+        /* MOVE & TREE LOGIC */
         function movePageUp(pageId, event) {
             event.stopPropagation();
             const parentId = wikiData.pages[pageId].parentId;
-            
             const siblings = wikiData.pageOrder.filter(id => wikiData.pages[id] && wikiData.pages[id].parentId === parentId);
             const indexInSiblings = siblings.indexOf(pageId);
 
@@ -347,7 +369,6 @@
         function movePageDown(pageId, event) {
             event.stopPropagation();
             const parentId = wikiData.pages[pageId].parentId;
-
             const siblings = wikiData.pageOrder.filter(id => wikiData.pages[id] && wikiData.pages[id].parentId === parentId);
             const indexInSiblings = siblings.indexOf(pageId);
 
@@ -364,7 +385,7 @@
             }
         }
 
-        /* ADVANCED DRAG & DROP LOGIC */
+        /* DRAG & DROP LOGIC */
         function handleDragStart(e, pageId) {
             draggedPageId = pageId;
             e.stopPropagation();
@@ -570,7 +591,7 @@
             return li;
         }
 
-        /* WEITERE WIKI FUNKTIONEN */
+        /* PAGE MANAGEMENT */
         function loadPage(pageId) {
             if (!wikiData.pages[pageId]) return;
             currentPageId = pageId;
@@ -657,6 +678,7 @@
             }).join('');
         }
 
+        /* SEARCH LOGIC */
         function performSearch(query) {
             const resultsContainer = document.getElementById('search-results');
             query = query.trim().toLowerCase();
@@ -715,6 +737,7 @@
         function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
         function escapeHTML(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
 
+        /* EDITOR HELPERS & SELECTION */
         function saveSelection() {
             const sel = window.getSelection();
             if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0);
@@ -944,6 +967,7 @@
             };
         }
 
+        /* EXPORT UND IMPORT LOGIK */
         function exportBackup() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData));
             const downloadAnchor = document.createElement('a');
@@ -964,6 +988,9 @@
                         if (importedData.pages) {
                             wikiData = importedData;
                             localStorage.setItem('my_wiki_data_v3', JSON.stringify(wikiData));
+                            if(wikiData.token) {
+                                document.getElementById('api-token').value = wikiData.token;
+                            }
                             loadPage(wikiData.activePageId || Object.keys(wikiData.pages)[0]);
                             alert('Wiki-Daten erfolgreich geladen!');
                         }
