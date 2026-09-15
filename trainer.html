@@ -110,9 +110,21 @@
 
         header {
             padding: 10px 30px; border-bottom: 1px solid var(--border-color);
-            display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
+            display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; background-color: #fafbfc;
         }
+        .header-left { display: flex; align-items: center; }
+        .header-center { display: flex; justify-content: center; }
+        .header-right { display: flex; justify-content: flex-end; align-items: center; gap: 15px; }
+
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+
+        .btn-home-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 50%; background: #ffffff;
+            border: 1px solid var(--border-color); font-size: 1.1rem; text-decoration: none;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); transition: all 0.2s;
+        }
+        .btn-home-icon:hover { background: #f1f5f9; border-color: var(--accent); transform: translateY(-1px); }
 
         .akte-container { padding: 25px 35px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; }
         .akte-header {
@@ -209,7 +221,6 @@
     <div id="sidebar">
         <h2>Trainerportal</h2>
 
-        <button class="btn btn-secondary" style="margin-bottom:8px; justify-content:flex-start; padding:8px 12px;" onclick="showHomeView()">🏠 Home / Übersicht</button>
         <button class="btn btn-warning-action" onclick="openHandlungsbedarfView()">📋 Handlungsbedarf</button>
         <button class="btn-new-trainer" onclick="openNewTrainerModal()">+ Neuer Trainer</button>
 
@@ -234,30 +245,20 @@
 
     <div id="content-wrapper">
         <header>
-            <div id="breadcrumb" class="breadcrumb">
-                <button class="btn-akte-action" onclick="showHomeView()">🏠 Home</button>
-                <span>/</span>
-                <span id="breadcrumb-title"><b>Verwaltung</b></span>
+            <div class="header-left">
+                <div id="breadcrumb" class="breadcrumb">
+                    <span>Trainerportal /</span>
+                    <span id="breadcrumb-title"><b>Verwaltung</b></span>
+                </div>
             </div>
-            <div>
-                <span id="save-status" style="color: #6c757d; font-size: 0.85rem; font-weight: 600; margin-right: 15px;">Status: Bereit</span>
+            <div class="header-center">
+                <a href="index.html" class="btn-home-icon" title="Zurück zu index.html">🏠</a>
+            </div>
+            <div class="header-right">
+                <span id="save-status" style="color: #6c757d; font-size: 0.85rem; font-weight: 600;">Status: Bereit</span>
                 <button class="btn-akte-action" onclick="window.print()">🖨️ Drucken / PDF</button>
             </div>
         </header>
-
-        <!-- HOME / ÜBERSICHT VIEW -->
-        <div id="home-view" class="akte-container">
-            <h1 style="color:var(--primary); margin-bottom:10px;">Willkommen im Trainerportal</h1>
-            <p style="color:#64748b; margin-bottom:20px;">Wähle einen Trainer aus der linken Liste oder öffne die Übersicht zum Handlungsbedarf.</p>
-            
-            <div class="form-section">
-                <h3>Schnellzugriff</h3>
-                <div style="display:flex; gap:15px; margin-top:10px;">
-                    <button class="btn btn-warning-action" style="width:auto; padding:12px 20px; font-size:0.9rem;" onclick="openHandlungsbedarfView()">📋 Akuter Handlungsbedarf anzeigen</button>
-                    <button class="btn btn-success" style="width:auto; padding:12px 20px; font-size:0.9rem;" onclick="openNewTrainerModal()">+ Neuen Trainer anlegen</button>
-                </div>
-            </div>
-        </div>
 
         <!-- HANDLUNGSBEDARF VIEW -->
         <div id="handlungsbedarf-view" class="akte-container" style="display:none;">
@@ -289,7 +290,7 @@
         </div>
 
         <!-- TRAINER AKTE VIEW -->
-        <div class="akte-container" id="akte-view-container" style="display:none;">
+        <div class="akte-container" id="akte-view-container">
             
             <div class="akte-header">
                 <div class="akte-profile-summary">
@@ -522,15 +523,6 @@
             return decodeURIComponent(escape(window.atob(str)));
         }
 
-        function showHomeView() {
-            currentTrainerId = null;
-            document.getElementById('home-view').style.display = 'block';
-            document.getElementById('handlungsbedarf-view').style.display = 'none';
-            document.getElementById('akte-view-container').style.display = 'none';
-            document.getElementById('breadcrumb-title').innerHTML = '<b>Home</b>';
-            renderTrainerList();
-        }
-
         async function loadTrainerFromGitHub() {
             const token = getStoredToken();
             if (!token) {
@@ -562,7 +554,13 @@
                 }
 
                 renderTrainerList();
-                showHomeView();
+                
+                // Ersten Trainer laden, falls vorhanden
+                const activeTrainers = trainerData.trainers.filter(t => t.status !== 'archived');
+                if (activeTrainers.length > 0) {
+                    loadTrainerAkte(activeTrainers[0].id);
+                }
+
                 setStatus('Synchronisiert mit GitHub', '#28a745');
 
             } catch (error) {
@@ -709,7 +707,6 @@
 
         function openHandlungsbedarfView() {
             currentTrainerId = null;
-            document.getElementById('home-view').style.display = 'none';
             document.getElementById('akte-view-container').style.display = 'none';
             document.getElementById('handlungsbedarf-view').style.display = 'block';
             document.getElementById('breadcrumb-title').innerHTML = '<b>Handlungsbedarf</b>';
@@ -763,7 +760,6 @@
             const t = trainerData.trainers.find(item => item.id === id);
             if (!t) return;
 
-            document.getElementById('home-view').style.display = 'none';
             document.getElementById('handlungsbedarf-view').style.display = 'none';
             document.getElementById('akte-view-container').style.display = 'block';
 
