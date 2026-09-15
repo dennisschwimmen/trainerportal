@@ -68,6 +68,8 @@
         .btn-success:hover { background-color: #218838; }
         .btn-secondary { background: #64748b; color: white; }
         .btn-secondary:hover { background: #475569; }
+        .btn-warning-action { background-color: #d97706; color: white; margin-bottom: 8px; }
+        .btn-warning-action:hover { background-color: #b45309; }
 
         .search-box { position: relative; margin-bottom: 12px; }
         .search-input {
@@ -110,7 +112,7 @@
             padding: 10px 30px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
-        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
         .akte-container { padding: 25px 35px; max-width: 1100px; width: 100%; margin: 0 auto; flex: 1; }
         .akte-header {
@@ -130,21 +132,17 @@
         .badge-archived { background: #f1f5f9; color: #64748b; }
         .badge-license { background: #dbeafe; color: #1d4ed8; }
 
+        .badge-valid { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .badge-expired { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; }
         .badge-warning { background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
 
         .license-alert {
-            padding: 10px 14px;
-            border-radius: 6px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 10px 14px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 8px;
         }
         .license-alert-danger { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
         .license-alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
+        .license-alert-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
 
         .akte-actions { display: flex; gap: 8px; }
         .btn-akte-action {
@@ -192,11 +190,17 @@
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
+        /* Handlungsbedarf Tabelle */
+        .action-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        .action-table th, .action-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
+        .action-table th { background: #f1f5f9; color: var(--primary); font-weight: 600; }
+
         @media print {
-            #sidebar, header, .akte-actions, .akte-tabs, .btn-secondary, .btn-new-trainer { display: none !important; }
+            #sidebar, header, .akte-actions, .akte-tabs, .btn-secondary, .btn-new-trainer, .btn-warning-action { display: none !important; }
             body, #content-wrapper, main { background: white; height: auto !important; overflow: visible !important; }
             .tab-content { display: block !important; }
             .form-section { border: 1px solid #ccc !important; break-inside: avoid; }
+            #handlungsbedarf-view { display: block !important; }
         }
     </style>
 </head>
@@ -205,6 +209,8 @@
     <div id="sidebar">
         <h2>Trainerportal</h2>
 
+        <button class="btn btn-secondary" style="margin-bottom:8px; justify-content:flex-start; padding:8px 12px;" onclick="showHomeView()">🏠 Home / Übersicht</button>
+        <button class="btn btn-warning-action" onclick="openHandlungsbedarfView()">📋 Handlungsbedarf</button>
         <button class="btn-new-trainer" onclick="openNewTrainerModal()">+ Neuer Trainer</button>
 
         <div class="btn-row">
@@ -228,13 +234,61 @@
 
     <div id="content-wrapper">
         <header>
-            <div id="breadcrumb" class="breadcrumb">Trainerportal / <b>Verwaltung</b></div>
+            <div id="breadcrumb" class="breadcrumb">
+                <button class="btn-akte-action" onclick="showHomeView()">🏠 Home</button>
+                <span>/</span>
+                <span id="breadcrumb-title"><b>Verwaltung</b></span>
+            </div>
             <div>
                 <span id="save-status" style="color: #6c757d; font-size: 0.85rem; font-weight: 600; margin-right: 15px;">Status: Bereit</span>
                 <button class="btn-akte-action" onclick="window.print()">🖨️ Drucken / PDF</button>
             </div>
         </header>
 
+        <!-- HOME / ÜBERSICHT VIEW -->
+        <div id="home-view" class="akte-container">
+            <h1 style="color:var(--primary); margin-bottom:10px;">Willkommen im Trainerportal</h1>
+            <p style="color:#64748b; margin-bottom:20px;">Wähle einen Trainer aus der linken Liste oder öffne die Übersicht zum Handlungsbedarf.</p>
+            
+            <div class="form-section">
+                <h3>Schnellzugriff</h3>
+                <div style="display:flex; gap:15px; margin-top:10px;">
+                    <button class="btn btn-warning-action" style="width:auto; padding:12px 20px; font-size:0.9rem;" onclick="openHandlungsbedarfView()">📋 Akuter Handlungsbedarf anzeigen</button>
+                    <button class="btn btn-success" style="width:auto; padding:12px 20px; font-size:0.9rem;" onclick="openNewTrainerModal()">+ Neuen Trainer anlegen</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- HANDLUNGSBEDARF VIEW -->
+        <div id="handlungsbedarf-view" class="akte-container" style="display:none;">
+            <div class="akte-header">
+                <div>
+                    <h1 style="color:var(--primary);">📋 Handlungsbedarf: Lizenzen & Nachweise</h1>
+                    <p style="color:#64748b; font-size:0.9rem; margin-top:4px;">Übersicht aller abgelaufenen und innerhalb der nächsten 6 Monate ablaufenden Qualifikationen.</p>
+                </div>
+                <div>
+                    <button class="btn-akte-action" onclick="window.print()">🖨️ Als PDF exportieren / Drucken</button>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <table class="action-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Trainer Name</th>
+                            <th>Qualifikation</th>
+                            <th>Gültig bis</th>
+                            <th>Aktion</th>
+                        </tr>
+                    </thead>
+                    <tbody id="handlungsbedarf-table-body">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TRAINER AKTE VIEW -->
         <div class="akte-container" id="akte-view-container" style="display:none;">
             
             <div class="akte-header">
@@ -369,7 +423,6 @@
             </div>
 
         </div>
-        <div id="akte-empty-state" style="padding:50px; text-align:center; color:#94a3b8;">Bitte wählen Sie einen Trainer links aus oder legen Sie einen neuen an.</div>
     </div>
 
     <div id="new-trainer-modal" class="modal-overlay">
@@ -461,13 +514,21 @@
             }
         }
 
-        // Sicheres UTF-8 UTF-16 Encoding für GitHub Base64
         function utf8_to_b64(str) {
             return window.btoa(unescape(encodeURIComponent(str)));
         }
 
         function b64_to_utf8(str) {
             return decodeURIComponent(escape(window.atob(str)));
+        }
+
+        function showHomeView() {
+            currentTrainerId = null;
+            document.getElementById('home-view').style.display = 'block';
+            document.getElementById('handlungsbedarf-view').style.display = 'none';
+            document.getElementById('akte-view-container').style.display = 'none';
+            document.getElementById('breadcrumb-title').innerHTML = '<b>Home</b>';
+            renderTrainerList();
         }
 
         async function loadTrainerFromGitHub() {
@@ -501,17 +562,7 @@
                 }
 
                 renderTrainerList();
-                currentTrainerId = trainerData.selectedTrainerId;
-
-                if (currentTrainerId && trainerData.trainers.some(t => t.id === currentTrainerId)) {
-                    loadTrainerAkte(currentTrainerId);
-                } else if (trainerData.trainers.length > 0) {
-                    loadTrainerAkte(trainerData.trainers[0].id);
-                } else {
-                    document.getElementById('akte-view-container').style.display = 'none';
-                    document.getElementById('akte-empty-state').style.display = 'block';
-                }
-
+                showHomeView();
                 setStatus('Synchronisiert mit GitHub', '#28a745');
 
             } catch (error) {
@@ -572,7 +623,7 @@
         }
 
         function getLicenseStatus(dateString) {
-            if (!dateString) return 'ok';
+            if (!dateString) return 'none';
             const expDate = new Date(dateString);
             const now = new Date();
             now.setHours(0,0,0,0);
@@ -609,7 +660,7 @@
 
             if (hasExpired) return '🚨';
             if (hasWarning) return '⚠️';
-            return '';
+            return '🟢';
         }
 
         function renderTrainerList(searchQuery = '') {
@@ -656,14 +707,67 @@
             renderTrainerList(query);
         }
 
+        function openHandlungsbedarfView() {
+            currentTrainerId = null;
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('akte-view-container').style.display = 'none';
+            document.getElementById('handlungsbedarf-view').style.display = 'block';
+            document.getElementById('breadcrumb-title').innerHTML = '<b>Handlungsbedarf</b>';
+
+            const tbody = document.getElementById('handlungsbedarf-table-body');
+            tbody.innerHTML = '';
+
+            let issueCount = 0;
+
+            trainerData.trainers.forEach(t => {
+                if (t.status === 'archived') return;
+
+                const checkItem = (has, exp, name) => {
+                    if (has !== 'ja' || !exp) return;
+                    const st = getLicenseStatus(exp);
+                    if (st === 'expired' || st === 'warning') {
+                        issueCount++;
+                        const formattedDate = new Date(exp).toLocaleDateString('de-DE');
+                        const row = document.createElement('tr');
+                        
+                        const statusBadge = st === 'expired' 
+                            ? `<span class="badge badge-expired">🚨 Abgelaufen</span>` 
+                            : `<span class="badge badge-warning">⚠️ Ablaufend</span>`;
+
+                        row.innerHTML = `
+                            <td>${statusBadge}</td>
+                            <td><b>${t.firstname} ${t.lastname}</b></td>
+                            <td>${name}</td>
+                            <td>${formattedDate}</td>
+                            <td><button class="btn btn-secondary" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="loadTrainerAkte('${t.id}')">Akte Öffnen</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    }
+                };
+
+                checkItem(t.hasLicense, t.licenseExp, t.licenseType || 'Trainerlizenz');
+                checkItem(t.hasLifeguard, t.lifeguardExp, `Rettungsschwimmer (${t.lifeguardLevel || 'Stufe unbekannt'})`);
+                checkItem(t.hasReferee, t.refereeExp, t.refereeType || 'Kampfrichter');
+            });
+
+            if (issueCount === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#166534; padding:20px;">🟢 Hervorragend! Es liegen derzeit keine abgelaufenen oder ablaufenden Lizenzen vor.</td></tr>`;
+            }
+
+            renderTrainerList();
+        }
+
         function loadTrainerAkte(id) {
             currentTrainerId = id;
             trainerData.selectedTrainerId = id;
             const t = trainerData.trainers.find(item => item.id === id);
             if (!t) return;
 
+            document.getElementById('home-view').style.display = 'none';
+            document.getElementById('handlungsbedarf-view').style.display = 'none';
             document.getElementById('akte-view-container').style.display = 'block';
-            document.getElementById('akte-empty-state').style.display = 'none';
+
+            document.getElementById('breadcrumb-title').innerHTML = `Akte / <b>${t.firstname} ${t.lastname}</b>`;
 
             document.getElementById('akte-fullname').innerText = `${t.firstname || ''} ${t.lastname || ''}`;
             const initials = ((t.firstname?.[0] || '') + (t.lastname?.[0] || '')).toUpperCase();
@@ -735,18 +839,21 @@
                         `;
                     }
                     badgesContainer.innerHTML += `<span class="badge badge-warning">⚠️ ${name} läuft bald ab</span>`;
+                } else if (status === 'ok') {
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="license-alert license-alert-success">
+                                🟢 <b>Gültig:</b> Die ${name} ist gültig bis zum ${formattedDate}.
+                            </div>
+                        `;
+                    }
+                    badgesContainer.innerHTML += `<span class="badge badge-valid">🟢 ${name} gültig</span>`;
                 }
             };
 
             checkCategory(t.hasLicense, t.licenseExp, 'Trainerlizenz', 'alert-container-license');
             checkCategory(t.hasLifeguard, t.lifeguardExp, 'Rettungsschwimmer-Qualifikation', 'alert-container-lifeguard');
             checkCategory(t.hasReferee, t.refereeExp, 'Kampfrichterlizenz', 'alert-container-referee');
-
-            if (t.hasLicense === 'ja' && getLicenseStatus(t.licenseExp) === 'ok') {
-                badgesContainer.innerHTML += `<span class="badge badge-license">${t.licenseType || 'Lizenz vorhanden'}</span>`;
-            } else if (t.hasLicense !== 'ja') {
-                badgesContainer.innerHTML += `<span class="badge badge-license">Keine Lizenz</span>`;
-            }
         }
 
         function updateTrainerData() {
