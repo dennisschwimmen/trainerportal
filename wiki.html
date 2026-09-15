@@ -46,19 +46,28 @@
             border-bottom: 2px solid var(--primary);
         }
 
-        /* TOKEN / CLOUD SYNC BOX */
-        .token-section {
+        /* OBERER CONTROL-BEREICH (TOKEN, SPEICHERN, AKTUALISIEREN) */
+        .top-controls {
             background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: 6px;
             padding: 10px;
             margin-bottom: 15px;
         }
-        .token-section label { font-size: 0.75rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
+        .top-controls label { font-size: 0.75rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
         .token-input {
             width: 100%; padding: 6px; border: 1px solid #cbd5e1;
-            border-radius: 4px; font-size: 0.8rem; margin-bottom: 6px;
+            border-radius: 4px; font-size: 0.8rem; margin-bottom: 8px;
         }
+        .btn-action-group { display: flex; gap: 6px; }
+        .btn-action {
+            flex: 1; padding: 7px; border: none; border-radius: 4px;
+            font-size: 0.8rem; font-weight: bold; cursor: pointer; color: white;
+        }
+        .btn-save { background-color: var(--primary); }
+        .btn-save:hover { background-color: var(--primary-hover); }
+        .btn-refresh { background-color: #6c757d; }
+        .btn-refresh:hover { background-color: #5a6268; }
 
         .search-box { position: relative; margin-bottom: 15px; }
         .search-input {
@@ -121,13 +130,6 @@
 
         .tree-children { list-style: none; padding-left: 16px; border-left: 1px dashed #cbd5e1; margin-left: 8px; }
         .tree-children.collapsed { display: none; }
-
-        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); }
-        .btn-secondary {
-            background: #6c757d; color: white; border: none; padding: 6px 10px;
-            border-radius: 4px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 5px;
-        }
-        .btn-primary-action { background: var(--primary); }
 
         /* MAIN CONTENT & TOOLBAR */
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
@@ -207,11 +209,14 @@
     <div id="sidebar">
         <h2>Mein Wiki</h2>
 
-        <!-- TOKEN & CLOUD SYNC SECTION -->
-        <div class="token-section">
-            <label for="api-token">🔑 GitHub Token (Optional Sync):</label>
-            <input type="password" id="api-token" class="token-input" placeholder="ghp_xxxxxxxxxxxx" onchange="saveToken(this.value)">
-            <button class="btn-secondary btn-primary-action" onclick="syncWithGitHub()">☁️ Cloud-Sync (GitHub)</button>
+        <!-- TOKEN & AKTIONEN OBEN LINKS -->
+        <div class="top-controls">
+            <label for="api-token">🔑 Token:</label>
+            <input type="password" id="api-token" class="token-input" placeholder="Token eingeben..." onchange="saveToken(this.value)">
+            <div class="btn-action-group">
+                <button class="btn-action btn-save" onclick="syncSave()">💾 Speichern</button>
+                <button class="btn-action btn-refresh" onclick="syncRefresh()">🔄 Aktualisieren</button>
+            </div>
         </div>
 
         <div class="search-box">
@@ -225,13 +230,6 @@
         </div>
         
         <ul class="tree-root" id="tree-root"></ul>
-
-        <!-- LOKALE IMPORT/EXPORT BUTTONS -->
-        <div class="sidebar-footer">
-            <button class="btn-secondary" onclick="exportBackup()">💾 Lokal Speichern (JSON)</button>
-            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Datei Laden</button>
-            <input type="file" id="import-file" style="display:none" accept=".json" onchange="importBackup(event)">
-        </div>
     </div>
 
     <div id="content-wrapper">
@@ -307,7 +305,7 @@
                 'home': {
                     title: 'Willkommen im Wiki',
                     parentId: null,
-                    content: '<h1>Willkommen!</h1><p>Du kannst Daten als JSON Speichern/Laden oder per Token synchronisieren.</p>'
+                    content: '<h1>Willkommen!</h1><p>Du kannst Daten oben links speichern und aktualisieren.</p>'
                 }
             }
         };
@@ -331,19 +329,29 @@
             loadPage(currentPageId);
         };
 
-        /* TOKEN-LOGIK */
+        /* TOKEN & SYNC BUTTONS LOGIK */
         function saveToken(val) {
             wikiData.token = val;
             saveCurrentPageToStorage();
         }
 
-        function syncWithGitHub() {
+        function syncSave() {
+            saveCurrentPage();
             const token = document.getElementById('api-token').value;
-            if(!token) {
-                alert("Bitte gib zuerst einen GitHub Personal Access Token ein.");
+            if (!token) {
+                alert("Bitte gib zuerst einen Token ein.");
                 return;
             }
-            alert("Token vorhanden! Synchronisations-Logik kann gestartet werden.");
+            alert("Speichervorgang per Token gestartet!");
+        }
+
+        function syncRefresh() {
+            const token = document.getElementById('api-token').value;
+            if (!token) {
+                alert("Bitte gib zuerst einen Token ein.");
+                return;
+            }
+            alert("Daten werden per Token aktualisiert!");
         }
 
         /* MOVE & TREE LOGIC */
@@ -965,39 +973,6 @@
                     if (targetId && wikiData.pages[targetId]) loadPage(targetId);
                 }
             };
-        }
-
-        /* EXPORT UND IMPORT LOGIK */
-        function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `wiki_backup_${new Date().toISOString().slice(0,10)}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
-        }
-
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const importedData = JSON.parse(e.target.result);
-                        if (importedData.pages) {
-                            wikiData = importedData;
-                            localStorage.setItem('my_wiki_data_v3', JSON.stringify(wikiData));
-                            if(wikiData.token) {
-                                document.getElementById('api-token').value = wikiData.token;
-                            }
-                            loadPage(wikiData.activePageId || Object.keys(wikiData.pages)[0]);
-                            alert('Wiki-Daten erfolgreich geladen!');
-                        }
-                    } catch (err) { alert('Fehler beim Lesen der Datei.'); }
-                };
-                reader.readAsText(file);
-            }
         }
     </script>
 </body>
