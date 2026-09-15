@@ -1,5 +1,5 @@
 {
-  "selectedTrainerId": "tr_1789506768885",
+  "selectedTrainerId": "tr_1789507522600",
   "trainerFilter": "active",
   "trainers": [
     {
@@ -75,6 +75,14 @@
       "hasReferee": "ja",
       "refereeType": "Kampfrichter",
       "refereeExp": "2029-06-13"
+    },
+    {
+      "id": "tr_1789507522600",
+      "firstname": "Ivo",
+      "lastname": "Rudolph",
+      "status": "active",
+      "documents": [],
+      "notes": []
     }
   ]
 }
