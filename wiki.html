@@ -99,13 +99,22 @@
         .tree-item.active { background-color: #dce7f5; color: var(--primary); font-weight: 600; }
         .tree-item.drag-over { background-color: #bfdbfe; border: 1px dashed var(--accent); }
 
+        .toggle-btn {
+            background: none; border: none; cursor: pointer; font-size: 0.75rem;
+            width: 16px; height: 16px; display: inline-flex; align-items: center;
+            justify-content: center; margin-right: 4px; color: #64748b; font-weight: bold;
+        }
+        .toggle-btn:hover { color: var(--primary); }
+        .toggle-spacer { width: 16px; margin-right: 4px; display: inline-block; }
+
         .tree-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
         .tree-actions { display: none; gap: 2px; align-items: center; }
         .tree-item:hover .tree-actions { display: flex; }
         .btn-icon { background: none; border: none; cursor: pointer; font-size: 0.85rem; opacity: 0.7; padding: 2px 3px; }
         .btn-icon:hover { opacity: 1; }
 
-        .tree-children { list-style: none; padding-left: 14px; border-left: 1px dashed #cbd5e1; margin-left: 6px; min-height: 5px; }
+        .tree-children { list-style: none; padding-left: 14px; border-left: 1px dashed #cbd5e1; margin-left: 6px; min-height: 5px; display: none; }
+        .tree-children.open { display: block; }
 
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
@@ -308,7 +317,7 @@
             activePageId: 'home',
             pageOrder: ['home'],
             pages: {
-                'home': { id: 'home', title: 'Startseite', content: '<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>', parentId: null, children: [] }
+                'home': { id: 'home', title: 'Startseite', content: '<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>', parentId: null, children: [], collapsed: false }
             }
         };
 
@@ -466,6 +475,7 @@
 
             Object.values(wikiData.pages).forEach(p => {
                 if (!p.children) p.children = [];
+                if (p.collapsed === undefined) p.collapsed = false;
             });
         }
 
@@ -479,6 +489,15 @@
                     root.appendChild(createTreeNode(wikiData.pages[id]));
                 }
             });
+        }
+
+        function toggleCollapse(pageId, event) {
+            if (event) event.stopPropagation();
+            const page = wikiData.pages[pageId];
+            if (page) {
+                page.collapsed = !page.collapsed;
+                renderTree();
+            }
         }
 
         function createTreeNode(page) {
@@ -520,7 +539,13 @@
                 }
             };
 
+            const hasChildren = page.children && page.children.length > 0;
+            const toggleIcon = hasChildren 
+                ? `<button class="toggle-btn" onclick="toggleCollapse('${page.id}', event)">${page.collapsed ? '▸' : '▾'}</button>` 
+                : `<span class="toggle-spacer"></span>`;
+
             item.innerHTML = `
+                ${toggleIcon}
                 <span class="tree-title">${page.title}</span>
                 <div class="tree-actions">
                     <button class="btn-icon" title="Unterseite erstellen" onclick="event.stopPropagation(); createNewSubPageFor('${page.id}')">➕</button>
@@ -532,9 +557,9 @@
 
             li.appendChild(item);
 
-            if (page.children && page.children.length) {
+            if (hasChildren) {
                 const ul = document.createElement('ul');
-                ul.className = 'tree-children';
+                ul.className = 'tree-children' + (page.collapsed ? '' : ' open');
                 page.children.forEach(childId => {
                     if (wikiData.pages[childId]) {
                         ul.appendChild(createTreeNode(wikiData.pages[childId]));
@@ -550,7 +575,6 @@
             if (targetId === 'home') return alert("Die Startseite kann nicht verschoben werden.");
             if (targetId === newParentId) return;
 
-            // Zirkuläre Vererbung verhindern
             let curr = wikiData.pages[newParentId];
             while (curr) {
                 if (curr.id === targetId) {
@@ -562,18 +586,17 @@
 
             const page = wikiData.pages[targetId];
 
-            // Aus alter Liste entfernen
             if (page.parentId && wikiData.pages[page.parentId]) {
                 wikiData.pages[page.parentId].children = wikiData.pages[page.parentId].children.filter(cId => cId !== targetId);
             } else {
                 wikiData.pageOrder = wikiData.pageOrder.filter(cId => cId !== targetId);
             }
 
-            // In neue Elternseite eintragen
             page.parentId = newParentId;
             const newParent = wikiData.pages[newParentId];
             if (!newParent.children) newParent.children = [];
             newParent.children.push(targetId);
+            newParent.collapsed = false;
 
             renderTree();
             setStatus('Per Drag & Drop verschoben (noch nicht gespeichert)', '#e67e22');
@@ -607,9 +630,20 @@
             }
         }
 
+        function expandParents(pageId) {
+            let curr = wikiData.pages[pageId];
+            while (curr && curr.parentId) {
+                const parent = wikiData.pages[curr.parentId];
+                if (parent) parent.collapsed = false;
+                curr = parent;
+            }
+        }
+
         function loadPage(id) {
             if (!wikiData.pages[id]) id = 'home';
             wikiData.activePageId = id;
+            
+            expandParents(id);
             
             const page = wikiData.pages[id];
             document.getElementById('editor').innerHTML = page.content;
@@ -711,7 +745,7 @@
             if (!title) return;
 
             const id = 'page_' + Date.now();
-            wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt hier eingeben...</p>`, parentId: null, children: [] };
+            wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt hier eingeben...</p>`, parentId: null, children: [], collapsed: false };
             if (!wikiData.pageOrder) wikiData.pageOrder = [];
             wikiData.pageOrder.push(id);
 
@@ -727,9 +761,10 @@
             if (!title) return;
 
             const id = 'page_' + Date.now();
-            wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt der Unterseite...</p>`, parentId: parent.id, children: [] };
+            wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt der Unterseite...</p>`, parentId: parent.id, children: [], collapsed: false };
             if (!parent.children) parent.children = [];
             parent.children.push(id);
+            parent.collapsed = false;
 
             loadPage(id);
             setStatus('Neue Unterseite erstellt (noch nicht gespeichert)', '#e67e22');
