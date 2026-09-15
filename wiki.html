@@ -50,7 +50,6 @@
             border-bottom: 2px solid var(--primary);
         }
 
-        /* BUTTON LAYOUT WIE MITGLIEDERVERWALTUNG */
         .btn-row {
             display: flex;
             gap: 6px;
@@ -89,7 +88,6 @@
         .search-result-title { font-weight: 600; color: var(--primary); }
         .search-result-snippet { font-size: 0.75rem; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        /* TREE & DRAG INDICATORS */
         .tree-root { list-style: none; margin-bottom: 20px; min-height: 50px; }
         .tree-node { margin-top: 2px; position: relative; }
         .tree-item {
@@ -122,7 +120,6 @@
         .tree-children { list-style: none; padding-left: 16px; border-left: 1px dashed #cbd5e1; margin-left: 8px; }
         .tree-children.collapsed { display: none; }
 
-        /* MAIN CONTENT & TOOLBAR */
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
         header {
@@ -185,7 +182,6 @@
         #editor-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; display: block; }
         .wiki-internal-link { color: var(--accent); text-decoration: underline; font-weight: 600; cursor: pointer; }
 
-        /* MODAL STYLES WIE MITGLIEDERVERWALTUNG */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -208,7 +204,6 @@
     <div id="sidebar">
         <h2>Mein Wiki</h2>
 
-        <!-- BUTTON-ZEILEN WIE IN DER MITGLIEDERVERWALTUNG -->
         <div class="btn-row">
             <button class="btn btn-primary" onclick="createNewPage(null)">➕ Hauptseite</button>
             <button class="btn btn-secondary" style="background:#17a2b8;" onclick="createNewPage(currentPageId)">➕ Unterseite</button>
@@ -294,20 +289,16 @@
         </main>
     </div>
 
-    <!-- MODAL GITHUB TOKEN EINGABE WIE IN MITGLIEDERVERWALTUNG -->
+    <!-- MODAL - NUR NOCH SCHLÜSSEL / TOKEN ERFORDERLICH -->
     <div id="token-modal" class="modal-overlay">
         <div class="modal">
             <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Synchronisation</h3>
             <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
-                Gib deinen Personal Access Token sowie den Pfad zu deiner JSON-Datei an.
+                Gib deinen GitHub Personal Access Token ein, um Daten zu laden und zu speichern.
             </p>
             <div class="field-group">
                 <label>Personal Access Token</label>
                 <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
-            </div>
-            <div class="field-group">
-                <label>Repository Pfad (User/Repo/file.json)</label>
-                <input type="text" id="github-repo-input" placeholder="benutzer/repo/wiki.json">
             </div>
             <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
                 <button class="btn btn-secondary" style="width:auto; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
@@ -317,6 +308,9 @@
     </div>
 
     <script>
+        // PFAD IST NUN FEST HINTERLEGT
+        const GITHUB_REPO_PATH = 'dennisschwimmen/trainerportal/wiki.json';
+
         let wikiData = JSON.parse(localStorage.getItem('my_wiki_data_v3')) || {
             fileSha: '',
             activePageId: 'home',
@@ -326,7 +320,7 @@
                 'home': {
                     title: 'Willkommen im Wiki',
                     parentId: null,
-                    content: '<h1>Willkommen!</h1><p>Du kannst Daten per GitHub Token oben synchronisieren.</p>'
+                    content: '<h1>Willkommen!</h1><p>Du kannst Daten per GitHub Token synchronisieren.</p>'
                 }
             }
         };
@@ -339,13 +333,8 @@
         let savedRange = null;
         let draggedPageId = null;
 
-        /* TOKEN-HANDLING LOGIK AUS DER MITGLIEDERVERWALTUNG */
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
-        }
-
-        function getStoredRepoPath() {
-            return localStorage.getItem('trainerportal_github_repopath') || '';
         }
 
         window.onload = function() {
@@ -366,7 +355,6 @@
 
         function openTokenModal() {
             document.getElementById('github-token-input').value = getStoredToken();
-            document.getElementById('github-repo-input').value = getStoredRepoPath();
             document.getElementById('token-modal').classList.add('active');
         }
 
@@ -376,15 +364,13 @@
 
         function saveGithubToken() {
             const token = document.getElementById('github-token-input').value.trim();
-            const repoPath = document.getElementById('github-repo-input').value.trim();
 
-            if (token && repoPath) {
+            if (token) {
                 localStorage.setItem('trainerportal_github_token', token);
-                localStorage.setItem('trainerportal_github_repopath', repoPath);
                 closeTokenModal();
                 loadWikiFromGitHub();
             } else {
-                alert("Bitte gib sowohl einen Token als auch einen Pfad an.");
+                alert("Bitte gib einen Token an.");
             }
         }
 
@@ -394,7 +380,6 @@
             el.style.color = color;
         }
 
-        /* GITHUB REST API SYNCHRONISATION */
         function utf8ToBase64(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
                 return String.fromCharCode('0x' + p1);
@@ -409,9 +394,8 @@
 
         async function loadWikiFromGitHub() {
             const token = getStoredToken();
-            const repoPath = getStoredRepoPath();
 
-            if (!token || !repoPath) {
+            if (!token) {
                 setStatus('Kein Token hinterlegt!', '#dc3545');
                 openTokenModal();
                 return;
@@ -420,7 +404,7 @@
             setStatus('Lade Daten von GitHub...', '#2b5c8f');
 
             try {
-                const res = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO_PATH}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
 
@@ -453,9 +437,8 @@
         async function saveWikiToGitHub() {
             saveCurrentPage();
             const token = getStoredToken();
-            const repoPath = getStoredRepoPath();
 
-            if (!token || !repoPath) {
+            if (!token) {
                 alert("Bitte erst einen Token eingeben!");
                 openTokenModal();
                 return;
@@ -465,7 +448,7 @@
 
             try {
                 let sha = wikiData.fileSha;
-                const getRes = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO_PATH}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
                 });
 
@@ -484,7 +467,7 @@
                 };
                 if (sha) bodyData.sha = sha;
 
-                const putRes = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO_PATH}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `token ${token}`,
@@ -508,7 +491,6 @@
             }
         }
 
-        /* MOVE & TREE LOGIC */
         function movePageUp(pageId, event) {
             event.stopPropagation();
             const parentId = wikiData.pages[pageId].parentId;
@@ -547,7 +529,6 @@
             }
         }
 
-        /* DRAG & DROP LOGIC */
         function handleDragStart(e, pageId) {
             draggedPageId = pageId;
             e.stopPropagation();
@@ -646,7 +627,6 @@
             return false;
         }
 
-        /* TREE RENDERER */
         function renderTree() {
             const rootEl = document.getElementById('tree-root');
             rootEl.innerHTML = '';
@@ -753,7 +733,6 @@
             return li;
         }
 
-        /* PAGE MANAGEMENT */
         function loadPage(pageId) {
             if (!wikiData.pages[pageId]) return;
             currentPageId = pageId;
@@ -840,7 +819,6 @@
             }).join('');
         }
 
-        /* SEARCH LOGIC */
         function performSearch(query) {
             const resultsContainer = document.getElementById('search-results');
             query = query.trim().toLowerCase();
@@ -899,7 +877,6 @@
         function escapeRegExp(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
         function escapeHTML(s) { return s.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m])); }
 
-        /* EDITOR HELPERS & SELECTION */
         function saveSelection() {
             const sel = window.getSelection();
             if (sel.rangeCount > 0) savedRange = sel.getRangeAt(0);
