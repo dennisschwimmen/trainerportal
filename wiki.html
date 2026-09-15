@@ -143,11 +143,12 @@
         }
         .toolbar button:hover, .btn-tool:hover { background-color: #e9ecef; }
         
-        .btn-highlight { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
-        .hl-yellow { background-color: #fef08a; }
-        .hl-green { background-color: #bbf7d0; }
-        .hl-red { background-color: #fca5a5; }
-        .hl-none { background-color: #ffffff; position: relative; }
+        /* Markieren-Knöpfe in den Farben */
+        .btn-highlight { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #cbd5e1; cursor: pointer; }
+        .hl-yellow { background-color: #fef08a !important; }
+        .hl-green { background-color: #bbf7d0 !important; }
+        .hl-red { background-color: #fca5a5 !important; }
+        .hl-none { background-color: #ffffff !important; position: relative; }
 
         main { padding: 30px; flex: 1; display: flex; flex-direction: column; max-width: 900px; width: 100%; margin: 0 auto; }
         
@@ -158,6 +159,12 @@
         #editor[contenteditable="true"] { background: #fff; border: 1px solid var(--border-color); }
         #editor[contenteditable="false"] { background: transparent; border: 1px solid transparent; }
         #editor mark { padding: 2px 4px; border-radius: 3px; color: inherit; }
+
+        /* Listen eingerückt */
+        #editor ul, #editor ol {
+            padding-left: 24px;
+            margin: 8px 0;
+        }
 
         .wiki-table-container { position: relative; margin: 20px 0; display: inline-block; max-width: 100%; }
         #editor table { width: 100%; border-collapse: collapse; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
@@ -510,7 +517,6 @@
             item.setAttribute('data-id', page.id);
             item.onclick = () => loadPage(page.id);
 
-            // Drag and Drop Event Handlers
             item.ondragstart = (e) => {
                 draggedPageId = page.id;
                 e.dataTransfer.setData('text/plain', page.id);
@@ -740,26 +746,25 @@
             }
         }
 
+        // Direkt als "Neue Seite" anlegen ohne prompt()
         function createNewPage() {
-            const title = prompt("Titel der neuen Hauptseite:");
-            if (!title) return;
-
+            const title = "Neue Seite";
             const id = 'page_' + Date.now();
             wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt hier eingeben...</p>`, parentId: null, children: [], collapsed: false };
             if (!wikiData.pageOrder) wikiData.pageOrder = [];
             wikiData.pageOrder.push(id);
 
             loadPage(id);
+            if (!isEditing) toggleEditMode();
             setStatus('Neue Seite erstellt (noch nicht gespeichert)', '#e67e22');
         }
 
+        // Direkt als "Neue Unterseite" anlegen ohne prompt()
         function createNewSubPageFor(parentId) {
             const parent = wikiData.pages[parentId];
             if (!parent) return;
 
-            const title = prompt(`Neue Unterseite für "${parent.title}":`);
-            if (!title) return;
-
+            const title = "Neue Unterseite";
             const id = 'page_' + Date.now();
             wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt der Unterseite...</p>`, parentId: parent.id, children: [], collapsed: false };
             if (!parent.children) parent.children = [];
@@ -767,6 +772,7 @@
             parent.collapsed = false;
 
             loadPage(id);
+            if (!isEditing) toggleEditMode();
             setStatus('Neue Unterseite erstellt (noch nicht gespeichert)', '#e67e22');
         }
 
