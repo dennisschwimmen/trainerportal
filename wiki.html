@@ -91,19 +91,21 @@
         .tree-node { margin-top: 2px; position: relative; }
         .tree-item {
             display: flex; align-items: center; padding: 5px 6px;
-            border-radius: 4px; font-size: 0.85rem; color: #444; cursor: pointer;
-            transition: background-color 0.1s; position: relative;
+            border-radius: 4px; font-size: 0.85rem; color: #444; cursor: grab;
+            transition: background-color 0.1s, border 0.1s; position: relative;
         }
+        .tree-item:active { cursor: grabbing; }
         .tree-item:hover { background-color: #e2e8f0; }
         .tree-item.active { background-color: #dce7f5; color: var(--primary); font-weight: 600; }
+        .tree-item.drag-over { background-color: #bfdbfe; border: 1px dashed var(--accent); }
 
         .tree-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
         .tree-actions { display: none; gap: 2px; align-items: center; }
         .tree-item:hover .tree-actions { display: flex; }
-        .btn-icon { background: none; border: none; cursor: pointer; font-size: 0.75rem; opacity: 0.7; padding: 2px 3px; }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 0.85rem; opacity: 0.7; padding: 2px 3px; }
         .btn-icon:hover { opacity: 1; }
 
-        .tree-children { list-style: none; padding-left: 14px; border-left: 1px dashed #cbd5e1; margin-left: 6px; }
+        .tree-children { list-style: none; padding-left: 14px; border-left: 1px dashed #cbd5e1; margin-left: 6px; min-height: 5px; }
 
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
@@ -195,7 +197,6 @@
 
         <div class="btn-row">
             <button class="btn btn-primary" style="background:#28a745;" onclick="createNewPage()">+ Hauptseite</button>
-            <button class="btn btn-primary" style="background:#17a2b8;" onclick="createNewSubPage()">+ Unterseite</button>
         </div>
 
         <div class="btn-row">
@@ -313,6 +314,7 @@
 
         let isEditing = false;
         let savedRange = null;
+        let draggedPageId = null;
 
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
@@ -456,14 +458,12 @@
         function ensurePageOrderStructure() {
             if (!wikiData.pageOrder) wikiData.pageOrder = [];
             
-            // Hauptseiten in pageOrder anordnen
             const rootPages = Object.keys(wikiData.pages).filter(id => !wikiData.pages[id].parentId);
             rootPages.forEach(id => {
                 if (!wikiData.pageOrder.includes(id)) wikiData.pageOrder.push(id);
             });
             wikiData.pageOrder = wikiData.pageOrder.filter(id => wikiData.pages[id] && !wikiData.pages[id].parentId);
 
-            // Unterseiten-Arrays prüfen
             Object.values(wikiData.pages).forEach(p => {
                 if (!p.children) p.children = [];
             });
@@ -487,14 +487,45 @@
             
             const item = document.createElement('div');
             item.className = 'tree-item' + (page.id === wikiData.activePageId ? ' active' : '');
+            item.draggable = true;
+            item.setAttribute('data-id', page.id);
             item.onclick = () => loadPage(page.id);
+
+            // Drag and Drop Event Handlers
+            item.ondragstart = (e) => {
+                draggedPageId = page.id;
+                e.dataTransfer.setData('text/plain', page.id);
+                e.stopPropagation();
+            };
+
+            item.ondragover = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (draggedPageId !== page.id) {
+                    item.classList.add('drag-over');
+                }
+            };
+
+            item.ondragleave = (e) => {
+                e.preventDefault();
+                item.classList.remove('drag-over');
+            };
+
+            item.ondrop = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                item.classList.remove('drag-over');
+                if (draggedPageId && draggedPageId !== page.id) {
+                    movePageToNewParent(draggedPageId, page.id);
+                }
+            };
 
             item.innerHTML = `
                 <span class="tree-title">${page.title}</span>
                 <div class="tree-actions">
+                    <button class="btn-icon" title="Unterseite erstellen" onclick="event.stopPropagation(); createNewSubPageFor('${page.id}')">➕</button>
                     <button class="btn-icon" title="Nach oben" onclick="event.stopPropagation(); movePageUp('${page.id}')">⬆️</button>
                     <button class="btn-icon" title="Nach unten" onclick="event.stopPropagation(); movePageDown('${page.id}')">⬇️</button>
-                    <button class="btn-icon" title="Ebene ändern" onclick="event.stopPropagation(); changePageParent('${page.id}')">📂</button>
                     <button class="btn-icon" title="Löschen" onclick="event.stopPropagation(); deletePage('${page.id}')">🗑️</button>
                 </div>
             `;
@@ -513,6 +544,39 @@
             }
 
             return li;
+        }
+
+        function movePageToNewParent(targetId, newParentId) {
+            if (targetId === 'home') return alert("Die Startseite kann nicht verschoben werden.");
+            if (targetId === newParentId) return;
+
+            // Zirkuläre Vererbung verhindern
+            let curr = wikiData.pages[newParentId];
+            while (curr) {
+                if (curr.id === targetId) {
+                    alert("Eine Seite kann nicht unter ihre eigene Unterseite verschoben werden!");
+                    return;
+                }
+                curr = curr.parentId ? wikiData.pages[curr.parentId] : null;
+            }
+
+            const page = wikiData.pages[targetId];
+
+            // Aus alter Liste entfernen
+            if (page.parentId && wikiData.pages[page.parentId]) {
+                wikiData.pages[page.parentId].children = wikiData.pages[page.parentId].children.filter(cId => cId !== targetId);
+            } else {
+                wikiData.pageOrder = wikiData.pageOrder.filter(cId => cId !== targetId);
+            }
+
+            // In neue Elternseite eintragen
+            page.parentId = newParentId;
+            const newParent = wikiData.pages[newParentId];
+            if (!newParent.children) newParent.children = [];
+            newParent.children.push(targetId);
+
+            renderTree();
+            setStatus('Per Drag & Drop verschoben (noch nicht gespeichert)', '#e67e22');
         }
 
         function movePageUp(id) {
@@ -541,42 +605,6 @@
                 renderTree();
                 setStatus('Reihenfolge geändert (noch nicht gespeichert)', '#e67e22');
             }
-        }
-
-        function changePageParent(id) {
-            if (id === 'home') return alert("Die Startseite kann nicht verschoben werden.");
-            const page = wikiData.pages[id];
-            
-            const availableParents = Object.values(wikiData.pages).filter(p => p.id !== id && p.parentId !== id);
-            let optionsStr = "0: [Keine Elternseite - als Hauptseite festlegen]\n";
-            optionsStr += availableParents.map((p, i) => `${i + 1}: ${p.title}`).join("\n");
-
-            let choice = prompt(`Wählen Sie die neue Überseite für "${page.title}":\n\n${optionsStr}`);
-            if (choice === null) return;
-
-            let num = parseInt(choice);
-            if (isNaN(num) || num < 0 || num > availableParents.length) return;
-
-            // Aus alter Liste entfernen
-            if (page.parentId && wikiData.pages[page.parentId]) {
-                wikiData.pages[page.parentId].children = wikiData.pages[page.parentId].children.filter(cId => cId !== id);
-            } else {
-                wikiData.pageOrder = wikiData.pageOrder.filter(cId => cId !== id);
-            }
-
-            // In neue Liste einfügen
-            if (num === 0) {
-                page.parentId = null;
-                wikiData.pageOrder.push(id);
-            } else {
-                let newParent = availableParents[num - 1];
-                page.parentId = newParent.id;
-                if (!newParent.children) newParent.children = [];
-                newParent.children.push(id);
-            }
-
-            renderTree();
-            setStatus('Hierarchie geändert (noch nicht gespeichert)', '#e67e22');
         }
 
         function loadPage(id) {
@@ -691,14 +719,14 @@
             setStatus('Neue Seite erstellt (noch nicht gespeichert)', '#e67e22');
         }
 
-        function createNewSubPage() {
-            if (!wikiData.activePageId) return alert("Bitte wählen Sie zuerst eine Elternseite aus.");
-            const title = prompt("Titel der neuen Unterseite:");
+        function createNewSubPageFor(parentId) {
+            const parent = wikiData.pages[parentId];
+            if (!parent) return;
+
+            const title = prompt(`Neue Unterseite für "${parent.title}":`);
             if (!title) return;
 
             const id = 'page_' + Date.now();
-            const parent = wikiData.pages[wikiData.activePageId];
-            
             wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt der Unterseite...</p>`, parentId: parent.id, children: [] };
             if (!parent.children) parent.children = [];
             parent.children.push(id);
@@ -863,7 +891,7 @@
                             </div>
                             <div class="file-preview-body"><embed src="${base64Data}" type="application/pdf" class="pdf-embed"></div>
                         </div><p contenteditable="true"><br></p>`;
-                    insertHTMLAtCursor(containerHTML);
+                            insertHTMLAtCursor(containerHTML);
                 };
                 reader.readAsDataURL(file);
             } else if (file.type.startsWith('image/')) {
