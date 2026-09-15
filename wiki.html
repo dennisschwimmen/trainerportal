@@ -16,6 +16,8 @@
             --bg-content: #ffffff;
             --text-color: #333333;
             --border-color: #e0e4e8;
+            --success: #28a745;
+            --danger: #dc3545;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,6 +28,7 @@
             display: flex;
             height: 100vh;
             background-color: var(--bg-content);
+            overflow: hidden;
         }
 
         #sidebar {
@@ -34,55 +37,49 @@
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            padding: 20px 15px;
+            padding: 15px 12px;
             overflow-y: auto;
+            flex-shrink: 0;
         }
 
         #sidebar h2 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--primary);
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 2px solid var(--primary);
         }
 
-        /* SYNC CONTROL-BEREICH OBEN LINKS */
-        .top-controls {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 15px;
+        /* BUTTON LAYOUT WIE MITGLIEDERVERWALTUNG */
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
         }
-        .top-controls label { font-size: 0.75rem; font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; }
-        .token-input {
-            width: 100%; padding: 6px; border: 1px solid #cbd5e1;
-            border-radius: 4px; font-size: 0.8rem; margin-bottom: 6px;
-        }
-        .config-input {
-            width: 100%; padding: 4px 6px; border: 1px solid #e2e8f0;
-            border-radius: 4px; font-size: 0.75rem; margin-bottom: 8px;
-        }
-        .btn-action-group { display: flex; gap: 6px; }
-        .btn-action {
-            flex: 1; padding: 7px; border: none; border-radius: 4px;
-            font-size: 0.8rem; font-weight: bold; cursor: pointer; color: white;
-            display: inline-flex; align-items: center; justify-content: center; gap: 4px;
-        }
-        .btn-save { background-color: var(--primary); }
-        .btn-save:hover { background-color: var(--primary-hover); }
-        .btn-refresh { background-color: #6c757d; }
-        .btn-refresh:hover { background-color: #5a6268; }
 
-        .search-box { position: relative; margin-bottom: 15px; }
+        .btn {
+            width: 100%; color: white; border: none; padding: 7px 6px; border-radius: 6px;
+            cursor: pointer; font-weight: bold; font-size: 0.78rem; margin-bottom: 0;
+            display: flex; align-items: center; justify-content: center; gap: 4px;
+            text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-decoration: none;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        .search-box { position: relative; margin-bottom: 12px; margin-top: 6px; }
         .search-input {
-            width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1;
-            border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+            width: 100%; padding: 7px 10px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 0.82rem; outline: none; transition: border-color 0.2s;
+            background: white; font-family: inherit;
         }
         .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
 
         .search-results {
-            margin-bottom: 15px; background: white; border: 1px solid var(--border-color);
+            margin-bottom: 12px; background: white; border: 1px solid var(--border-color);
             border-radius: 6px; max-height: 250px; overflow-y: auto; display: none;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
@@ -92,22 +89,12 @@
         .search-result-title { font-weight: 600; color: var(--primary); }
         .search-result-snippet { font-size: 0.75rem; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .btn-group-new { display: flex; gap: 8px; margin-bottom: 15px; }
-        .btn-new-page, .btn-new-subpage {
-            flex: 1; color: white; border: none; padding: 9px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
-        }
-        .btn-new-page { background-color: #28a745; }
-        .btn-new-page:hover { background-color: #218838; }
-        .btn-new-subpage { background-color: #17a2b8; }
-        .btn-new-subpage:hover { background-color: #138496; }
-
         /* TREE & DRAG INDICATORS */
         .tree-root { list-style: none; margin-bottom: 20px; min-height: 50px; }
         .tree-node { margin-top: 2px; position: relative; }
         .tree-item {
             display: flex; align-items: center; padding: 5px 6px;
-            border-radius: 4px; font-size: 0.9rem; color: #444; cursor: grab;
+            border-radius: 4px; font-size: 0.88rem; color: #444; cursor: grab;
             transition: background-color 0.1s; position: relative;
         }
         .tree-item:active { cursor: grabbing; }
@@ -139,7 +126,7 @@
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
         header {
-            padding: 10px 30px; border-bottom: 1px solid var(--border-color);
+            padding: 12px 30px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
@@ -197,7 +184,15 @@
 
         #editor-content img { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; display: block; }
         .wiki-internal-link { color: var(--accent); text-decoration: underline; font-weight: 600; cursor: pointer; }
-        .btn-export { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+
+        /* MODAL STYLES WIE MITGLIEDERVERWALTUNG */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 15px; }
+        .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .field-group input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; background: #ffffff; font-family: inherit; }
+        .field-group input:focus { border-color: var(--accent); }
 
         @media print {
             #sidebar, header, .toolbar, .table-controls, .btn-preview-toggle { display: none !important; }
@@ -213,29 +208,25 @@
     <div id="sidebar">
         <h2>Mein Wiki</h2>
 
-        <!-- TOKEN & GITHUB SYNC BEREICH -->
-        <div class="top-controls">
-            <label for="api-token">🔑 Personal Access Token:</label>
-            <input type="password" id="api-token" class="token-input" placeholder="ghp_xxxxxxxxxxxx" onchange="updateConfig('token', this.value)">
-            
-            <label for="repo-path">📁 Repo Path (User/Repo/file.json):</label>
-            <input type="text" id="repo-path" class="config-input" placeholder="Benutzer/Repo/wiki.json" onchange="updateConfig('repoPath', this.value)">
+        <!-- BUTTON-ZEILEN WIE IN DER MITGLIEDERVERWALTUNG -->
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="createNewPage(null)">➕ Hauptseite</button>
+            <button class="btn btn-secondary" style="background:#17a2b8;" onclick="createNewPage(currentPageId)">➕ Unterseite</button>
+        </div>
 
-            <div class="btn-action-group">
-                <button class="btn-action btn-save" onclick="syncSave()">💾 Speichern</button>
-                <button class="btn-action btn-refresh" onclick="syncRefresh()">🔄 Aktualisieren</button>
-            </div>
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="loadWikiFromGitHub()">🔄 Laden</button>
+            <button class="btn btn-success" onclick="saveWikiToGitHub()">💾 Speichern</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 8px;">
+            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
         </div>
 
         <div class="search-box">
             <input type="text" id="search-input" class="search-input" placeholder="🔍 Thema oder Schlagwort..." oninput="performSearch(this.value)">
         </div>
         <div id="search-results" class="search-results"></div>
-
-        <div class="btn-group-new">
-            <button class="btn-new-page" onclick="createNewPage(null)">+ Hauptseite</button>
-            <button class="btn-new-subpage" onclick="createNewPage(currentPageId)">+ Unterseite</button>
-        </div>
         
         <ul class="tree-root" id="tree-root"></ul>
     </div>
@@ -244,8 +235,8 @@
         <header>
             <div id="breadcrumb" class="breadcrumb">Wiki</div>
             <div>
-                <span id="save-status" style="color: #6c757d; font-size: 0.8rem; margin-right: 15px;">Gespeichert</span>
-                <button class="btn-export" onclick="window.print()">🖨️ Als PDF exportieren</button>
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.85rem; margin-right: 15px;">Status: Bereit</span>
+                <button class="btn btn-primary" style="display:inline-flex; width:auto; padding:6px 12px;" onclick="window.print()">🖨️ Als PDF exportieren</button>
             </div>
         </header>
 
@@ -303,10 +294,30 @@
         </main>
     </div>
 
+    <!-- MODAL GITHUB TOKEN EINGABE WIE IN MITGLIEDERVERWALTUNG -->
+    <div id="token-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Synchronisation</h3>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
+                Gib deinen Personal Access Token sowie den Pfad zu deiner JSON-Datei an.
+            </p>
+            <div class="field-group">
+                <label>Personal Access Token</label>
+                <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div class="field-group">
+                <label>Repository Pfad (User/Repo/file.json)</label>
+                <input type="text" id="github-repo-input" placeholder="benutzer/repo/wiki.json">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:20px;">
+                <button class="btn btn-secondary" style="width:auto; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
+                <button class="btn btn-success" style="width:auto; padding:8px 14px;" onclick="saveGithubToken()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let wikiData = JSON.parse(localStorage.getItem('my_wiki_data_v3')) || {
-            token: '',
-            repoPath: '',
             fileSha: '',
             activePageId: 'home',
             collapsedNodes: {},
@@ -315,7 +326,7 @@
                 'home': {
                     title: 'Willkommen im Wiki',
                     parentId: null,
-                    content: '<h1>Willkommen!</h1><p>Du kannst Daten per GitHub Token oben links synchronisieren.</p>'
+                    content: '<h1>Willkommen!</h1><p>Du kannst Daten per GitHub Token oben synchronisieren.</p>'
                 }
             }
         };
@@ -328,23 +339,62 @@
         let savedRange = null;
         let draggedPageId = null;
 
+        /* TOKEN-HANDLING LOGIK AUS DER MITGLIEDERVERWALTUNG */
+        function getStoredToken() {
+            return localStorage.getItem('trainerportal_github_token') || '';
+        }
+
+        function getStoredRepoPath() {
+            return localStorage.getItem('trainerportal_github_repopath') || '';
+        }
+
         window.onload = function() {
             if (!wikiData.pages[currentPageId]) {
                 currentPageId = Object.keys(wikiData.pages)[0] || 'home';
             }
-            if(wikiData.token) document.getElementById('api-token').value = wikiData.token;
-            if(wikiData.repoPath) document.getElementById('repo-path').value = wikiData.repoPath;
             
             renderTree();
             loadPage(currentPageId);
+
+            const token = getStoredToken();
+            if (!token) {
+                openTokenModal();
+            } else {
+                loadWikiFromGitHub();
+            }
         };
 
-        function updateConfig(key, value) {
-            wikiData[key] = value.trim();
-            saveCurrentPageToStorage();
+        function openTokenModal() {
+            document.getElementById('github-token-input').value = getStoredToken();
+            document.getElementById('github-repo-input').value = getStoredRepoPath();
+            document.getElementById('token-modal').classList.add('active');
         }
 
-        /* GITHUB API SYNCHRONISATION (SPEICHERN & AKTUALISIEREN) */
+        function closeTokenModal() {
+            document.getElementById('token-modal').classList.remove('active');
+        }
+
+        function saveGithubToken() {
+            const token = document.getElementById('github-token-input').value.trim();
+            const repoPath = document.getElementById('github-repo-input').value.trim();
+
+            if (token && repoPath) {
+                localStorage.setItem('trainerportal_github_token', token);
+                localStorage.setItem('trainerportal_github_repopath', repoPath);
+                closeTokenModal();
+                loadWikiFromGitHub();
+            } else {
+                alert("Bitte gib sowohl einen Token als auch einen Pfad an.");
+            }
+        }
+
+        function setStatus(text, color) {
+            const el = document.getElementById('save-status');
+            el.innerText = text;
+            el.style.color = color;
+        }
+
+        /* GITHUB REST API SYNCHRONISATION */
         function utf8ToBase64(str) {
             return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
                 return String.fromCharCode('0x' + p1);
@@ -357,21 +407,63 @@
             }).join(''));
         }
 
-        async function syncSave() {
-            saveCurrentPage();
-            const token = document.getElementById('api-token').value.trim();
-            const repoPath = document.getElementById('repo-path').value.trim();
+        async function loadWikiFromGitHub() {
+            const token = getStoredToken();
+            const repoPath = getStoredRepoPath();
 
             if (!token || !repoPath) {
-                alert("Bitte gib einen Token und einen Repo-Pfad an (z. B. nutzer/repo/wiki.json).");
+                setStatus('Kein Token hinterlegt!', '#dc3545');
+                openTokenModal();
                 return;
             }
 
-            const statusEl = document.getElementById('save-status');
-            statusEl.innerText = 'Speichere auf GitHub...';
+            setStatus('Lade Daten von GitHub...', '#2b5c8f');
 
             try {
-                // Vorab SHA der Datei abrufen, falls vorhanden
+                const res = await fetch(`https://api.github.com/repos/${repoPath}`, {
+                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
+                });
+
+                if (res.status === 401 || res.status === 403) {
+                    alert("Token ungültig oder abgelaufen! Bitte erstelle einen neuen Token.");
+                    openTokenModal();
+                    throw new Error("Authentifizierungsfehler");
+                }
+
+                if (!res.ok) throw new Error("Fehler beim Laden!");
+
+                const fileData = await res.json();
+                const rawJson = base64ToUtf8(fileData.content.replace(/\n/g, ''));
+                const importedWiki = JSON.parse(rawJson);
+
+                wikiData = importedWiki;
+                wikiData.fileSha = fileData.sha;
+
+                saveCurrentPageToStorage();
+                renderTree();
+                loadPage(wikiData.activePageId || Object.keys(wikiData.pages)[0]);
+
+                setStatus('Erfolgreich geladen!', '#28a745');
+            } catch (e) {
+                console.error(e);
+                setStatus('Fehler beim Laden!', '#dc3545');
+            }
+        }
+
+        async function saveWikiToGitHub() {
+            saveCurrentPage();
+            const token = getStoredToken();
+            const repoPath = getStoredRepoPath();
+
+            if (!token || !repoPath) {
+                alert("Bitte erst einen Token eingeben!");
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Speichere auf GitHub...', '#2b5c8f');
+
+            try {
                 let sha = wikiData.fileSha;
                 const getRes = await fetch(`https://api.github.com/repos/${repoPath}`, {
                     headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
@@ -387,7 +479,7 @@
                 const contentBase64 = utf8ToBase64(jsonContent);
 
                 const bodyData = {
-                    message: "Wiki aktualisiert am " + new Date().toLocaleString(),
+                    message: "Wiki via Web-App aktualisiert am " + new Date().toLocaleString(),
                     content: contentBase64
                 };
                 if (sha) bodyData.sha = sha;
@@ -406,60 +498,13 @@
                     const resData = await putRes.json();
                     wikiData.fileSha = resData.content.sha;
                     saveCurrentPageToStorage();
-                    statusEl.innerText = 'Erfolgreich auf GitHub gespeichert!';
-                    alert("Erfolgreich auf GitHub gespeichert!");
+                    setStatus('Erfolgreich auf GitHub gespeichert!', '#28a745');
                 } else {
-                    const err = await putRes.json();
-                    alert("Fehler beim Speichern auf GitHub: " + (err.message || putRes.statusText));
-                    statusEl.innerText = 'Fehler beim Speichern';
+                    throw new Error("Fehler beim Speichern");
                 }
             } catch (e) {
-                alert("Netzwerkfehler beim Synchronisieren: " + e.message);
-                statusEl.innerText = 'Fehler beim Speichern';
-            }
-        }
-
-        async function syncRefresh() {
-            const token = document.getElementById('api-token').value.trim();
-            const repoPath = document.getElementById('repo-path').value.trim();
-
-            if (!token || !repoPath) {
-                alert("Bitte gib einen Token und einen Repo-Pfad an (z. B. nutzer/repo/wiki.json).");
-                return;
-            }
-
-            const statusEl = document.getElementById('save-status');
-            statusEl.innerText = 'Lade von GitHub...';
-
-            try {
-                const res = await fetch(`https://api.github.com/repos/${repoPath}`, {
-                    headers: { 'Authorization': `token ${token}`, 'Accept': 'application/vnd.github.v3+json' }
-                });
-
-                if (res.ok) {
-                    const fileData = await res.json();
-                    const rawJson = base64ToUtf8(fileData.content.replace(/\n/g, ''));
-                    const importedWiki = JSON.parse(rawJson);
-
-                    wikiData = importedWiki;
-                    wikiData.fileSha = fileData.sha;
-                    wikiData.token = token;
-                    wikiData.repoPath = repoPath;
-
-                    saveCurrentPageToStorage();
-                    renderTree();
-                    loadPage(wikiData.activePageId || Object.keys(wikiData.pages)[0]);
-                    
-                    statusEl.innerText = 'Erfolgreich geladen!';
-                    alert("Wiki erfolgreich von GitHub aktualisiert!");
-                } else {
-                    const err = await res.json();
-                    alert("Fehler beim Laden von GitHub: " + (err.message || res.statusText));
-                    statusEl.innerText = 'Fehler beim Laden';
-                }
-            } catch (e) {
-                alert("Netzwerkfehler beim Laden: " + e.message);
-                statusEl.innerText = 'Fehler beim Laden';
+                console.error(e);
+                setStatus('Fehler beim Speichern!', '#dc3545');
             }
         }
 
@@ -737,7 +782,7 @@
 
         function saveCurrentPageToStorage() {
             localStorage.setItem('my_wiki_data_v3', JSON.stringify(wikiData));
-            document.getElementById('save-status').innerText = 'Gespeichert um ' + new Date().toLocaleTimeString();
+            setStatus('Änderungen ungespeichert', '#e67e22');
         }
 
         function createNewPage(parentId = null) {
