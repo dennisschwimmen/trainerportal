@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mein Interaktives Lokales Wiki</title>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <title>Vereins-Wiki</title>
 
     <style>
         :root {
@@ -16,6 +14,9 @@
             --bg-content: #ffffff;
             --text-color: #333333;
             --border-color: #e0e4e8;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #e67e22;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -26,129 +27,141 @@
             display: flex;
             height: 100vh;
             background-color: var(--bg-content);
+            overflow: hidden;
         }
 
         #sidebar {
-            width: 340px;
+            width: 320px;
             background-color: var(--bg-sidebar);
             border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            padding: 20px 15px;
+            padding: 15px 12px;
             overflow-y: auto;
+            flex-shrink: 0;
         }
 
         #sidebar h2 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             color: var(--primary);
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 2px solid var(--primary);
         }
 
-        .search-box { position: relative; margin-bottom: 15px; }
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 7px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background: #64748b; color: white; }
+
+        .search-box { position: relative; margin-bottom: 10px; }
         .search-input {
-            width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1;
-            border-radius: 6px; font-size: 0.85rem; outline: none; transition: border-color 0.2s;
+            width: 100%; padding: 6px 10px; border: 1px solid #cbd5e1;
+            border-radius: 6px; font-size: 0.82rem; outline: none; transition: border-color 0.2s;
+            background: white; font-family: inherit;
         }
         .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
 
         .search-results {
-            margin-bottom: 15px; background: white; border: 1px solid var(--border-color);
-            border-radius: 6px; max-height: 250px; overflow-y: auto; display: none;
+            margin-bottom: 10px; background: white; border: 1px solid var(--border-color);
+            border-radius: 6px; max-height: 200px; overflow-y: auto; display: none;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
         .search-results.active { display: block; }
-        .search-result-item { padding: 8px 10px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 0.85rem; }
+        .search-result-item { padding: 6px 8px; border-bottom: 1px solid #f1f5f9; cursor: pointer; font-size: 0.8rem; }
         .search-result-item:hover { background-color: #f8fafc; }
         .search-result-title { font-weight: 600; color: var(--primary); }
-        .search-result-snippet { font-size: 0.75rem; color: #64748b; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-        .btn-group-new { display: flex; gap: 8px; margin-bottom: 15px; }
-        .btn-new-page, .btn-new-subpage {
-            flex: 1; color: white; border: none; padding: 9px;
-            border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
-        }
-        .btn-new-page { background-color: #28a745; }
-        .btn-new-page:hover { background-color: #218838; }
-        .btn-new-subpage { background-color: #17a2b8; }
-        .btn-new-subpage:hover { background-color: #138496; }
-
-        .tree-root { list-style: none; margin-bottom: 20px; min-height: 50px; }
+        .tree-root { list-style: none; margin-bottom: 15px; flex: 1; overflow-y: auto; }
         .tree-node { margin-top: 2px; position: relative; }
         .tree-item {
             display: flex; align-items: center; padding: 5px 6px;
-            border-radius: 4px; font-size: 0.9rem; color: #444; cursor: grab;
-            transition: background-color 0.1s;
-            position: relative;
+            border-radius: 4px; font-size: 0.85rem; color: #444; cursor: pointer;
+            transition: background-color 0.1s; position: relative;
         }
-        .tree-item:active { cursor: grabbing; }
         .tree-item:hover { background-color: #e2e8f0; }
         .tree-item.active { background-color: #dce7f5; color: var(--primary); font-weight: 600; }
 
-        .tree-item.drop-inside { background-color: #bae6fd !important; border: 1px dashed var(--accent); }
-        .tree-item.drop-above { border-top: 2px solid var(--accent) !important; }
-        .tree-item.drop-below { border-bottom: 2px solid var(--accent) !important; }
-        .tree-node.dragging { opacity: 0.3; }
-
-        .tree-toggle {
-            width: 18px; height: 18px; display: inline-flex;
-            align-items: center; justify-content: center; cursor: pointer;
-            font-size: 0.75rem; color: #777; user-select: none; margin-right: 2px;
-        }
-        .tree-toggle.empty { visibility: hidden; }
         .tree-title { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; user-select: none; }
-
         .tree-actions { display: none; gap: 2px; align-items: center; }
         .tree-item:hover .tree-actions { display: flex; }
-        .btn-icon { background: none; border: none; cursor: pointer; font-size: 0.75rem; opacity: 0.7; padding: 2px 3px; border-radius: 3px; }
-        .btn-icon:hover { opacity: 1; background-color: rgba(0,0,0,0.08); }
+        .btn-icon { background: none; border: none; cursor: pointer; font-size: 0.75rem; opacity: 0.7; padding: 2px 3px; }
+        .btn-icon:hover { opacity: 1; }
 
-        .tree-children { list-style: none; padding-left: 16px; border-left: 1px dashed #cbd5e1; margin-left: 8px; }
-        .tree-children.collapsed { display: none; }
-
-        .sidebar-footer { margin-top: auto; padding-top: 15px; border-top: 1px solid var(--border-color); }
-        .btn-secondary {
-            background: #6c757d; color: white; border: none; padding: 6px 10px;
-            border-radius: 4px; cursor: pointer; font-size: 0.8rem; width: 100%; margin-top: 5px;
-        }
+        .tree-children { list-style: none; padding-left: 14px; border-left: 1px dashed #cbd5e1; margin-left: 6px; }
 
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
 
         header {
-            padding: 10px 30px; border-bottom: 1px solid var(--border-color);
+            padding: 12px 30px; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .home-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; transition: all 0.2s;
+        }
+        .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
 
         .toolbar {
-            display: flex; gap: 6px; background: #f1f3f5; padding: 8px 20px;
+            display: flex; gap: 6px; background: #f1f3f5; padding: 8px 30px;
             border-bottom: 1px solid var(--border-color); flex-wrap: wrap; align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
+            position: sticky; top: 0; z-index: 100;
         }
-        .toolbar button, .toolbar select, .btn-tool {
-            padding: 5px 10px; border: 1px solid #ced4da; border-radius: 4px;
-            background: white; cursor: pointer; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 4px;
+        .toolbar button {
+            padding: 4px 8px; border: 1px solid #ced4da; border-radius: 4px;
+            background: white; cursor: pointer; font-size: 0.82rem;
         }
-        .toolbar button:hover, .btn-tool:hover { background-color: #e9ecef; }
+        .toolbar button:hover { background-color: #e9ecef; }
         
-        .btn-highlight { width: 24px; height: 24px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; display: inline-block; }
+        .btn-highlight { width: 22px; height: 22px; border-radius: 4px; border: 1px solid #ccc; cursor: pointer; }
         .hl-yellow { background-color: #fef08a; }
         .hl-green { background-color: #bbf7d0; }
         .hl-red { background-color: #fca5a5; }
         .hl-none { background-color: #ffffff; position: relative; }
-        .hl-none::after { content: "✕"; position: absolute; top: 2px; left: 5px; font-size: 11px; color: #ef4444; font-weight: bold; }
 
         main { padding: 30px; flex: 1; display: flex; flex-direction: column; }
         #editor {
-            flex: 1; outline: none; line-height: 1.6; font-size: 1rem;
+            flex: 1; outline: none; line-height: 1.6; font-size: 0.95rem;
             min-height: 400px; padding: 15px; border-radius: 6px;
         }
         #editor[contenteditable="true"] { background: #fff; border: 1px solid var(--border-color); }
         #editor[contenteditable="false"] { background: transparent; border: 1px solid transparent; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .field-group input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; }
     </style>
 </head>
 <body>
@@ -156,31 +169,37 @@
     <div id="sidebar">
         <h2>Vereins-Wiki</h2>
 
+        <div class="btn-row">
+            <button class="btn btn-primary" style="background:#28a745;" onclick="createNewPage()">+ Hauptseite</button>
+            <button class="btn btn-primary" style="background:#17a2b8;" onclick="createNewSubPage()">+ Unterseite</button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="loadWikiFromGitHub()">🔄 Laden</button>
+            <button class="btn btn-success" onclick="saveWikiToGitHub()">💾 Speichern</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 10px;">
+            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
+        </div>
+
         <div class="search-box">
             <input type="text" class="search-input" placeholder="🔍 Wiki durchsuchen..." oninput="searchWiki(this.value)">
             <div class="search-results" id="search-results"></div>
         </div>
 
-        <div class="btn-group-new">
-            <button class="btn-new-page" onclick="createNewPage()">+ Hauptseite</button>
-            <button class="btn-new-subpage" onclick="createNewSubPage()">+ Unterseite</button>
-        </div>
-
         <ul class="tree-root" id="tree-root"></ul>
-
-        <div class="sidebar-footer">
-            <button class="btn-secondary" onclick="exportBackup()">💾 Wiki Sichern</button>
-            <button class="btn-secondary" onclick="document.getElementById('import-file').click()">📂 Wiki Laden</button>
-            <input type="file" id="import-file" style="display:none" onchange="importBackup(event)">
-        </div>
     </div>
 
     <div id="content-wrapper">
         <header>
-            <div id="breadcrumb" class="breadcrumb">Wiki / Hauptseite</div>
-            <div>
-                <span id="save-status" style="color: #6c757d; font-size: 0.8rem; margin-right: 15px;">Gespeichert</span>
-                <button class="btn-tool" onclick="toggleEditMode()" id="btn-toggle-edit">✏️ Bearbeiten</button>
+            <div class="header-left">
+                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+                <div id="breadcrumb" class="breadcrumb">Wiki / Startseite</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.85rem;">Status: Bereit</span>
+                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="toggleEditMode()" id="btn-toggle-edit">✏️ Bearbeiten</button>
             </div>
         </header>
 
@@ -193,7 +212,7 @@
             <button onclick="applyHighlight('#fef08a')" class="btn-highlight hl-yellow" title="Gelb markieren"></button>
             <button onclick="applyHighlight('#bbf7d0')" class="btn-highlight hl-green" title="Grün markieren"></button>
             <button onclick="applyHighlight('#fca5a5')" class="btn-highlight hl-red" title="Rot markieren"></button>
-            <button onclick="applyHighlight('transparent')" class="btn-highlight hl-none" title="Markierung entfernen"></button>
+            <button onclick="applyHighlight('transparent')" class="btn-highlight hl-none" title="Markierung entfernen">✕</button>
         </div>
 
         <main>
@@ -201,8 +220,30 @@
         </main>
     </div>
 
+    <!-- MODAL GITHUB TOKEN EINGABE -->
+    <div id="token-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Token eingeben</h3>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
+                Gib hier deinen Personal Access Token (Classic mit Scope 'repo') ein. Dieser wird lokal in deinem Browser gespeichert.
+            </p>
+            <div class="field-group" style="margin-bottom:20px;">
+                <label>Personal Access Token</label>
+                <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="width:auto; margin:0; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
+                <button class="btn btn-success" style="width:auto; margin:0; padding:8px 14px;" onclick="saveGithubToken()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        let wikiData = JSON.parse(localStorage.getItem('wiki_data')) || {
+        const REPO_OWNER = "dennisschwimmen";
+        const REPO_NAME = "trainerportal";
+        const FILE_PATH = "wiki.json";
+
+        let wikiData = {
             activePageId: 'home',
             pages: {
                 'home': { id: 'home', title: 'Startseite', content: '<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>', parentId: null, children: [] }
@@ -211,10 +252,144 @@
 
         let isEditing = false;
 
+        function getStoredToken() {
+            return localStorage.getItem('trainerportal_github_token') || '';
+        }
+
         window.onload = function() {
-            renderTree();
-            loadPage(wikiData.activePageId || 'home');
+            const token = getStoredToken();
+            if (!token) {
+                openTokenModal();
+            } else {
+                loadWikiFromGitHub();
+            }
         };
+
+        function setStatus(text, color) {
+            const el = document.getElementById('save-status');
+            el.innerText = text;
+            el.style.color = color;
+        }
+
+        function openTokenModal() {
+            document.getElementById('github-token-input').value = getStoredToken();
+            document.getElementById('token-modal').classList.add('active');
+        }
+
+        function closeTokenModal() {
+            document.getElementById('token-modal').classList.remove('active');
+        }
+
+        function saveGithubToken() {
+            const val = document.getElementById('github-token-input').value.trim();
+            if (val) {
+                localStorage.setItem('trainerportal_github_token', val);
+                closeTokenModal();
+                loadWikiFromGitHub();
+            } else {
+                alert("Bitte einen gültigen Token eingeben.");
+            }
+        }
+
+        async function loadWikiFromGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                setStatus('Kein Token hinterlegt!', '#dc3545');
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Lade Wiki von GitHub...', '#2b5c8f');
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    alert("Token ungültig oder abgelaufen! Bitte erstelle einen neuen Token auf GitHub.");
+                    openTokenModal();
+                    throw new Error("Authentifizierungsfehler");
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const jsonText = decodeURIComponent(escape(atob(data.content)));
+                    const parsed = JSON.parse(jsonText);
+                    if (parsed && parsed.pages) {
+                        wikiData = parsed;
+                    }
+                }
+
+                renderTree();
+                loadPage(wikiData.activePageId || 'home');
+                setStatus('Synchronisiert mit GitHub', '#28a745');
+
+            } catch (error) {
+                console.error(error);
+                setStatus('Fehler beim Laden!', '#dc3545');
+            }
+        }
+
+        async function saveWikiToGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                alert("Bitte erst einen Token eingeben!");
+                openTokenModal();
+                return;
+            }
+
+            // Aktuellen Editor-Inhalt sichern falls editiert wird
+            if (isEditing) {
+                const page = wikiData.pages[wikiData.activePageId];
+                if (page) {
+                    page.content = document.getElementById('editor').innerHTML;
+                }
+            }
+
+            setStatus('Speichere auf GitHub...', '#2b5c8f');
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+            try {
+                const getRes = await fetch(apiUrl, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                
+                let currentSha = "";
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    currentSha = fileData.sha;
+                }
+
+                const jsonString = JSON.stringify(wikiData, null, 2);
+                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+                const bodyPayload = {
+                    message: "Wiki-Seiten via Web-App aktualisiert",
+                    content: contentBase64
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
+
+                const putRes = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (putRes.ok) {
+                    setStatus('Erfolgreich auf GitHub gespeichert!', '#28a745');
+                    if (isEditing) toggleEditMode();
+                } else {
+                    throw new Error("Fehler beim Commit");
+                }
+            } catch (err) {
+                console.error(err);
+                setStatus('Fehler beim Speichern!', '#dc3545');
+            }
+        }
 
         function renderTree() {
             const root = document.getElementById('tree-root');
@@ -233,7 +408,6 @@
             item.onclick = () => loadPage(page.id);
 
             item.innerHTML = `
-                <span class="tree-toggle ${page.children && page.children.length ? '' : 'empty'}">▼</span>
                 <span class="tree-title">${page.title}</span>
                 <div class="tree-actions">
                     <button class="btn-icon" onclick="event.stopPropagation(); deletePage('${page.id}')">🗑️</button>
@@ -266,7 +440,6 @@
             
             if (isEditing) toggleEditMode();
             renderTree();
-            saveDataToStorage();
         }
 
         function toggleEditMode() {
@@ -277,13 +450,13 @@
 
             editor.contentEditable = isEditing;
             toolbar.style.display = isEditing ? 'flex' : 'none';
-            btn.innerText = isEditing ? '💾 Speichern' : '✏️ Bearbeiten';
+            btn.innerText = isEditing ? '👁️ Vorschau' : '✏️ Bearbeiten';
 
             if (!isEditing) {
                 const page = wikiData.pages[wikiData.activePageId];
                 if (page) {
                     page.content = editor.innerHTML;
-                    saveDataToStorage();
+                    setStatus('Ungespeicherte Änderungen vorhanden', '#e67e22');
                 }
             }
         }
@@ -303,6 +476,7 @@
             const id = 'page_' + Date.now();
             wikiData.pages[id] = { id, title, content: `<h2>${title}</h2><p>Inhalt hier eingeben...</p>`, parentId: null, children: [] };
             loadPage(id);
+            setStatus('Neue Seite erstellt (noch nicht gespeichert)', '#e67e22');
         }
 
         function createNewSubPage() {
@@ -318,6 +492,7 @@
             parent.children.push(id);
 
             loadPage(id);
+            setStatus('Neue Unterseite erstellt (noch nicht gespeichert)', '#e67e22');
         }
 
         function deletePage(id) {
@@ -329,6 +504,7 @@
                 }
                 delete wikiData.pages[id];
                 loadPage('home');
+                setStatus('Seite gelöscht (noch nicht gespeichert)', '#e67e22');
             }
         }
 
@@ -360,34 +536,6 @@
                 });
             }
             resultsContainer.classList.add('active');
-        }
-
-        function saveDataToStorage() {
-            localStorage.setItem('wiki_data', JSON.stringify(wikiData));
-            document.getElementById('save-status').innerText = 'Gespeichert um ' + new Date().toLocaleTimeString();
-        }
-
-        function exportBackup() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(wikiData));
-            const anchor = document.createElement('a');
-            anchor.setAttribute("href", dataStr);
-            anchor.setAttribute("download", `wiki_backup.json`);
-            document.body.appendChild(anchor);
-            anchor.click();
-            anchor.remove();
-        }
-
-        function importBackup(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    wikiData = JSON.parse(e.target.result);
-                    saveDataToStorage();
-                    location.reload();
-                };
-                reader.readAsText(file);
-            }
         }
     </script>
 </body>
