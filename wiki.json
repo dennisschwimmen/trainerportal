@@ -1,1 +1,19 @@
-
+{
+  "activePageId": "page_1789475300014",
+  "pages": {
+    "home": {
+      "id": "home",
+      "title": "Startseite",
+      "content": "<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>",
+      "parentId": null,
+      "children": []
+    },
+    "page_1789475300014": {
+      "id": "page_1789475300014",
+      "title": "teest",
+      "content": "<h2>teest</h2><p>Inhalt hier eingeben...</p>",
+      "parentId": null,
+      "children": []
+    }
+  }
+}
