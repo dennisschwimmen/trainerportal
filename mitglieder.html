@@ -183,15 +183,23 @@
             .file-grid { grid-template-columns: 1fr; }
         }
 
+        /* Druck-Spezifische Stile für 1:1 Layout nach Screenshot */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
             #print-area { position: absolute; left: 0; top: 0; width: 100%; font-family: Arial, sans-serif; }
-            .print-card { display: flex; padding: 12px 0; border-bottom: 1px solid #000; page-break-inside: avoid; font-size: 13px; line-height: 1.4; }
+            .print-card { 
+                display: flex; 
+                padding: 12px 0; 
+                border-bottom: 1px solid #000; 
+                page-break-inside: avoid; 
+                font-size: 14px; 
+                line-height: 1.5; 
+            }
             .print-card:first-child { border-top: 1px solid #000; }
-            .print-num { width: 35px; font-weight: bold; font-size: 13px; }
-            .print-col1 { width: 48%; display: grid; grid-template-columns: 100px 1fr; }
-            .print-col2 { width: 48%; display: grid; grid-template-columns: 90px 1fr; }
+            .print-num { width: 40px; font-weight: bold; font-size: 14px; }
+            .print-col1 { width: 55%; display: grid; grid-template-columns: 100px 1fr; }
+            .print-col2 { width: 40%; display: grid; grid-template-columns: 110px 1fr; }
             .print-label { font-weight: normal; }
             .print-val { font-weight: normal; }
         }
@@ -286,6 +294,13 @@
                 <div class="form-grid">
                     <div class="field-group"><label>Vorname</label><input type="text" id="m-firstname" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Nachname</label><input type="text" id="m-lastname" onchange="updateMemberData()"></div>
+                    <div class="field-group"><label>Geschlecht</label>
+                        <select id="m-gender" onchange="updateMemberData()">
+                            <option value="männlich">männlich</option>
+                            <option value="weiblich">weiblich</option>
+                            <option value="divers">divers</option>
+                        </select>
+                    </div>
                     <div class="field-group"><label>Geburtsdatum</label><input type="date" id="m-dob" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Mitgliedsstatus</label>
                         <select id="m-status" onchange="updateMemberData()">
@@ -403,7 +418,7 @@
         const FILE_PATH = "mitglieder.json";
 
         let db = {
-            groups: ["U10 Wettkampf", "U14 Wettkampf", "Breitensport", "Masters"],
+            groups: ["Ballas / Schubert", "U10 Wettkampf", "U14 Wettkampf", "Breitensport", "Masters"],
             members: []
         };
 
@@ -495,11 +510,11 @@
                     const parsed = JSON.parse(jsonText);
                     if (parsed && Array.isArray(parsed.members)) {
                         db = parsed;
-                        // Abwärtskompatibilität: alte 'archived' Werte bereinigen
                         db.members.forEach(m => {
                             if (m.status === 'archived' || !m.status) {
                                 m.status = m.status === 'archived' ? 'Gekündigt' : 'Aktiv';
                             }
+                            if (!m.gender) m.gender = 'männlich';
                         });
                     }
                 }
@@ -581,26 +596,10 @@
             return Math.abs(ageDate.getUTCFullYear() - 1970);
         }
 
+        // Automatische Altersklasse als reine Zahl (Jahre) analog zum Screenshot
         function calculateAltersklasse(dobString) {
-            if (!dobString) return '-';
-            const dob = new Date(dobString);
-            if (isNaN(dob.getTime())) return '-';
-            
-            const currentYear = new Date().getFullYear();
-            const birthYear = dob.getFullYear();
-            const ageThisYear = currentYear - birthYear;
-
-            if (ageThisYear < 6) return 'Bambini';
-            if (ageThisYear === 6 || ageThisYear === 7) return 'Jugend F';
-            if (ageThisYear === 8 || ageThisYear === 9) return 'Jugend E';
-            if (ageThisYear === 10 || ageThisYear === 11) return 'Jugend D';
-            if (ageThisYear === 12 || ageThisYear === 13) return 'Jugend C';
-            if (ageThisYear === 14 || ageThisYear === 15) return 'Jugend B';
-            if (ageThisYear === 16 || ageThisYear === 17) return 'Jugend A';
-            if (ageThisYear >= 18 && ageThisYear <= 19) return 'Offene Klasse / AK 18';
-
-            const akStep = Math.floor(ageThisYear / 5) * 5;
-            return `AK ${akStep}`;
+            if (!dobString) return '';
+            return calculateAge(dobString);
         }
 
         function populateGroupDropdowns() {
@@ -649,7 +648,7 @@
                     case 'lastname_asc': return lnA.localeCompare(lnB) || fnA.localeCompare(fnB);
                     case 'lastname_desc': return lnB.localeCompare(lnA) || fnB.localeCompare(fnA);
                     case 'firstname_asc': return fnA.localeCompare(fnB) || lnA.localeCompare(lnB);
-                    case 'firstname_desc': return fnB.localeCompare(fnA) || lnB.localeCompare(lnA);
+                    case 'firstname_desc': return fnB.localeCompare(fnA) || lnB.localeCompare(fnA);
                     case 'age_asc': return ageA - ageB;
                     case 'age_desc': return ageB - ageA;
                     default: return 0;
@@ -670,13 +669,12 @@
                 const ln = m.lastname || '';
                 const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase();
                 const age = calculateAge(m.dob || m.birthdate);
-                const ak = calculateAltersklasse(m.dob || m.birthdate);
 
                 card.innerHTML = `
                     <div class="list-avatar">${initials || '👤'}</div>
                     <div class="list-info">
                         <div class="list-name">${fn} ${ln}</div>
-                        <div class="list-sub">${m.group || 'Keine Gruppe'} • ${ak} (${age} J.)</div>
+                        <div class="list-sub">${m.group || 'Keine Gruppe'} • AK ${age}</div>
                     </div>
                 `;
                 container.appendChild(card);
@@ -718,11 +716,11 @@
             document.getElementById('m-avatar').innerText = initials || '👤';
 
             const age = calculateAge(m.dob || m.birthdate);
-            const ak = calculateAltersklasse(m.dob || m.birthdate);
-            document.getElementById('m-age-display').innerText = `Alter: ${age} Jahre | Altersklasse: ${ak}`;
+            document.getElementById('m-age-display').innerText = `Alter: ${age} Jahre | Altersklasse: ${age}`;
 
             document.getElementById('m-firstname').value = m.firstname || '';
             document.getElementById('m-lastname').value = m.lastname || '';
+            document.getElementById('m-gender').value = m.gender || 'männlich';
             document.getElementById('m-dob').value = m.dob || m.birthdate || '';
             document.getElementById('m-status').value = m.status || 'Aktiv';
             document.getElementById('m-street').value = m.street || '';
@@ -747,6 +745,7 @@
 
             m.firstname = document.getElementById('m-firstname').value;
             m.lastname = document.getElementById('m-lastname').value;
+            m.gender = document.getElementById('m-gender').value;
             m.dob = document.getElementById('m-dob').value;
             m.status = document.getElementById('m-status').value;
             m.street = document.getElementById('m-street').value;
@@ -761,8 +760,7 @@
 
             document.getElementById('m-fullname').innerText = `${m.firstname} ${m.lastname}`;
             const age = calculateAge(m.dob);
-            const ak = calculateAltersklasse(m.dob);
-            document.getElementById('m-age-display').innerText = `Alter: ${age} Jahre | Altersklasse: ${ak}`;
+            document.getElementById('m-age-display').innerText = `Alter: ${age} Jahre | Altersklasse: ${age}`;
 
             renderMemberList();
             setStatus('Ungespeicherte Änderungen vorhanden', '#e67e22');
@@ -774,6 +772,7 @@
                 id: newId,
                 firstname: "Neues",
                 lastname: "Mitglied",
+                gender: "männlich",
                 street: "",
                 city: "",
                 dsvid: "",
@@ -951,7 +950,7 @@
             const groupVal = document.getElementById('export-group-select').value;
             const sortMode = document.getElementById('export-sort-select').value;
 
-            // Nur AKTIVE Mitglieder
+            // Nur AKTIVE Mitglieder auf dem Export
             let list = db.members.filter(m => (m.status || 'Aktiv') === 'Aktiv');
 
             if (groupVal !== 'ALL') {
@@ -990,6 +989,7 @@
             }
         }
 
+        // 1:1 Generierung des Layouts aus dem hochgeladenen Beispielbild
         function generatePDF(list) {
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = '';
@@ -999,23 +999,24 @@
                 card.className = 'print-card';
                 
                 const rawDob = m.dob || m.birthdate;
-                const dobFormatted = rawDob ? new Date(rawDob).toLocaleDateString('de-DE') : '-';
+                const dobFormatted = rawDob ? new Date(rawDob).toLocaleDateString('de-DE') : '';
                 const ak = calculateAltersklasse(rawDob);
-                const addressFormatted = [m.street, m.city].filter(Boolean).join(', ') || '-';
 
                 card.innerHTML = `
-                    <div class="print-num">${idx + 1}.</div>
+                    <div class="print-num">${idx + 1}</div>
                     <div class="print-col1">
-                        <span class="print-label">Name:</span><span class="print-val"><b>${m.lastname || ''}, ${m.firstname || ''}</b></span>
-                        <span class="print-label">Geburtsdatum:</span><span class="print-val">${dobFormatted}</span>
-                        <span class="print-label">Altersklasse:</span><span class="print-val"><b>${ak}</b></span>
-                        <span class="print-label">Wohnort:</span><span class="print-val">${addressFormatted}</span>
+                        <span class="print-label">Name:</span><span class="print-val">${m.lastname || ''}, ${m.firstname || ''}</span>
+                        <span class="print-label">Straße:</span><span class="print-val">${m.street || ''}</span>
+                        <span class="print-label">PLZ / Ort:</span><span class="print-val">${m.city || ''}</span>
+                        <span class="print-label">E-Mail:</span><span class="print-val">${m.email || ''}</span>
+                        <span class="print-label">Telefon:</span><span class="print-val">${m.phone || ''}</span>
+                        <span class="print-label">Gruppe:</span><span class="print-val">${m.group || ''}</span>
                     </div>
                     <div class="print-col2">
-                        <span class="print-label">Gruppe:</span><span class="print-val">${m.group || '-'}</span>
-                        <span class="print-label">Telefon:</span><span class="print-val">${m.phone || '-'}</span>
-                        <span class="print-label">E-Mail:</span><span class="print-val">${m.email || '-'}</span>
-                        <span class="print-label">DSV-ID:</span><span class="print-val">${m.dsvid || '-'}</span>
+                        <span class="print-label">Geschlecht:</span><span class="print-val">${m.gender || 'männlich'}</span>
+                        <span class="print-label">Geburtstag:</span><span class="print-val">${dobFormatted}</span>
+                        <span class="print-label">Altersklasse:</span><span class="print-val">${ak}</span>
+                        <span class="print-label">DSV ID:</span><span class="print-val">${m.dsvid || ''}</span>
                     </div>
                 `;
                 printArea.appendChild(card);
@@ -1025,11 +1026,12 @@
         }
 
         function generateCSV(list) {
-            let csv = "data:text/csv;charset=utf-8,Vorname;Nachname;Geburtsdatum;Altersklasse;Gruppe;Straße;PLZ_Ort;EMail;Telefon;DSV_ID\n";
+            let csv = "data:text/csv;charset=utf-8,Nachname;Vorname;Geschlecht;Straße;PLZ_Ort;EMail;Telefon;Gruppe;Geburtstag;Altersklasse;DSV_ID\n";
             list.forEach(m => {
                 const rawDob = m.dob || m.birthdate || '';
+                const dobFormatted = rawDob ? new Date(rawDob).toLocaleDateString('de-DE') : '';
                 const ak = calculateAltersklasse(rawDob);
-                csv += `${m.firstname || ''};${m.lastname || ''};${rawDob};${ak};${m.group || ''};${m.street || ''};${m.city || ''};${m.email || ''};${m.phone || ''};${m.dsvid || ''}\n`;
+                csv += `${m.lastname || ''};${m.firstname || ''};${m.gender || 'männlich'};${m.street || ''};${m.city || ''};${m.email || ''};${m.phone || ''};${m.group || ''};${dobFormatted};${ak};${m.dsvid || ''}\n`;
             });
             const encodedUri = encodeURI(csv);
             const link = document.createElement("a");
