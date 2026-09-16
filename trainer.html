@@ -29,6 +29,7 @@
             height: 100vh;
             background-color: var(--bg-content);
             overflow: hidden;
+            position: relative;
         }
 
         #sidebar {
@@ -40,6 +41,8 @@
             padding: 20px 15px;
             overflow-y: auto;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
         #sidebar h2 {
@@ -117,7 +120,6 @@
 
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 
-        /* Rechteckiger Wiki-Style Home-Button (Links positioniert) */
         .btn-home-wiki {
             display: inline-flex; align-items: center; gap: 6px;
             padding: 6px 12px; border-radius: 6px; background: #ffffff;
@@ -138,7 +140,7 @@
         .akte-avatar-large {
             width: 80px; height: 80px; border-radius: 50%; background: #cbd5e1;
             display: flex; align-items: center; justify-content: center; font-size: 2rem; color: #475569;
-            border: 2px solid var(--border-color);
+            border: 2px solid var(--border-color); flex-shrink: 0;
         }
         .akte-title-area h1 { font-size: 1.8rem; color: var(--primary); margin-bottom: 4px; }
         .akte-badges { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
@@ -159,17 +161,17 @@
         .license-alert-warning { background: #fef3c7; color: #92400e; border: 1px solid #fcd34d; }
         .license-alert-success { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
 
-        .akte-actions { display: flex; gap: 8px; }
+        .akte-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         .btn-akte-action {
             padding: 7px 12px; border: 1px solid var(--border-color); border-radius: 6px;
             background: white; cursor: pointer; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; gap: 6px;
         }
         .btn-akte-action:hover { background: #f8fafc; }
 
-        .akte-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; }
+        .akte-tabs { display: flex; gap: 10px; border-bottom: 2px solid var(--border-color); margin-bottom: 20px; overflow-x: auto; white-space: nowrap; }
         .akte-tab {
             padding: 10px 16px; font-weight: 600; font-size: 0.9rem; color: #64748b;
-            cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+            cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; flex-shrink: 0;
         }
         .akte-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
 
@@ -201,17 +203,46 @@
         .timeline-header { display: flex; justify-content: space-between; font-size: 0.75rem; color: #64748b; margin-bottom: 6px; }
         .timeline-body { font-size: 0.9rem; color: #334155; line-height: 1.4; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
 
-        /* Handlungsbedarf Tabelle */
+        .action-table-wrapper { overflow-x: auto; width: 100%; }
         .action-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
         .action-table th, .action-table td { border: 1px solid var(--border-color); padding: 10px; text-align: left; }
         .action-table th { background: #f1f5f9; color: var(--primary); font-weight: 600; }
 
+        .mobile-menu-btn {
+            display: none; background: var(--primary); color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; font-size: 1.1rem; cursor: pointer;
+        }
+        .sidebar-overlay {
+            display: none; position: fixed; top:0; left:0; width:100vw; height:100vh;
+            background: rgba(0,0,0,0.4); z-index: 999;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+            #sidebar {
+                position: fixed; top: 0; left: 0; bottom: 0;
+                transform: translateX(-100%); width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            #sidebar.mobile-open { transform: translateX(0); }
+            header { padding: 10px 15px; flex-wrap: wrap; gap: 10px; }
+            .header-left, .header-right { gap: 8px; width: 100%; justify-content: space-between; }
+            .breadcrumb { font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 180px; }
+            .akte-container { padding: 15px; }
+            .akte-header { flex-direction: column; gap: 15px; align-items: stretch; }
+            .akte-profile-summary { flex-direction: row; gap: 12px; }
+            .akte-avatar-large { width: 50px; height: 50px; font-size: 1.3rem; }
+            .akte-title-area h1 { font-size: 1.3rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .doc-grid { grid-template-columns: 1fr; }
+        }
+
         @media print {
-            #sidebar, header, .akte-actions, .akte-tabs, .btn-secondary, .btn-new-trainer, .btn-warning-action { display: none !important; }
+            #sidebar, header, .akte-actions, .akte-tabs, .btn-secondary, .btn-new-trainer, .btn-warning-action, .mobile-menu-btn { display: none !important; }
             body, #content-wrapper, main { background: white; height: auto !important; overflow: visible !important; }
             .tab-content { display: block !important; }
             .form-section { border: 1px solid #ccc !important; break-inside: avoid; }
@@ -220,6 +251,8 @@
     </style>
 </head>
 <body>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
     <div id="sidebar">
         <h2>Trainerportal</h2>
@@ -249,7 +282,7 @@
     <div id="content-wrapper">
         <header>
             <div class="header-left">
-                <!-- Wiki-Style Home Button links platziert -->
+                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menü öffnen">☰</button>
                 <a href="index.html" class="btn-home-wiki" title="Zurück zur Hauptseite">
                     🏠 <span>Home</span>
                 </a>
@@ -259,7 +292,7 @@
                 </div>
             </div>
             <div class="header-right">
-                <span id="save-status" style="color: #6c757d; font-size: 0.85rem; font-weight: 600;">Status: Bereit</span>
+                <span id="save-status" style="color: #6c757d; font-size: 0.8rem; font-weight: 600;">Status: Bereit</span>
                 <button class="btn-akte-action" onclick="window.print()">🖨️ Drucken / PDF</button>
             </div>
         </header>
@@ -277,19 +310,21 @@
             </div>
 
             <div class="form-section">
-                <table class="action-table">
-                    <thead>
-                        <tr>
-                            <th>Status</th>
-                            <th>Trainer Name</th>
-                            <th>Qualifikation</th>
-                            <th>Gültig bis</th>
-                            <th>Aktion</th>
-                        </tr>
-                    </thead>
-                    <tbody id="handlungsbedarf-table-body">
-                    </tbody>
-                </table>
+                <div class="action-table-wrapper">
+                    <table class="action-table">
+                        <thead>
+                            <tr>
+                                <th>Status</th>
+                                <th>Trainer Name</th>
+                                <th>Qualifikation</th>
+                                <th>Gültig bis</th>
+                                <th>Aktion</th>
+                            </tr>
+                        </thead>
+                        <tbody id="handlungsbedarf-table-body">
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -404,7 +439,7 @@
             <div id="tab-dokumente" class="tab-content">
                 <div class="form-section">
                     <h3>Dokumenten-Upload (Verträge, Urkunden, Führungszeugnis)</h3>
-                    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px;">
+                    <div style="display:flex; gap:10px; align-items:center; margin-bottom: 15px; flex-wrap:wrap;">
                         <input type="file" id="doc-upload-input" style="display:none" onchange="uploadTrainerDocument(event)">
                         <button class="btn-new-trainer" style="width:auto; margin:0;" onclick="document.getElementById('doc-upload-input').click()">➕ Dokument hochladen</button>
                     </div>
@@ -477,6 +512,11 @@
         };
 
         let currentTrainerId = null;
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
 
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
@@ -559,7 +599,6 @@
 
                 renderTrainerList();
                 
-                // Ersten Trainer laden, falls vorhanden
                 const activeTrainers = trainerData.trainers.filter(t => t.status !== 'archived');
                 if (activeTrainers.length > 0) {
                     loadTrainerAkte(activeTrainers[0].id);
@@ -680,7 +719,12 @@
             filtered.forEach(t => {
                 const card = document.createElement('div');
                 card.className = 'trainer-card' + (t.id === currentTrainerId ? ' active' : '');
-                card.onclick = () => loadTrainerAkte(t.id);
+                card.onclick = () => {
+                    loadTrainerAkte(t.id);
+                    if (window.innerWidth <= 768) {
+                        toggleMobileSidebar();
+                    }
+                };
 
                 const alertIcon = checkOverallTrainerAlert(t);
                 const fn = t.firstname || '';
@@ -753,6 +797,10 @@
 
             if (issueCount === 0) {
                 tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#166534; padding:20px;">🟢 Hervorragend! Es liegen derzeit keine abgelaufenen oder ablaufenden Lizenzen vor.</td></tr>`;
+            }
+
+            if (window.innerWidth <= 768) {
+                toggleMobileSidebar();
             }
 
             renderTrainerList();
