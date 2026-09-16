@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vereinsportal - Kalender</title>
+    <title>Vereinsportal - Terminkalender</title>
     <style>
         :root {
             --primary: #2b5c8f;
             --primary-hover: #1d4067;
             --accent: #4a90e2;
-            --bg-sidebar: #f4f6f9;
-            --bg-content: #ffffff;
+            --bg-body: #f8fafc;
+            --bg-card: #ffffff;
             --text-color: #333333;
-            --border-color: #e0e4e8;
+            --border-color: #cbd5e1;
             --success: #28a745;
             --danger: #dc3545;
             --warning: #e67e22;
@@ -24,87 +24,11 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             color: var(--text-color);
-            display: flex;
-            height: 100vh;
-            background-color: var(--bg-content);
-            overflow: hidden;
-        }
-
-        #sidebar {
-            width: 320px;
-            background-color: var(--bg-sidebar);
-            border-right: 1px solid var(--border-color);
+            background-color: var(--bg-body);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            padding: 15px 12px;
-            overflow-y: auto;
-            flex-shrink: 0;
-            transition: transform 0.3s ease;
-            z-index: 100;
         }
-
-        #sidebar h2 {
-            font-size: 1.1rem;
-            color: var(--primary);
-            margin-bottom: 10px;
-            padding-bottom: 6px;
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .btn-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
-
-        .btn {
-            width: 100%;
-            color: white;
-            border: none;
-            padding: 7px 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.78rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            text-align: center;
-            text-decoration: none;
-        }
-        .btn-primary { background-color: var(--primary); }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-success { background-color: var(--success); }
-        .btn-success:hover { background-color: #218838; }
-        .btn-danger { background-color: var(--danger); }
-        .btn-danger:hover { background-color: #c82333; }
-        .btn-secondary { background: #64748b; color: white; }
-
-        .upcoming-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            overflow-y: auto;
-            flex: 1;
-            margin-top: 10px;
-        }
-
-        .event-card {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            border-left: 4px solid var(--accent);
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-        .event-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .event-card .event-title { font-weight: bold; font-size: 0.82rem; color: #1e293b; margin-bottom: 2px; }
-        .event-card .event-date { font-size: 0.72rem; color: #64748b; font-weight: 600; margin-bottom: 2px; }
-        .event-card .event-desc { font-size: 0.75rem; color: #475569; }
-
-        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
         header {
             padding: 12px 20px;
@@ -112,52 +36,59 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background-color: #fafbfc;
+            background-color: var(--bg-card);
         }
         .header-left { display: flex; align-items: center; gap: 10px; }
         
-        .menu-toggle-btn {
-            display: none;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
-
         .home-btn {
             display: inline-flex; align-items: center; justify-content: center;
-            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
-            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
+            background: #ffffff; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 6px 12px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
             text-decoration: none; transition: all 0.2s;
         }
         .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
 
-        #calendar-main { flex: 1; display: flex; flex-direction: column; padding: 15px; overflow-y: auto; }
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* KALENDER OBERER BEREICH */
+        .calendar-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
         .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
         .calendar-nav { display: flex; align-items: center; gap: 10px; }
         .calendar-nav h1 { font-size: 1.2rem; color: var(--primary); min-width: 160px; text-align: center; }
         .btn-nav {
-            background: white; border: 1px solid var(--border-color); padding: 5px 10px;
+            background: white; border: 1px solid var(--border-color); padding: 5px 12px;
             border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
         }
         .btn-nav:hover { background: #f8fafc; }
 
-        /* EINHEITLICHES MONATSRASTER FOR DESKTOP & MOBILE */
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 1px;
             background: var(--border-color);
             border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 100%;
+            border-radius: 6px;
+            overflow: hidden;
         }
 
         .day-header {
-            background: #f8fafc;
+            background: #f1f5f9;
             padding: 6px 2px;
             text-align: center;
             font-weight: 600;
@@ -167,7 +98,7 @@
 
         .day-cell {
             background: white;
-            min-height: 85px;
+            min-height: 75px;
             padding: 4px;
             display: flex;
             flex-direction: column;
@@ -192,6 +123,78 @@
             cursor: pointer;
         }
 
+        /* AKTIONEN & BUTTONS UNTER DEM KALENDER */
+        .actions-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            background: var(--bg-card);
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .btn {
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        /* LISTE UNTER DEM KALENDER */
+        .upcoming-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .upcoming-section h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .upcoming-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .event-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            border-left: 4px solid var(--accent);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .event-card:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .event-card .event-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; margin-bottom: 2px; }
+        .event-card .event-date { font-size: 0.75rem; color: #64748b; font-weight: 600; margin-bottom: 4px; }
+        .event-card .event-desc { font-size: 0.78rem; color: #475569; }
+
+        /* MODALE FENSTER */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 8px; padding: 25px; width: 90%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
@@ -203,53 +206,29 @@
 
         #print-area { display: none; }
 
-        /* SMARTPHONE ANPASSUNG (OPTIMIERTES GRID OHNE VERDOPPLUNG) */
+        /* MOBIL ANPASSUNGEN */
         @media (max-width: 650px) {
-            body { flex-direction: column; position: relative; }
-            header { padding: 8px 12px; }
-            .menu-toggle-btn { display: block; }
-            .breadcrumb { display: none; }
-
-            #sidebar {
-                position: absolute; top: 48px; left: 0; width: 280px;
-                height: calc(100vh - 48px); transform: translateX(-100%);
-                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-            }
-            #sidebar.open { transform: translateX(0); }
-
-            #calendar-main { padding: 6px; }
+            .container { padding: 8px; gap: 12px; }
+            .calendar-card { padding: 8px; }
             .calendar-header { margin-bottom: 8px; }
             .calendar-nav h1 { font-size: 0.95rem; min-width: 110px; }
-            .btn-nav { padding: 4px 6px; font-size: 0.75rem; }
+            .btn-nav { padding: 4px 8px; font-size: 0.75rem; }
 
-            /* Kompaktes Grid für Mobilgeräte */
             .day-header { padding: 4px 1px; font-size: 0.68rem; }
-            
-            .day-cell {
-                min-height: 55px; /* Angenehme Höhe auf Handys */
-                padding: 2px;
-            }
+            .day-cell { min-height: 55px; padding: 2px; }
+            .day-number { font-size: 0.65rem; }
+            .cal-event-pill { font-size: 0.6rem; padding: 1px 2px; }
 
-            .day-number {
-                font-size: 0.65rem;
-            }
-
-            .cal-event-pill {
-                font-size: 0.6rem;
-                padding: 1px 2px;
-                border-radius: 2px;
-                line-height: 1.1;
-            }
+            .actions-bar { flex-direction: column; align-items: stretch; }
+            .btn { width: 100%; }
+            .upcoming-grid { grid-template-columns: 1fr; }
         }
 
-        /* DRUCK-STYLES */
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
             #print-area {
-                display: block !important;
-                position: absolute; left: 0; top: 0; width: 100%; padding: 20px;
-                background: white; color: black;
+                display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black;
             }
             .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
             .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
@@ -259,43 +238,20 @@
 </head>
 <body>
 
-    <div id="sidebar">
-        <h2>Kalenderverwaltung</h2>
-
-        <div class="btn-row">
-            <button class="btn btn-primary" onclick="openEventModal()">➕ Termin anlegen</button>
+    <header>
+        <div class="header-left">
+            <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+            <div id="breadcrumb" class="breadcrumb">Portal / <b>Terminkalender</b></div>
         </div>
-
-        <div class="btn-row">
-            <button class="btn btn-secondary" onclick="loadDataFromGitHub()">🔄 Laden</button>
-            <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
+        <div>
+            <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
         </div>
+    </header>
 
-        <div class="btn-row">
-            <button class="btn btn-secondary" style="background:#0284c7;" onclick="openExportModal()">📄 PDF Export</button>
-        </div>
-
-        <div class="btn-row" style="margin-bottom: 12px;">
-            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
-        </div>
-
-        <h2>Anstehende Termine</h2>
-        <div class="upcoming-list" id="upcoming-events-container"></div>
-    </div>
-
-    <div id="content-wrapper">
-        <header>
-            <div class="header-left">
-                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
-                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
-                <div id="breadcrumb" class="breadcrumb">Portal / <b>Terminkalender</b></div>
-            </div>
-            <div>
-                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
-            </div>
-        </header>
-
-        <div id="calendar-main">
+    <div class="container">
+        
+        <!-- OBERER BEREICH: KALENDER -->
+        <div class="calendar-card">
             <div class="calendar-header">
                 <div class="calendar-nav">
                     <button class="btn-nav" onclick="changeMonth(-1)">&lt;</button>
@@ -315,6 +271,22 @@
                 <div class="day-header">So</div>
             </div>
         </div>
+
+        <!-- STEUERUNGS-BUTTONS UNTER DEM KALENDER -->
+        <div class="actions-bar">
+            <button class="btn btn-primary" onclick="openEventModal()">➕ Termin anlegen</button>
+            <button class="btn btn-secondary" onclick="loadDataFromGitHub()">🔄 Laden</button>
+            <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
+            <button class="btn btn-secondary" style="background:#0284c7;" onclick="openExportModal()">📄 PDF Export</button>
+            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
+        </div>
+
+        <!-- UNTERER BEREICH: ANSTEHENDE TERMINE -->
+        <div class="upcoming-section">
+            <h2>Anstehende Termine</h2>
+            <div class="upcoming-grid" id="upcoming-events-container"></div>
+        </div>
+
     </div>
 
     <!-- TERMIN LISTE FÜR DEN DRUCK -->
@@ -454,10 +426,6 @@
         let currentDate = new Date();
         let portalData = { events: [] };
         let memberData = [];
-
-        function toggleSidebar() {
-            document.getElementById('sidebar').classList.toggle('open');
-        }
 
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
@@ -734,11 +702,11 @@
             const upcoming = sortedEvents.filter(e => (e.endDate || e.startDate) >= todayStr);
 
             if (upcoming.length === 0) {
-                container.innerHTML = '<div style="color:#94a3b8; font-size:0.8rem; text-align:center; padding:15px;">Keine anstehenden Termine</div>';
+                container.innerHTML = '<div style="color:#94a3b8; font-size:0.85rem; grid-column: 1/-1; text-align:center; padding:15px;">Keine anstehenden Termine</div>';
                 return;
             }
 
-            upcoming.slice(0, 15).forEach(evt => {
+            upcoming.slice(0, 12).forEach(evt => {
                 const card = document.createElement('div');
                 card.className = 'event-card';
                 card.style.borderLeftColor = evt.color || 'var(--primary)';
