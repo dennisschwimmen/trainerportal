@@ -24,7 +24,20 @@
       "attestExp": "2026-12-31",
       "street": "Thießen 28",
       "city": "06886 Wittenberg",
-      "dsvid": "268559"
+      "dsvid": "268559",
+      "gender": "männlich"
+    },
+    {
+      "id": "m_1789561666629",
+      "firstname": "Neues",
+      "lastname": "Mitglied",
+      "gender": "männlich",
+      "street": "",
+      "city": "",
+      "dsvid": "",
+      "status": "Aktiv",
+      "notes": [],
+      "files": []
     }
   ]
 }
