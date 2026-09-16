@@ -3,51 +3,189 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vereins-Portal - Übersicht</title>
+    <title>Trainerportal - Hauptübersicht</title>
     <style>
-        :root { --primary: #2b5c8f; --accent: #4a90e2; --bg: #f4f6f9; --border: #e0e4e8; }
+        :root {
+            --primary: #2b5c8f;
+            --primary-hover: #1d4067;
+            --accent: #4a90e2;
+            --bg-content: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #64748b;
+            --border-color: #e0e4e8;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); height: 100vh; display: flex; flex-direction: column; }
-        header { background: white; padding: 15px 30px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        h1 { color: var(--primary); font-size: 1.5rem; }
-        .dashboard { flex: 1; padding: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; max-width: 1000px; width: 100%; }
-        .card { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 30px; text-align: center; text-decoration: none; color: inherit; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card:hover { transform: translateY(-4px); border-color: var(--accent); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
-        .card .icon { font-size: 3rem; margin-bottom: 15px; }
-        .btn-sec { background: #6c757d; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-content);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 20px 40px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        header h1 {
+            color: var(--primary);
+            font-size: 1.8rem;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        main {
+            flex: 1;
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .portal-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 30px 25px;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: all 0.25s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: var(--primary);
+            transition: background 0.25s ease;
+        }
+
+        .portal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+
+        .portal-card:hover::before {
+            background: var(--accent);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            line-height: 1;
+        }
+
+        .card-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .card-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+        }
+
+        @media (max-width: 768px) {
+            header {
+                padding: 15px 20px;
+            }
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            main {
+                padding: 20px 15px;
+            }
+
+            .grid-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .portal-card {
+                padding: 20px 15px;
+            }
+        }
     </style>
 </head>
 <body>
+
     <header>
-        <h1>🏆 Vereins- & Trainer-Portal</h1>
-        <div>
-            <button class="btn-sec" onclick="exportBackup()">💾 Datensicherung</button>
-            <button class="btn-sec" onclick="document.getElementById('imp').click()">📂 Daten Importieren</button>
-            <input type="file" id="imp" style="display:none" onchange="importBackup(event)">
-        </div>
+        <h1>Digitales Vereinsportal</h1>
+        <p>Zentrale Verwaltung aller Vereinsbereiche</p>
     </header>
-    <div class="dashboard">
-        <div class="grid">
-            <a href="mitglieder.html" class="card"><div class="icon">👥</div><h3>Mitgliederverwaltung</h3><p>Mitgliederakten, Filter & Export</p></a>
-            <a href="kalender.html" class="card"><div class="icon">📅</div><h3>Vereinskalender</h3><p>Termine, Wettkämpfe & Training</p></a>
-            <a href="wiki.html" class="card"><div class="icon">📖</div><h3>Vereins-Wiki</h3><p>Wissen & Dokumentation</p></a>
-            <a href="trainer.html" class="card"><div class="icon">🪪</div><h3>Trainerarchiv</h3><p>Qualifikationen & Akten</p></a>
+
+    <main>
+        <div class="grid-container">
+            
+            <a href="trainer_2.html" class="portal-card">
+                <div class="card-icon">📋</div>
+                <div class="card-title">Trainerportal</div>
+                <div class="card-desc">Verwaltung von Trainerakten, Qualifikationen, Lizenzen und Nachweisen mit Ablaufwarnungen.</div>
+            </a>
+
+            <a href="mitglieder.html" class="portal-card">
+                <div class="card-icon">👥</div>
+                <div class="card-title">Mitgliederverwaltung</div>
+                <div class="card-desc">Stammdaten, Altersübersichten, Gruppenverwaltung, Atteste und PDF-Listenexporte.</div>
+            </a>
+
+            <a href="wiki.html" class="portal-card">
+                <div class="card-icon">📖</div>
+                <div class="card-title">Vereins-Wiki</div>
+                <div class="card-desc">Wissensdatenbank, Anleitungen, Dokumenten-Vorschau und interaktive Vorlagen.</div>
+            </a>
+
         </div>
-    </div>
-    <script>
-        function exportBackup() {
-            const data = localStorage.getItem('vereins_portal_db') || '{}';
-            const a = document.createElement('a');
-            a.href = "data:text/json;charset=utf-8," + encodeURIComponent(data);
-            a.download = `vereinsportal_backup.json`;
-            a.click();
-        }
-        function importBackup(e) {
-            const reader = new FileReader();
-            reader.onload = (ev) => { localStorage.setItem('vereins_portal_db', ev.target.result); alert('Daten importiert!'); location.reload(); };
-            reader.readAsText(e.target.files[0]);
-        }
-    </script>
+    </main>
+
+    <footer>
+        &copy; Vereinsverwaltung Digital
+    </footer>
+
 </body>
 </html>
