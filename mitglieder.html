@@ -183,11 +183,11 @@
             .file-grid { grid-template-columns: 1fr; }
         }
 
-        /* Druck-Spezifische Stile für genau 7 Einträge pro Seite */
+        /* Druck-Stile für genau 7 Einträge pro Seite (optimal ausbalanciert) */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 10mm 12mm;
+                margin: 12mm 12mm; /* Ausgewogener Rand */
             }
 
             body * { 
@@ -208,11 +208,11 @@
 
             .print-card { 
                 display: flex; 
-                padding: 5px 0; 
+                padding: 7px 0; /* Leicht erhöhter Innenabstand */
                 border-bottom: 1px solid #000; 
                 page-break-inside: avoid; 
-                font-size: 11px; 
-                line-height: 1.35; 
+                font-size: 11.5px; /* Etwas größere, gut lesbare Schrift */
+                line-height: 1.45; /* Luftigerer Zeilenabstand */
             }
 
             .print-card:first-child { 
@@ -222,7 +222,7 @@
             .print-num { 
                 width: 35px; 
                 font-weight: bold; 
-                font-size: 11px; 
+                font-size: 11.5px; 
             }
 
             .print-col1 { 
