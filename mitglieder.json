@@ -14,14 +14,17 @@
       "notes": [],
       "files": [],
       "dob": "2002-02-23",
-      "email": "",
-      "phone": "",
+      "email": "dennis.schwimmen@gmail.com",
+      "phone": "23423425252",
       "group": "Masters",
       "parentName": "",
       "parentPhone": "",
       "parentEmail": "",
-      "attestStatus": "nein",
-      "attestExp": ""
+      "attestStatus": "ja",
+      "attestExp": "2026-12-31",
+      "street": "Thießen 28",
+      "city": "06886 Wittenberg",
+      "dsvid": "268559"
     }
   ]
 }
