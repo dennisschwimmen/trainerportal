@@ -168,9 +168,15 @@
 
             #sidebar {
                 width: 100%;
-                max-height: 300px;
+                max-height: none;
                 border-right: none;
                 border-bottom: 1px solid var(--border-color);
+            }
+
+            .upcoming-list,
+            #sidebar h2:nth-of-type(2),
+            .btn-export-row {
+                display: none !important;
             }
 
             #content-wrapper {
@@ -205,6 +211,35 @@
                 padding: 1px 3px;
             }
         }
+
+        /* DRUCK-STYS FÜR PDF-EXPORT */
+        @media print {
+            #sidebar, header, .calendar-nav, .calendar-header button, .modal-overlay {
+                display: none !important;
+            }
+
+            body, #content-wrapper, #calendar-main {
+                height: auto !important;
+                overflow: visible !important;
+                padding: 0 !important;
+                background: white !important;
+            }
+
+            .calendar-grid {
+                border: 1px solid #000 !important;
+            }
+
+            .day-cell {
+                min-height: 100px !important;
+                border: 1px solid #ccc !important;
+            }
+
+            .cal-event-pill {
+                border: 1px solid #000;
+                color: #000 !important;
+                background: #f0f0f0 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -221,7 +256,7 @@
             <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
         </div>
 
-        <div class="btn-row">
+        <div class="btn-row btn-export-row">
             <button class="btn btn-secondary" style="background:#0284c7;" onclick="openExportModal()">📥 Exportieren</button>
         </div>
 
@@ -229,7 +264,7 @@
             <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
         </div>
 
-        <h2 style="margin-top: 10px; font-size: 0.95rem;">Anstehende Termine</h2>
+        <h2>Anstehende Termine</h2>
         <div class="upcoming-list" id="upcoming-events-container"></div>
     </div>
 
@@ -356,6 +391,7 @@
 
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
                 <button class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="closeExportModal()">Abbrechen</button>
+                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="runPdfExport()">🖨️ PDF Drucken</button>
                 <button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="runExport()">Download (.json)</button>
             </div>
         </div>
@@ -873,6 +909,13 @@
             downloadAnchor.remove();
 
             closeExportModal();
+        }
+
+        function runPdfExport() {
+            closeExportModal();
+            setTimeout(() => {
+                window.print();
+            }, 200);
         }
     </script>
 </body>
