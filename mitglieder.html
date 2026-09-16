@@ -183,25 +183,67 @@
             .file-grid { grid-template-columns: 1fr; }
         }
 
-        /* Druck-Spezifische Stile für 1:1 Layout nach Screenshot */
+        /* Druck-Spezifische Stile für genau 7 Einträge pro Seite */
         @media print {
-            body * { visibility: hidden; }
-            #print-area, #print-area * { visibility: visible; }
-            #print-area { position: absolute; left: 0; top: 0; width: 100%; font-family: Arial, sans-serif; }
+            @page {
+                size: A4 portrait;
+                margin: 10mm 12mm;
+            }
+
+            body * { 
+                visibility: hidden; 
+            }
+
+            #print-area, #print-area * { 
+                visibility: visible; 
+            }
+
+            #print-area { 
+                position: absolute; 
+                left: 0; 
+                top: 0; 
+                width: 100%; 
+                font-family: Arial, sans-serif; 
+            }
+
             .print-card { 
                 display: flex; 
-                padding: 12px 0; 
+                padding: 5px 0; 
                 border-bottom: 1px solid #000; 
                 page-break-inside: avoid; 
-                font-size: 14px; 
-                line-height: 1.5; 
+                font-size: 11px; 
+                line-height: 1.35; 
             }
-            .print-card:first-child { border-top: 1px solid #000; }
-            .print-num { width: 40px; font-weight: bold; font-size: 14px; }
-            .print-col1 { width: 55%; display: grid; grid-template-columns: 100px 1fr; }
-            .print-col2 { width: 40%; display: grid; grid-template-columns: 110px 1fr; }
-            .print-label { font-weight: normal; }
-            .print-val { font-weight: normal; }
+
+            .print-card:first-child { 
+                border-top: 1px solid #000; 
+            }
+
+            .print-num { 
+                width: 35px; 
+                font-weight: bold; 
+                font-size: 11px; 
+            }
+
+            .print-col1 { 
+                width: 55%; 
+                display: grid; 
+                grid-template-columns: 85px 1fr; 
+            }
+
+            .print-col2 { 
+                width: 40%; 
+                display: grid; 
+                grid-template-columns: 95px 1fr; 
+            }
+
+            .print-label { 
+                font-weight: normal; 
+            }
+
+            .print-val { 
+                font-weight: normal; 
+            }
         }
     </style>
 </head>
@@ -596,7 +638,6 @@
             return Math.abs(ageDate.getUTCFullYear() - 1970);
         }
 
-        // Automatische Altersklasse als reine Zahl (Jahre) analog zum Screenshot
         function calculateAltersklasse(dobString) {
             if (!dobString) return '';
             return calculateAge(dobString);
@@ -648,7 +689,7 @@
                     case 'lastname_asc': return lnA.localeCompare(lnB) || fnA.localeCompare(fnB);
                     case 'lastname_desc': return lnB.localeCompare(lnA) || fnB.localeCompare(fnA);
                     case 'firstname_asc': return fnA.localeCompare(fnB) || lnA.localeCompare(lnB);
-                    case 'firstname_desc': return fnB.localeCompare(fnA) || lnB.localeCompare(fnA);
+                    case 'firstname_desc': return fnB.localeCompare(fnA) || lnA.localeCompare(lnB);
                     case 'age_asc': return ageA - ageB;
                     case 'age_desc': return ageB - ageA;
                     default: return 0;
@@ -950,7 +991,6 @@
             const groupVal = document.getElementById('export-group-select').value;
             const sortMode = document.getElementById('export-sort-select').value;
 
-            // Nur AKTIVE Mitglieder auf dem Export
             let list = db.members.filter(m => (m.status || 'Aktiv') === 'Aktiv');
 
             if (groupVal !== 'ALL') {
@@ -989,7 +1029,6 @@
             }
         }
 
-        // 1:1 Generierung des Layouts aus dem hochgeladenen Beispielbild
         function generatePDF(list) {
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = '';
