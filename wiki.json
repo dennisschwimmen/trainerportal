@@ -4,7 +4,7 @@
     "home": {
       "id": "home",
       "title": "Startseite",
-      "content": "<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p>",
+      "content": "<h2>Willkommen im Vereins-Wiki</h2><p>Hier finden Sie alle Dokumente und Anleitungen.</p><p><br></p><p><br></p><p>Test</p>",
       "parentId": null,
       "children": [],
       "collapsed": false
