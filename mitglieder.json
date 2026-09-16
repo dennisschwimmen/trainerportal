@@ -37,7 +37,13 @@
       "dsvid": "",
       "status": "Aktiv",
       "notes": [],
-      "files": []
+      "files": [],
+      "dob": "",
+      "email": "",
+      "phone": "",
+      "group": "",
+      "attestStatus": "nicht_benoetigt",
+      "attestExp": ""
     }
   ]
 }
