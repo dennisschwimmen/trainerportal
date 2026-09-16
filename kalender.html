@@ -39,6 +39,8 @@
             padding: 15px 12px;
             overflow-y: auto;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
         }
 
         #sidebar h2 {
@@ -105,14 +107,25 @@
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 
         header {
-            padding: 12px 30px;
+            padding: 12px 20px;
             border-bottom: 1px solid var(--border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background-color: #fafbfc;
         }
-        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        
+        .menu-toggle-btn {
+            display: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
         .home-btn {
             display: inline-flex; align-items: center; justify-content: center;
             background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
@@ -158,41 +171,36 @@
             padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
         }
 
-        /* MOBILE ANPASSUNGEN */
+        /* DRUCK-CONTAINER VERSTECKT FÜR NORMALEN BROWSER */
+        #print-area { display: none; }
+
+        /* MOBILE ANPASSUNGEN & BURGER MENÜ */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
-                height: auto;
-                overflow: auto;
+                position: relative;
+            }
+
+            .menu-toggle-btn {
+                display: block;
             }
 
             #sidebar {
-                width: 100%;
-                max-height: none;
-                border-right: none;
-                border-bottom: 1px solid var(--border-color);
+                position: absolute;
+                top: 50px;
+                left: 0;
+                width: 280px;
+                height: calc(100vh - 50px);
+                transform: translateX(-100%);
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             }
 
-            .upcoming-list,
-            #sidebar h2:nth-of-type(2),
-            .btn-export-row {
-                display: none !important;
-            }
-
-            #content-wrapper {
-                overflow: visible;
-            }
-
-            header {
-                padding: 10px 15px;
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
+            #sidebar.open {
+                transform: translateX(0);
             }
 
             #calendar-main {
-                padding: 15px 10px;
-                overflow: visible;
+                padding: 10px;
             }
 
             .calendar-header {
@@ -203,7 +211,6 @@
             .day-cell {
                 min-height: 50px;
                 padding: 2px;
-                font-size: 0.7rem;
             }
 
             .cal-event-pill {
@@ -212,32 +219,37 @@
             }
         }
 
-        /* DRUCK-STYS FÜR PDF-EXPORT */
+        /* DRUCK-STYLES (PDF EXPORT LISTE) */
         @media print {
-            #sidebar, header, .calendar-nav, .calendar-header button, .modal-overlay {
-                display: none !important;
+            body * {
+                visibility: hidden;
             }
-
-            body, #content-wrapper, #calendar-main {
-                height: auto !important;
-                overflow: visible !important;
-                padding: 0 !important;
-                background: white !important;
+            #print-area, #print-area * {
+                visibility: visible;
             }
-
-            .calendar-grid {
-                border: 1px solid #000 !important;
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                padding: 20px;
+                background: white;
+                color: black;
             }
-
-            .day-cell {
-                min-height: 100px !important;
-                border: 1px solid #ccc !important;
+            .print-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
             }
-
-            .cal-event-pill {
-                border: 1px solid #000;
-                color: #000 !important;
-                background: #f0f0f0 !important;
+            .print-table th, .print-table td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+                font-size: 12px;
+            }
+            .print-table th {
+                background-color: #f2f2f2;
             }
         }
     </style>
@@ -256,8 +268,8 @@
             <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
         </div>
 
-        <div class="btn-row btn-export-row">
-            <button class="btn btn-secondary" style="background:#0284c7;" onclick="openExportModal()">📥 Exportieren</button>
+        <div class="btn-row">
+            <button class="btn btn-secondary" style="background:#0284c7;" onclick="openExportModal()">📄 PDF Export</button>
         </div>
 
         <div class="btn-row" style="margin-bottom: 12px;">
@@ -271,6 +283,7 @@
     <div id="content-wrapper">
         <header>
             <div class="header-left">
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
                 <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
                 <div id="breadcrumb" class="breadcrumb">Portal / <b>Terminkalender</b></div>
             </div>
@@ -299,6 +312,22 @@
                 <div class="day-header">So</div>
             </div>
         </div>
+    </div>
+
+    <!-- TERMIN LISTE FÜR DEN DRUCK -->
+    <div id="print-area">
+        <h2 id="print-title">Terminübersicht</h2>
+        <p id="print-subtitle" style="font-size: 12px; color: #666; margin-bottom: 10px;"></p>
+        <table class="print-table">
+            <thead>
+                <tr>
+                    <th>Datum</th>
+                    <th>Titel</th>
+                    <th>Beschreibung</th>
+                </tr>
+            </thead>
+            <tbody id="print-table-body"></tbody>
+        </table>
     </div>
 
     <!-- MODAL TERMIN ANLEGEN / BEARBEITEN -->
@@ -368,7 +397,7 @@
     <!-- MODAL EXPORT -->
     <div id="export-modal" class="modal-overlay">
         <div class="modal">
-            <h3 style="margin-bottom:15px; color:var(--primary);">📅 Kalender exportieren</h3>
+            <h3 style="margin-bottom:15px; color:var(--primary);">📄 Terminliste als PDF</h3>
             
             <div class="field-group">
                 <label>Export-Umfang</label>
@@ -391,8 +420,7 @@
 
             <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:15px;">
                 <button class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="closeExportModal()">Abbrechen</button>
-                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="runPdfExport()">🖨️ PDF Drucken</button>
-                <button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="runExport()">Download (.json)</button>
+                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="runPdfExport()">📄 PDF / Drucken</button>
             </div>
         </div>
     </div>
@@ -423,6 +451,10 @@
         let currentDate = new Date();
         let portalData = { events: [] };
         let memberData = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
 
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
@@ -874,15 +906,21 @@
             document.getElementById('export-modal').classList.remove('active');
         }
 
-        function runExport() {
+        function formatDateDE(dateStr) {
+            if(!dateStr) return '';
+            const p = dateStr.split('-');
+            return `${p[2]}.${p[1]}.${p[0]}`;
+        }
+
+        function runPdfExport() {
             const exportType = document.getElementById('export-type').value;
             const startDate = document.getElementById('export-start').value;
             const endDate = document.getElementById('export-end').value;
 
             let dataToExport = [];
+            const currentYear = currentDate.getFullYear();
 
             if (exportType === 'all_with_birthdays') {
-                const currentYear = currentDate.getFullYear();
                 dataToExport = getAllEventsForYear(currentYear);
             } else {
                 dataToExport = [...portalData.events];
@@ -900,19 +938,33 @@
                 return;
             }
 
-            const jsonString = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
-            const downloadAnchor = document.createElement('a');
-            downloadAnchor.setAttribute("href", jsonString);
-            downloadAnchor.setAttribute("download", `kalender_export_${new Date().toISOString().split('T')[0]}.json`);
-            document.body.appendChild(downloadAnchor);
-            downloadAnchor.click();
-            downloadAnchor.remove();
+            dataToExport.sort((a,b) => new Date(a.startDate) - new Date(b.startDate));
+
+            const printTbody = document.getElementById('print-table-body');
+            printTbody.innerHTML = '';
+
+            dataToExport.forEach(e => {
+                const tr = document.createElement('tr');
+                let dDisplay = formatDateDE(e.startDate);
+                if(e.endDate && e.endDate !== e.startDate) {
+                    dDisplay += ` - ${formatDateDE(e.endDate)}`;
+                }
+                tr.innerHTML = `
+                    <td style="white-space:nowrap; font-weight:bold;">${dDisplay}</td>
+                    <td>${e.title}</td>
+                    <td>${e.desc || ''}</td>
+                `;
+                printTbody.appendChild(tr);
+            });
+
+            let sub = "Erstellt am " + new Date().toLocaleDateString('de-DE');
+            if(startDate || endDate) {
+                sub += ` | Zeitraum: ${startDate ? formatDateDE(startDate) : 'Anfang'} bis ${endDate ? formatDateDE(endDate) : 'Ende'}`;
+            }
+            document.getElementById('print-subtitle').innerText = sub;
 
             closeExportModal();
-        }
 
-        function runPdfExport() {
-            closeExportModal();
             setTimeout(() => {
                 window.print();
             }, 200);
