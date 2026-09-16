@@ -104,7 +104,7 @@
         .event-card .event-date { font-size: 0.72rem; color: #64748b; font-weight: 600; margin-bottom: 2px; }
         .event-card .event-desc { font-size: 0.75rem; color: #475569; }
 
-        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
         header {
             padding: 12px 20px;
@@ -148,49 +148,56 @@
         .calendar-grid {
             display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px;
             background: var(--border-color); border: 1px solid var(--border-color);
-            border-radius: 8px; overflow: hidden; flex: 1;
+            border-radius: 8px; overflow: hidden; flex: 1; width: 100%;
         }
-        .day-header { background: #f8fafc; padding: 8px; text-align: center; font-weight: 600; font-size: 0.8rem; color: #475569; }
-        .day-cell { background: white; min-height: 90px; padding: 6px; display: flex; flex-direction: column; gap: 4px; overflow-y: auto; }
+        .day-header { background: #f8fafc; padding: 8px 2px; text-align: center; font-weight: 600; font-size: 0.8rem; color: #475569; }
+        .day-cell { background: white; min-height: 90px; padding: 4px; display: flex; flex-direction: column; gap: 2px; overflow-y: auto; }
         .day-cell.other-month { background: #fafafa; opacity: 0.5; }
         .day-cell.today { background: #f0f7ff; }
         .day-number { font-size: 0.75rem; font-weight: bold; color: #64748b; margin-bottom: 2px; }
         .day-cell.today .day-number { color: var(--accent); }
 
         .cal-event-pill {
-            font-size: 0.72rem; padding: 2px 5px; border-radius: 4px; color: white;
+            font-size: 0.72rem; padding: 2px 4px; border-radius: 3px; color: white;
             font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
         }
 
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
         .modal-overlay.active { display: flex; }
-        .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 90%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
         .field-group input, .field-group select, .field-group textarea {
             padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
         }
 
-        /* DRUCK-CONTAINER VERSTECKT FÜR NORMALEN BROWSER */
         #print-area { display: none; }
 
-        /* MOBILE ANPASSUNGEN & BURGER MENÜ */
+        /* MOBILE OPTIMIERUNG */
         @media (max-width: 768px) {
             body {
                 flex-direction: column;
                 position: relative;
             }
 
+            header {
+                padding: 8px 12px;
+            }
+
             .menu-toggle-btn {
                 display: block;
             }
 
+            .breadcrumb {
+                display: none;
+            }
+
             #sidebar {
                 position: absolute;
-                top: 50px;
+                top: 48px;
                 left: 0;
                 width: 280px;
-                height: calc(100vh - 50px);
+                height: calc(100vh - 48px);
                 transform: translateX(-100%);
                 box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             }
@@ -200,57 +207,58 @@
             }
 
             #calendar-main {
-                padding: 10px;
+                padding: 6px;
             }
 
             .calendar-header {
-                flex-direction: column;
-                gap: 10px;
+                margin-bottom: 8px;
+            }
+
+            .calendar-nav h1 {
+                font-size: 1rem;
+                min-width: 120px;
+            }
+
+            .btn-nav {
+                padding: 4px 8px;
+                font-size: 0.8rem;
+            }
+
+            .day-header {
+                padding: 4px 0;
+                font-size: 0.7rem;
             }
 
             .day-cell {
-                min-height: 50px;
+                min-height: 38px;
                 padding: 2px;
             }
 
+            .day-number {
+                font-size: 0.65rem;
+                margin-bottom: 1px;
+            }
+
             .cal-event-pill {
-                font-size: 0.6rem;
-                padding: 1px 3px;
+                font-size: 0.55rem;
+                padding: 1px 2px;
+                border-radius: 2px;
+                line-height: 1.1;
             }
         }
 
-        /* DRUCK-STYLES (PDF EXPORT LISTE) */
+        /* DRUCK-STYLES */
         @media print {
-            body * {
-                visibility: hidden;
-            }
-            #print-area, #print-area * {
-                visibility: visible;
-            }
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
             #print-area {
                 display: block !important;
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                padding: 20px;
-                background: white;
-                color: black;
+                position: absolute; left: 0; top: 0; width: 100%; padding: 20px;
+                background: white; color: black;
             }
-            .print-table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 15px;
-            }
-            .print-table th, .print-table td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-                font-size: 12px;
-            }
-            .print-table th {
-                background-color: #f2f2f2;
-            }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .print-table th, .print-table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+            .print-table th { background-color: #f2f2f2; }
         }
     </style>
 </head>
@@ -288,7 +296,7 @@
                 <div id="breadcrumb" class="breadcrumb">Portal / <b>Terminkalender</b></div>
             </div>
             <div>
-                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.85rem;">Status: Bereit</span>
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
             </div>
         </header>
 
@@ -895,7 +903,6 @@
             }
         }
 
-        // EXPORT-FUNKTIONEN
         function openExportModal() {
             document.getElementById('export-start').value = '';
             document.getElementById('export-end').value = '';
