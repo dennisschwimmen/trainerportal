@@ -190,7 +190,7 @@
             .print-card { display: flex; padding: 15px 0; border-bottom: 1px solid #000; page-break-inside: avoid; font-size: 13px; line-height: 1.5; }
             .print-card:first-child { border-top: 1px solid #000; }
             .print-num { width: 40px; font-weight: bold; font-size: 14px; }
-            .print-col1 { width: 45%; display: grid; grid-template-columns: 80px 1fr; }
+            .print-col1 { width: 45%; display: grid; grid-template-columns: 90px 1fr; }
             .print-col2 { width: 45%; display: grid; grid-template-columns: 90px 1fr; }
             .print-label { font-weight: normal; }
             .print-val { font-weight: normal; }
@@ -286,18 +286,12 @@
                     <div class="field-group"><label>Vorname</label><input type="text" id="m-firstname" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Nachname</label><input type="text" id="m-lastname" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Geburtsdatum</label><input type="date" id="m-dob" onchange="updateMemberData()"></div>
+                    <div class="field-group"><label>Straße</label><input type="text" id="m-street" onchange="updateMemberData()"></div>
+                    <div class="field-group"><label>PLZ / Ort</label><input type="text" id="m-city" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>E-Mail Adresse</label><input type="email" id="m-email" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Telefon / Mobil</label><input type="text" id="m-phone" onchange="updateMemberData()"></div>
+                    <div class="field-group"><label>DSV-ID</label><input type="text" id="m-dsvid" placeholder="z. B. 123456" onchange="updateMemberData()"></div>
                     <div class="field-group"><label>Gruppe / Team</label><select id="m-group-select" onchange="updateMemberData()"></select></div>
-                </div>
-            </div>
-
-            <div class="form-section">
-                <h3>Erziehungsberechtigte (bei Minderjährigen)</h3>
-                <div class="form-grid">
-                    <div class="field-group"><label>Name Erziehungsberechtigte/r</label><input type="text" id="m-parent-name" onchange="updateMemberData()"></div>
-                    <div class="field-group"><label>Telefon Erziehungsberechtigte/r</label><input type="text" id="m-parent-phone" onchange="updateMemberData()"></div>
-                    <div class="field-group"><label>E-Mail Erziehungsberechtigte/r</label><input type="email" id="m-parent-email" onchange="updateMemberData()"></div>
                 </div>
             </div>
 
@@ -554,6 +548,7 @@
         function calculateAge(dobString) {
             if (!dobString) return 0;
             const dob = new Date(dobString);
+            if (isNaN(dob.getTime())) return 0;
             const diff = Date.now() - dob.getTime();
             const ageDate = new Date(diff);
             return Math.abs(ageDate.getUTCFullYear() - 1970);
@@ -599,11 +594,11 @@
                 const lnA = (a.lastname || '').toLowerCase();
                 const fnB = (b.firstname || '').toLowerCase();
                 const lnB = (b.lastname || '').toLowerCase();
-                const ageA = calculateAge(a.dob);
-                const ageB = calculateAge(b.dob);
+                const ageA = calculateAge(a.dob || a.birthdate);
+                const ageB = calculateAge(b.dob || b.birthdate);
 
                 switch (currentSort) {
-                    case 'lastname_asc': return lnA.localeCompare(lnA) || fnA.localeCompare(fnB);
+                    case 'lastname_asc': return lnA.localeCompare(lnB) || fnA.localeCompare(fnB);
                     case 'lastname_desc': return lnB.localeCompare(lnA) || fnB.localeCompare(fnA);
                     case 'firstname_asc': return fnA.localeCompare(fnB) || lnA.localeCompare(lnB);
                     case 'firstname_desc': return fnB.localeCompare(fnA) || lnB.localeCompare(lnA);
@@ -626,7 +621,7 @@
                 const fn = m.firstname || '';
                 const ln = m.lastname || '';
                 const initials = ((fn[0] || '') + (ln[0] || '')).toUpperCase();
-                const age = calculateAge(m.dob);
+                const age = calculateAge(m.dob || m.birthdate);
 
                 card.innerHTML = `
                     <div class="list-avatar">${initials || '👤'}</div>
@@ -673,21 +668,20 @@
             const initials = ((m.firstname?.[0] || '') + (m.lastname?.[0] || '')).toUpperCase();
             document.getElementById('m-avatar').innerText = initials || '👤';
 
-            const age = calculateAge(m.dob);
+            const age = calculateAge(m.dob || m.birthdate);
             document.getElementById('m-age-display').innerText = `Alter: ${age} Jahre`;
 
             document.getElementById('btn-archive-member').innerText = m.status === 'archived' ? '📂 Reaktivieren' : '📦 Ins Archiv';
 
             document.getElementById('m-firstname').value = m.firstname || '';
             document.getElementById('m-lastname').value = m.lastname || '';
-            document.getElementById('m-dob').value = m.dob || '';
+            document.getElementById('m-dob').value = m.dob || m.birthdate || '';
+            document.getElementById('m-street').value = m.street || '';
+            document.getElementById('m-city').value = m.city || '';
             document.getElementById('m-email').value = m.email || '';
             document.getElementById('m-phone').value = m.phone || '';
+            document.getElementById('m-dsvid').value = m.dsvid || '';
             document.getElementById('m-group-select').value = m.group || '';
-
-            document.getElementById('m-parent-name').value = m.parentName || '';
-            document.getElementById('m-parent-phone').value = m.parentPhone || '';
-            document.getElementById('m-parent-email').value = m.parentEmail || '';
 
             document.getElementById('m-attest-status').value = m.attestStatus || 'nein';
             document.getElementById('m-attest-exp').value = m.attestExp || '';
@@ -705,13 +699,12 @@
             m.firstname = document.getElementById('m-firstname').value;
             m.lastname = document.getElementById('m-lastname').value;
             m.dob = document.getElementById('m-dob').value;
+            m.street = document.getElementById('m-street').value;
+            m.city = document.getElementById('m-city').value;
             m.email = document.getElementById('m-email').value;
             m.phone = document.getElementById('m-phone').value;
+            m.dsvid = document.getElementById('m-dsvid').value;
             m.group = document.getElementById('m-group-select').value;
-
-            m.parentName = document.getElementById('m-parent-name').value;
-            m.parentPhone = document.getElementById('m-parent-phone').value;
-            m.parentEmail = document.getElementById('m-parent-email').value;
 
             m.attestStatus = document.getElementById('m-attest-status').value;
             m.attestExp = document.getElementById('m-attest-exp').value;
@@ -730,6 +723,9 @@
                 id: newId,
                 firstname: "Neues",
                 lastname: "Mitglied",
+                street: "",
+                city: "",
+                dsvid: "",
                 status: "active",
                 notes: [],
                 files: []
@@ -905,22 +901,22 @@
                 const card = document.createElement('div');
                 card.className = 'print-card';
                 
-                const dobFormatted = m.dob ? new Date(m.dob).toLocaleDateString('de-DE') : '-';
-                const attestFormatted = m.attestExp ? new Date(m.attestExp).toLocaleDateString('de-DE') : '-';
+                const rawDob = m.dob || m.birthdate;
+                const dobFormatted = rawDob ? new Date(rawDob).toLocaleDateString('de-DE') : '-';
+                const addressFormatted = [m.street, m.city].filter(Boolean).join(', ') || '-';
 
                 card.innerHTML = `
                     <div class="print-num">${idx + 1}.</div>
                     <div class="print-col1">
                         <span class="print-label">Name:</span><span class="print-val"><b>${m.lastname || ''}, ${m.firstname || ''}</b></span>
                         <span class="print-label">Geburtsdatum:</span><span class="print-val">${dobFormatted}</span>
+                        <span class="print-label">Wohnort:</span><span class="print-val">${addressFormatted}</span>
                         <span class="print-label">Gruppe:</span><span class="print-val">${m.group || '-'}</span>
-                        <span class="print-label">Attest bis:</span><span class="print-val">${attestFormatted}</span>
                     </div>
                     <div class="print-col2">
                         <span class="print-label">Telefon:</span><span class="print-val">${m.phone || '-'}</span>
                         <span class="print-label">E-Mail:</span><span class="print-val">${m.email || '-'}</span>
-                        <span class="print-label">Eltern Name:</span><span class="print-val">${m.parentName || '-'}</span>
-                        <span class="print-label">Eltern Tel:</span><span class="print-val">${m.parentPhone || '-'}</span>
+                        <span class="print-label">DSV-ID:</span><span class="print-val">${m.dsvid || '-'}</span>
                     </div>
                 `;
                 printArea.appendChild(card);
@@ -930,9 +926,9 @@
         }
 
         function exportToCSV() {
-            let csv = "data:text/csv;charset=utf-8,Vorname;Nachname;Geburtsdatum;Gruppe;EMail;Telefon;ElternName;ElternTelefon;AttestStatus;AttestGueltigBis\n";
+            let csv = "data:text/csv;charset=utf-8,Vorname;Nachname;Geburtsdatum;Straße;PLZ_Ort;Gruppe;EMail;Telefon;DSV_ID;Status\n";
             db.members.forEach(m => {
-                csv += `${m.firstname || ''};${m.lastname || ''};${m.dob || ''};${m.group || ''};${m.email || ''};${m.phone || ''};${m.parentName || ''};${m.parentPhone || ''};${m.attestStatus || ''};${m.attestExp || ''}\n`;
+                csv += `${m.firstname || ''};${m.lastname || ''};${m.dob || m.birthdate || ''};${m.street || ''};${m.city || ''};${m.group || ''};${m.email || ''};${m.phone || ''};${m.dsvid || ''};${m.status || ''}\n`;
             });
             const encodedUri = encodeURI(csv);
             const link = document.createElement("a");
