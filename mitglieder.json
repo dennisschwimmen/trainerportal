@@ -1,0 +1,27 @@
+{
+  "groups": [
+    "U10 Wettkampf",
+    "U14 Wettkampf",
+    "Breitensport",
+    "Masters"
+  ],
+  "members": [
+    {
+      "id": "m_1789557543766",
+      "firstname": "Dennis",
+      "lastname": "Schemmel",
+      "status": "active",
+      "notes": [],
+      "files": [],
+      "dob": "2002-02-23",
+      "email": "",
+      "phone": "",
+      "group": "",
+      "parentName": "",
+      "parentPhone": "",
+      "parentEmail": "",
+      "attestStatus": "nein",
+      "attestExp": ""
+    }
+  ]
+}
