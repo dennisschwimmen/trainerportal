@@ -183,11 +183,11 @@
             .file-grid { grid-template-columns: 1fr; }
         }
 
-        /* Druck-Stile für genau 7 Einträge pro Seite (optimal ausbalanciert) */
+        /* Präzises Layout für genau 7 Einträge pro Seite ohne großen Freiraum */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 12mm 12mm; /* Ausgewogener Rand */
+                margin: 12mm 12mm 10mm 12mm;
             }
 
             body * { 
@@ -208,11 +208,18 @@
 
             .print-card { 
                 display: flex; 
-                padding: 7px 0; /* Leicht erhöhter Innenabstand */
+                /* Dynamischer Abstand, der den Platz der Seite gleichmäßig füllt */
+                padding: 12px 0; 
                 border-bottom: 1px solid #000; 
                 page-break-inside: avoid; 
-                font-size: 11.5px; /* Etwas größere, gut lesbare Schrift */
-                line-height: 1.45; /* Luftigerer Zeilenabstand */
+                font-size: 12px; /* Gut lesbare, größere Schrift */
+                line-height: 1.5; /* Luftiger Zeilenabstand */
+            }
+
+            /* Steuert gezielt, dass nach jedem 7. Eintrag ein Harter Seitenumbruch erfolgt */
+            .print-card:nth-child(7n) {
+                page-break-after: always;
+                break-after: page;
             }
 
             .print-card:first-child { 
@@ -222,19 +229,19 @@
             .print-num { 
                 width: 35px; 
                 font-weight: bold; 
-                font-size: 11.5px; 
+                font-size: 12px; 
             }
 
             .print-col1 { 
                 width: 55%; 
                 display: grid; 
-                grid-template-columns: 85px 1fr; 
+                grid-template-columns: 90px 1fr; 
             }
 
             .print-col2 { 
                 width: 40%; 
                 display: grid; 
-                grid-template-columns: 95px 1fr; 
+                grid-template-columns: 100px 1fr; 
             }
 
             .print-label { 
