@@ -30,6 +30,7 @@
             height: 100vh;
             background-color: var(--bg-content);
             overflow: hidden;
+            position: relative;
         }
 
         #sidebar {
@@ -41,6 +42,8 @@
             padding: 15px 12px;
             overflow-y: auto;
             flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 1000;
         }
 
         #sidebar h2 {
@@ -166,18 +169,18 @@
             margin: 8px 0;
         }
 
-        .wiki-table-container { position: relative; margin: 20px 0; display: inline-block; max-width: 100%; }
+        .wiki-table-container { position: relative; margin: 20px 0; display: block; max-width: 100%; overflow-x: auto; }
         #editor table { width: 100%; border-collapse: collapse; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         #editor table, #editor th, #editor td { border: 1px solid #cbd5e1; }
         #editor th, #editor td { padding: 8px 12px; text-align: left; min-width: 60px; }
         #editor th { background-color: #f1f5f9; font-weight: 600; color: var(--primary); }
 
-        .table-controls { display: flex; gap: 5px; margin-top: 5px; opacity: 0.4; transition: opacity 0.2s; }
+        .table-controls { display: flex; gap: 5px; margin-top: 5px; opacity: 0.4; transition: opacity 0.2s; flex-wrap: wrap; }
         .wiki-table-container:hover .table-controls { opacity: 1; }
         .table-controls button { background: #e2e8f0; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px 6px; font-size: 0.75rem; cursor: pointer; }
 
         .file-box { border: 1px solid #cbd5e1; border-radius: 6px; background: #f8fafc; margin: 12px 0; padding: 10px 14px; }
-        .file-box-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+        .file-box-header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
         .file-box-info { display: flex; align-items: center; gap: 8px; font-weight: 600; color: #334155; font-size: 0.88rem; }
         .btn-preview-toggle, .btn-download {
             background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px;
@@ -191,15 +194,41 @@
         #editor img { max-width: 100%; height: auto; border-radius: 6px; margin: 15px 0; display: block; }
         .wiki-internal-link { color: var(--accent); text-decoration: underline; font-weight: 600; cursor: pointer; }
 
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 2000; }
         .modal-overlay.active { display: flex; }
         .modal { background: white; border-radius: 8px; padding: 25px; width: 100%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
         .field-group input { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; }
 
+        .mobile-menu-btn {
+            display: none; background: var(--primary); color: white; border: none;
+            padding: 6px 12px; border-radius: 6px; font-size: 1.1rem; cursor: pointer;
+        }
+        .sidebar-overlay {
+            display: none; position: fixed; top:0; left:0; width:100vw; height:100vh;
+            background: rgba(0,0,0,0.4); z-index: 999;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        @media (max-width: 768px) {
+            .mobile-menu-btn { display: inline-flex; align-items: center; justify-content: center; }
+            #sidebar {
+                position: fixed; top: 0; left: 0; bottom: 0;
+                transform: translateX(-100%); width: 280px; box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            #sidebar.mobile-open { transform: translateX(0); }
+            header { padding: 10px 15px; flex-wrap: wrap; gap: 10px; }
+            .header-left { gap: 8px; }
+            .breadcrumb { font-size: 0.78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 150px; }
+            .toolbar { padding: 8px 15px; gap: 4px; }
+            .toolbar button, .toolbar select, .btn-tool { padding: 6px 8px; font-size: 0.85rem; }
+            main { padding: 15px; }
+            .tree-actions { display: flex; }
+        }
+
         @media print {
-            #sidebar, header, .toolbar, .table-controls, .btn-preview-toggle { display: none !important; }
+            #sidebar, header, .toolbar, .table-controls, .btn-preview-toggle, .mobile-menu-btn { display: none !important; }
             body, #content-wrapper, main { background: white; height: auto !important; overflow: visible !important; }
             main { padding: 0; margin: 0; max-width: 100%; }
             .file-preview-body { display: block !important; }
@@ -207,6 +236,8 @@
     </style>
 </head>
 <body>
+
+    <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleMobileSidebar()"></div>
 
     <div id="sidebar">
         <h2>Vereins-Wiki</h2>
@@ -235,13 +266,14 @@
     <div id="content-wrapper">
         <header>
             <div class="header-left">
+                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()" title="Menü öffnen">☰</button>
                 <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
                 <div id="breadcrumb" class="breadcrumb">Wiki / Startseite</div>
             </div>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.85rem;">Status: Bereit</span>
-                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="window.print()">🖨️ PDF</button>
-                <button class="btn btn-primary" style="width:auto; padding:6px 12px;" onclick="toggleEditMode()" id="btn-toggle-edit">✏️ Bearbeiten</button>
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
+                <button class="btn btn-primary" style="width:auto; padding:5px 10px;" onclick="window.print()">🖨️ PDF</button>
+                <button class="btn btn-primary" style="width:auto; padding:5px 10px;" onclick="toggleEditMode()" id="btn-toggle-edit">✏️ Bearbeiten</button>
             </div>
         </header>
 
@@ -331,6 +363,11 @@
         let isEditing = false;
         let savedRange = null;
         let draggedPageId = null;
+
+        function toggleMobileSidebar() {
+            document.getElementById('sidebar').classList.toggle('mobile-open');
+            document.getElementById('sidebar-overlay').classList.toggle('active');
+        }
 
         function getStoredToken() {
             return localStorage.getItem('trainerportal_github_token') || '';
@@ -515,7 +552,12 @@
             item.className = 'tree-item' + (page.id === wikiData.activePageId ? ' active' : '');
             item.draggable = true;
             item.setAttribute('data-id', page.id);
-            item.onclick = () => loadPage(page.id);
+            item.onclick = () => {
+                loadPage(page.id);
+                if (window.innerWidth <= 768) {
+                    toggleMobileSidebar();
+                }
+            };
 
             item.ondragstart = (e) => {
                 draggedPageId = page.id;
@@ -789,7 +831,6 @@
             }
         }
 
-        // Erzeugt ein Text-Snippet mit hervorgehobenem Suchbegriff
         function getSearchSnippet(htmlContent, query) {
             const tempDiv = document.createElement('div');
             tempDiv.innerHTML = htmlContent;
