@@ -1,1 +1,599 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vereinsportal - Kontakte</title>
+    <style>
+        :root {
+            --primary: #2b5c8f;
+            --primary-hover: #1d4067;
+            --accent: #4a90e2;
+            --bg-sidebar: #f4f6f9;
+            --bg-content: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e4e8;
+            --success: #28a745;
+            --danger: #dc3545;
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-content);
+            overflow: hidden;
+        }
+
+        /* DESKTOP SIDEBAR LINKS */
+        #sidebar {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 15px 12px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        #sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 7px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.78rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        /* RECHTER BEREICH */
+        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+
+        header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafbfc;
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        
+        .menu-toggle-btn {
+            display: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .home-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; transition: all 0.2s;
+        }
+        .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
+        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+
+        #main-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* KONTAKT GRID */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .contact-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+            position: relative;
+        }
+        .contact-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-color: var(--accent); }
+        .contact-tag {
+            display: inline-block;
+            font-size: 0.68rem;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 4px;
+            background: #e2e8f0;
+            color: #475569;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+        .contact-name { font-size: 1.05rem; font-weight: bold; color: var(--primary); margin-bottom: 2px; }
+        .contact-org { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 10px; }
+        
+        .contact-info-list { font-size: 0.82rem; display: flex; flex-direction: column; gap: 4px; color: #334155; }
+        .contact-info-list a { color: var(--accent); text-decoration: none; }
+        .contact-info-list a:hover { text-decoration: underline; }
+
+        .card-actions {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 25px; width: 90%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
+        .field-group input, .field-group select, .field-group textarea {
+            padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            body { flex-direction: column; position: relative; }
+            header { padding: 8px 12px; }
+            .menu-toggle-btn { display: block; }
+            .breadcrumb { display: none; }
+
+            #sidebar {
+                position: absolute; top: 48px; left: 0; width: 280px;
+                height: calc(100vh - 48px); transform: translateX(-100%);
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { padding: 10px; }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- LINKS: SIDEBAR -->
+    <div id="sidebar">
+        <h2>Kontakte</h2>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="openContactModal()">➕ Kontakt anlegen</button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="loadDataFromGitHub()">🔄 Laden</button>
+            <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 12px;">
+            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
+        </div>
+
+        <h2>Filter & Suche</h2>
+        <input type="text" id="search-input" class="search-box" placeholder="Name, Verein, Ort..." oninput="renderContacts()">
+        
+        <div class="field-group">
+            <label>Kategorie-Filter</label>
+            <select id="category-filter" onchange="renderContacts()">
+                <option value="all">Alle Kategorien</option>
+                <option value="Verband">Verband / Bez
+               <option value="Trainer">Trainer / Übungsleiter</option>
+                <option value="Halle">Hallenwart / Bademeister</option>
+                <option value="Partner">Partner / Sponsoren</option>
+                <option value="Sonstiges">Sonstiges</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- RECHTS: HAUPTBEREICH -->
+    <div id="content-wrapper">
+        <header>
+            <div class="header-left">
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+                <div id="breadcrumb" class="breadcrumb">Portal / <b>Kontakte</b></div>
+            </div>
+            <div>
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
+            </div>
+        </header>
+
+        <div id="main-content">
+            <div class="contact-grid" id="contact-grid"></div>
+        </div>
+    </div>
+
+    <!-- MODAL KONTAKT ANLEGEN / BEARBEITEN -->
+    <div id="contact-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title" style="margin-bottom:15px; color:var(--primary);">Kontakt anlegen</h3>
+            <input type="hidden" id="cnt-id">
+
+            <div class="field-group">
+                <label>Kategorie</label>
+                <select id="cnt-category">
+                    <option value="Verband">Verband / Bezirk</option>
+                    <option value="Trainer">Trainer / Übungsleiter</option>
+                    <option value="Halle">Hallenwart / Bademeister</option>
+                    <option value="Partner">Partner / Sponsoren</option>
+                    <option value="Sonstiges" selected>Sonstiges</option>
+                </select>
+            </div>
+
+            <div class="field-group">
+                <label>Name / Ansprechpartner *</label>
+                <input type="text" id="cnt-name" placeholder="z. B. Max Mustermann">
+            </div>
+
+            <div class="field-group">
+                <label>Organisation / Verein / Funktion</label>
+                <input type="text" id="cnt-org" placeholder="z. B. Schwimmverband Nds.">
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <div class="field-group" style="flex:1;">
+                    <label>E-Mail</label>
+                    <input type="email" id="cnt-email" placeholder="mail@example.com">
+                </div>
+                <div class="field-group" style="flex:1;">
+                    <label>Telefon / Mobil</label>
+                    <input type="tel" id="cnt-phone" placeholder="0170 1234567">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Adresse / Ort (optional)</label>
+                <input type="text" id="cnt-address" placeholder="Musterstraße 1, 12345 Ort">
+            </div>
+
+            <div class="field-group">
+                <label>Notizen / Anmerkungen</label>
+                <textarea id="cnt-notes" rows="3" placeholder="Zusatzinfos, Sprechzeiten..."></textarea>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                <button class="btn btn-danger" id="btn-delete-cnt" style="display:none; width:auto; padding:6px 12px;" onclick="deleteContact()">Löschen</button>
+                <div style="display:flex; gap:8px; margin-left:auto;">
+                    <button class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="closeContactModal()">Abbrechen</button>
+                    <button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="saveContactLocal()">Übernehmen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL GITHUB TOKEN EINGABE -->
+    <div id="token-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Token eingeben</h3>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
+                Gib hier deinen Personal Access Token (Classic mit Scope 'repo') ein.
+            </p>
+            <div class="field-group" style="margin-bottom:20px;">
+                <label>Personal Access Token</label>
+                <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="width:auto; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
+                <button class="btn btn-success" style="width:auto; padding:8px 14px;" onclick="saveGithubToken()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPO_OWNER = "dennisschwimmen";
+        const REPO_NAME = "trainerportal";
+        const FILE_PATH = "kontakte.json";
+
+        let contactsData = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function getStoredToken() {
+            return localStorage.getItem('trainerportal_github_token') || '';
+        }
+
+        window.onload = function() {
+            const token = getStoredToken();
+            if (!token) {
+                openTokenModal();
+            } else {
+                loadDataFromGitHub();
+            }
+        };
+
+        function openTokenModal() {
+            document.getElementById('github-token-input').value = getStoredToken();
+            document.getElementById('token-modal').classList.add('active');
+        }
+
+        function closeTokenModal() {
+            document.getElementById('token-modal').classList.remove('active');
+        }
+
+        function saveGithubToken() {
+            const val = document.getElementById('github-token-input').value.trim();
+            if (val) {
+                localStorage.setItem('trainerportal_github_token', val);
+                closeTokenModal();
+                loadDataFromGitHub();
+            } else {
+                alert("Bitte einen gültigen Token eingeben.");
+            }
+        }
+
+        function setStatus(text, color) {
+            const el = document.getElementById('save-status');
+            el.innerText = text;
+            el.style.color = color;
+        }
+
+        async function loadDataFromGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                setStatus('Kein Token hinterlegt!', '#dc3545');
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Lade Kontakte von GitHub...', '#2b5c8f');
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    alert("Token ungültig oder abgelaufen!");
+                    openTokenModal();
+                    throw new Error("Authentifizierungsfehler");
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const jsonText = decodeURIComponent(escape(atob(data.content)));
+                    const parsed = JSON.parse(jsonText);
+                    contactsData = parsed.contacts || (Array.isArray(parsed) ? parsed : []);
+                } else if (response.status === 404) {
+                    contactsData = [];
+                }
+
+                renderContacts();
+                setStatus(`Synchronisiert (${contactsData.length} Kontakte)`, '#28a745');
+
+            } catch (error) {
+                console.error(error);
+                setStatus('Fehler beim Laden!', '#dc3545');
+            }
+        }
+
+        async function saveDataToGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                alert("Bitte erst einen Token eingeben!");
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Speichere auf GitHub...', '#2b5c8f');
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+            try {
+                const getRes = await fetch(apiUrl, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                
+                let currentSha = "";
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    currentSha = fileData.sha;
+                }
+
+                const payloadData = { contacts: contactsData };
+                const jsonString = JSON.stringify(payloadData, null, 2);
+                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+                const bodyPayload = {
+                    message: "Kontakte via Web-App aktualisiert",
+                    content: contentBase64
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
+
+                const putRes = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (putRes.ok) {
+                    setStatus('Erfolgreich gespeichert!', '#28a745');
+                } else {
+                    throw new Error("Fehler beim Commit");
+                }
+            } catch (err) {
+                console.error(err);
+                setStatus('Fehler beim Speichern!', '#dc3545');
+            }
+        }
+
+        function renderContacts() {
+            const grid = document.getElementById('contact-grid');
+            grid.innerHTML = '';
+
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+            const catVal = document.getElementById('category-filter').value;
+
+            const filtered = contactsData.filter(c => {
+                const matchesSearch = (c.name || '').toLowerCase().includes(searchVal) ||
+                                      (c.org || '').toLowerCase().includes(searchVal) ||
+                                      (c.notes || '').toLowerCase().includes(searchVal);
+                const matchesCat = catVal === 'all' || c.category === catVal;
+                return matchesSearch && matchesCat;
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem; grid-column: 1/-1; text-align:center; padding:30px;">Keine Kontakte gefunden.</div>';
+                return;
+            }
+
+            filtered.sort((a,b) => a.name.localeCompare(b.name)).forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'contact-card';
+
+                card.innerHTML = `
+                    <span class="contact-tag">${c.category || 'Sonstiges'}</span>
+                    <div class="contact-name">${c.name}</div>
+                    ${c.org ? `<div class="contact-org">${c.org}</div>` : ''}
+                    
+                    <div class="contact-info-list">
+                        ${c.phone ? `<div>📞 <a href="tel:${c.phone}">${c.phone}</a></div>` : ''}
+                        ${c.email ? `<div>✉️ <a href="mailto:${c.email}">${c.email}</a></div>` : ''}
+                        ${c.address ? `<div>📍 ${c.address}</div>` : ''}
+                        ${c.notes ? `<div style="margin-top:6px; color:#64748b; font-style:italic;">📝 ${c.notes}</div>` : ''}
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="openContactModal('${c.id}')">✏️ Bearbeiten</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openContactModal(contactId = null) {
+            const modal = document.getElementById('contact-modal');
+            const deleteBtn = document.getElementById('btn-delete-cnt');
+
+            if (contactId) {
+                const c = contactsData.find(x => x.id === contactId);
+                if (!c) return;
+
+                document.getElementById('modal-title').innerText = "Kontakt bearbeiten";
+                document.getElementById('cnt-id').value = c.id;
+                document.getElementById('cnt-category').value = c.category || 'Sonstiges';
+                document.getElementById('cnt-name').value = c.name || '';
+                document.getElementById('cnt-org').value = c.org || '';
+                document.getElementById('cnt-email').value = c.email || '';
+                document.getElementById('cnt-phone').value = c.phone || '';
+                document.getElementById('cnt-address').value = c.address || '';
+                document.getElementById('cnt-notes').value = c.notes || '';
+                
+                deleteBtn.style.display = 'block';
+            } else {
+                document.getElementById('modal-title').innerText = "Neuen Kontakt anlegen";
+                document.getElementById('cnt-id').value = '';
+                document.getElementById('cnt-category').value = 'Sonstiges';
+                document.getElementById('cnt-name').value = '';
+                document.getElementById('cnt-org').value = '';
+                document.getElementById('cnt-email').value = '';
+                document.getElementById('cnt-phone').value = '';
+                document.getElementById('cnt-address').value = '';
+                document.getElementById('cnt-notes').value = '';
+                
+                deleteBtn.style.display = 'none';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contact-modal').classList.remove('active');
+        }
+
+        function saveContactLocal() {
+            const id = document.getElementById('cnt-id').value;
+            const category = document.getElementById('cnt-category').value;
+            const name = document.getElementById('cnt-name').value.trim();
+            const org = document.getElementById('cnt-org').value.trim();
+            const email = document.getElementById('cnt-email').value.trim();
+            const phone = document.getElementById('cnt-phone').value.trim();
+            const address = document.getElementById('cnt-address').value.trim();
+            const notes = document.getElementById('cnt-notes').value.trim();
+
+            if (!name) {
+                alert("Bitte gib einen Namen ein.");
+                return;
+            }
+
+            if (id) {
+                const c = contactsData.find(x => x.id === id);
+                if (c) {
+                    Object.assign(c, { category, name, org, email, phone, address, notes });
+                }
+            } else {
+                contactsData.push({
+                    id: 'cnt_' + Date.now(),
+                    category, name, org, email, phone, address, notes
+                });
+            }
+
+            closeContactModal();
+            renderContacts();
+            setStatus('Änderungen ungespeichert', '#e67e22');
+        }
+
+        function deleteContact() {
+            const id = document.getElementById('cnt-id').value;
+            if (!id) return;
+
+            if (confirm("Möchtest du diesen Kontakt wirklich löschen?")) {
+                contactsData = contactsData.filter(x => x.id !== id);
+                closeContactModal();
+                renderContacts();
+                setStatus('Kontakt gelöscht (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+    </script>
+</body>
+</html>
