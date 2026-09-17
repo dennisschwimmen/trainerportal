@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trainerportal - Hauptübersicht</title>
+    <title>Vereinsportal - Startseite</title>
     <style>
         :root {
             --primary: #2b5c8f;
             --primary-hover: #1d4067;
             --accent: #4a90e2;
-            --bg-content: #f4f6f9;
-            --card-bg: #ffffff;
+            --bg-sidebar: #f4f6f9;
+            --bg-content: #ffffff;
             --text-color: #333333;
-            --text-muted: #64748b;
             --border-color: #e0e4e8;
-            --shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-            --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.1);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --card-shadow-hover: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,175 +22,278 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             color: var(--text-color);
+            display: flex;
+            height: 100vh;
             background-color: var(--bg-content);
-            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR LINKS (DESKTOP DEFAULT) */
+        #sidebar {
+            width: 280px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
+            padding: 20px 15px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        #sidebar h2 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin-bottom: 20px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sidebar-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .sidebar-btn:hover {
+            border-color: var(--accent);
+            color: var(--primary);
+            transform: translateX(2px);
+        }
+
+        /* RECHTER HAUPTBEREICH */
+        #content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            width: 100%;
         }
 
         header {
-            background-color: var(--card-bg);
+            padding: 15px 30px;
             border-bottom: 1px solid var(--border-color);
-            padding: 20px 40px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafbfc;
         }
 
-        header h1 {
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .menu-toggle-btn {
+            display: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        h1 {
+            font-size: 1.5rem;
             color: var(--primary);
-            font-size: 1.8rem;
-            margin-bottom: 6px;
         }
 
-        header p {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-        }
-
-        main {
-            flex: 1;
-            max-width: 1200px;
-            width: 100%;
+        /* KACHEL GRID */
+        .dashboard-container {
+            padding: 30px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 40px 20px;
+            width: 100%;
         }
 
-        .grid-container {
+        .dashboard-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
         }
 
-        .portal-card {
-            background: var(--card-bg);
+        .tile-card {
+            background: white;
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 30px 25px;
+            padding: 24px;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            text-align: center;
-            box-shadow: var(--shadow);
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
             transition: all 0.25s ease;
             position: relative;
             overflow: hidden;
         }
 
-        .portal-card::before {
+        .tile-card::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
-            height: 5px;
-            background: var(--primary);
-            transition: background 0.25s ease;
-        }
-
-        .portal-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-hover);
-            border-color: var(--accent);
-        }
-
-        .portal-card:hover::before {
+            height: 4px;
             background: var(--accent);
+            opacity: 0.8;
+            transition: height 0.2s;
         }
 
-        .card-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-            line-height: 1;
+        .tile-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-shadow-hover);
+            border-color: #cbd5e1;
         }
 
-        .card-title {
-            font-size: 1.3rem;
+        .tile-card:hover::before {
+            height: 6px;
+        }
+
+        .tile-icon {
+            font-size: 2.2rem;
+            margin-bottom: 12px;
+        }
+
+        .tile-title {
+            font-size: 1.15rem;
             font-weight: 700;
-            color: var(--primary);
-            margin-bottom: 10px;
+            color: #1e293b;
+            margin-bottom: 8px;
         }
 
-        .card-desc {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.5;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
+        .tile-desc {
             font-size: 0.85rem;
-            border-top: 1px solid var(--border-color);
-            background-color: var(--card-bg);
+            color: #64748b;
+            line-height: 1.4;
         }
 
+        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
-            header {
-                padding: 15px 20px;
-            }
+            body { flex-direction: column; position: relative; }
+            header { padding: 12px 15px; }
+            .menu-toggle-btn { display: block; }
 
-            header h1 {
-                font-size: 1.4rem;
+            #sidebar {
+                position: absolute;
+                top: 57px;
+                left: 0;
+                width: 250px;
+                height: calc(100vh - 57px);
+                transform: translateX(-100%);
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
             }
+            #sidebar.open { transform: translateX(0); }
 
-            main {
-                padding: 20px 15px;
+            .dashboard-container { padding: 15px; }
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+                gap: 12px;
             }
-
-            .grid-container {
-                grid-template-columns: 1fr;
-                gap: 15px;
-            }
-
-            .portal-card {
-                padding: 20px 15px;
-            }
+            .tile-card { padding: 16px; }
         }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>Digitales Vereinsportal</h1>
-        <p>Zentrale Verwaltung aller Vereinsbereiche</p>
-    </header>
+    <!-- LINKS: SIDEBAR FÜR COMPUTER (EINKLAPPBAR AUF SMARTPHONES) -->
+    <div id="sidebar">
+        <h2>Vereinsportal</h2>
+        <nav class="sidebar-menu">
+            <a href="index.html" class="sidebar-btn">🏠 Startseite</a>
+            <a href="kalender.html" class="sidebar-btn">📅 Terminkalender</a>
+            <a href="mitglieder.html" class="sidebar-btn">👥 Mitglieder</a>
+            <a href="kontakte.html" class="sidebar-btn">🎇 Kontakte</a>
+            <a href="wettkampf.html" class="sidebar-btn">🏆 Wettkampf abrechnen</a>
+            <a href="finanzen.html" class="sidebar-btn">💰 Finanzen</a>
+        </nav>
+    </div>
 
-    <main>
-        <div class="grid-container">
-            
-            <a href="trainer.html" class="portal-card">
-                <div class="card-icon">📋</div>
-                <div class="card-title">Trainerverwaltung</div>
-                <div class="card-desc">Verwaltung von Trainerakten, Qualifikationen, Lizenzen und Nachweisen mit Ablaufwarnungen.</div>
-            </a>
+    <!-- RECHTS: HAUPTBEREICH MIT KACHELN -->
+    <div id="content-wrapper">
+        <header>
+            <div class="header-left">
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+                <h1>Dashboard</h1>
+            </div>
+            <div>
+                <span style="color: #64748b; font-weight: 600; font-size: 0.85rem;">Willkommen zurück!</span>
+            </div>
+        </header>
 
-            <a href="mitglieder.html" class="portal-card">
-                <div class="card-icon">👥</div>
-                <div class="card-title">Mitgliederverwaltung</div>
-                <div class="card-desc">Stammdaten, Altersübersichten, Gruppenverwaltung, Atteste und PDF-Listenexporte.</div>
-            </a>
+        <div class="dashboard-container">
+            <div class="dashboard-grid">
 
-            <a href="wiki.html" class="portal-card">
-                <div class="card-icon">📖</div>
-                <div class="card-title">Vereins-Wiki</div>
-                <div class="card-desc">Wissensdatenbank, Anleitungen, Dokumenten-Vorschau und interaktive Vorlagen.</div>
-            </a>
+                <!-- KACHEL: KALENDER -->
+                <a href="kalender.html" class="tile-card">
+                    <div>
+                        <div class="tile-icon">📅</div>
+                        <div class="tile-title">Terminkalender</div>
+                        <div class="tile-desc">Vereinstermine, Trainingseinheiten & Geburtstage verwalten und als PDF exportieren.</div>
+                    </div>
+                </a>
 
-            <a href="kalender.html" class="portal-card">
-                <div class="card-icon">📅</div>
-                <div class="card-title">Terminkalender</div>
-                <div class="card-desc">Übersicht aller Vereinsterine, Trainingszeiten, Wettkämpfe und Geburtstage.</div>
-            </a>
+                <!-- KACHEL: MITGLIEDER -->
+                <a href="mitglieder.html" class="tile-card">
+                    <div>
+                        <div class="tile-icon">👥</div>
+                        <div class="tile-title">Mitgliederverwaltung</div>
+                        <div class="tile-desc">Stammdaten, Altersklassen, Kontaktdaten und Mitgliedsstatus übersichtlich verwalten.</div>
+                    </div>
+                </a>
 
+                <!-- NEUE KACHEL 1: KONTAKTE -->
+                <a href="kontakte.html" class="tile-card">
+                    <div>
+                        <div class="tile-icon">🎇</div>
+                        <div class="tile-title">Kontakte</div>
+                        <div class="tile-desc">Ansprechpartner, Verbandskontakte, Trainer, Hallenwarte & externe Partner.</div>
+                    </div>
+                </a>
+
+                <!-- NEUE KACHEL 2: WETTKAMPF ABRECHNEN -->
+                <a href="wettkampf.html" class="tile-card">
+                    <div>
+                        <div class="tile-icon">🏆</div>
+                        <div class="tile-title">Wettkampf abrechnen</div>
+                        <div class="tile-desc">Spritkosten, Pauschalen, Eigenanteile, Verpflegung und Übernachtungen berechnen.</div>
+                    </div>
+                </a>
+
+                <!-- NEUE KACHEL 3: FINANZEN -->
+                <a href="finanzen.html" class="tile-card">
+                    <div>
+                        <div class="tile-icon">💰</div>
+                        <div class="tile-title">Finanzen</div>
+                        <div class="tile-desc">Kontenblätter, Rechnungen, Einnahmen/Ausgaben-Übersichten & Belege erfassen.</div>
+                    </div>
+                </a>
+
+            </div>
         </div>
-    </main>
+    </div>
 
-    <footer>
-        &copy; Vereinsverwaltung Digital
-    </footer>
-
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+    </script>
 </body>
 </html>
