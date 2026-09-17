@@ -1,3 +1,24 @@
 {
-  "contacts": []
+  "contacts": [
+    {
+      "id": "cnt_1789681664993",
+      "category": "Partner",
+      "name": "Kevin van IJperen",
+      "org": "Wittenberg Gemüse GmbH",
+      "email": "kevin.ijperen@wbg.de",
+      "phone": "0170 123456",
+      "address": "Musterstraße 1, 06886 Wittenberg",
+      "notes": "Zusatzinfos, Anmerkungen"
+    },
+    {
+      "id": "cnt_1789681748526",
+      "category": "Trainer",
+      "name": "Dennis Schemmel",
+      "org": "Schwimmen",
+      "email": "neu@neu.de",
+      "phone": "1028 37052352",
+      "address": "",
+      "notes": ""
+    }
+  ]
 }
