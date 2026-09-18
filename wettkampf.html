@@ -170,12 +170,21 @@
             .receipt-img, .receipt-canvas { max-width: 100%; max-height: 22cm; display: block; margin: 10px auto; border: 1px solid #ccc; }
         }
 
+        /* MOBIL-ANPASSUNGEN (RESPONSIVE DESIGN) */
         @media (max-width: 768px) {
             body { flex-direction: column; position: relative; }
             header { padding: 8px 12px; }
             .menu-toggle-btn { display: block; }
             .breadcrumb { display: none; }
-            #sidebar { position: absolute; top: 48px; left: 0; width: 300px; height: calc(100vh - 48px); transform: translateX(-100%); box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
+            #sidebar { 
+                position: absolute; 
+                top: 48px; 
+                left: 0; 
+                width: 300px; 
+                height: calc(100vh - 48px); 
+                transform: translateX(-100%); 
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1); 
+            }
             #sidebar.open { transform: translateX(0); }
             #main-content { padding: 12px; }
             .flex-row { flex-direction: column; gap: 0; }
@@ -222,9 +231,9 @@
 
         <div id="main-content">
             <div class="form-container">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; flex-wrap: wrap; gap: 8px;">
                     <h2 id="form-heading" style="color:var(--primary);">Abrechnung Erfassen</h2>
-                    <div style="display:flex; gap:8px;">
+                    <div style="display:flex; gap:8px; flex-wrap: wrap;">
                         <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
                         <button class="btn btn-primary" style="width:auto; padding:6px 14px; background-color:var(--accent);" onclick="printCurrentSettlement()">📄 PDF</button>
                         <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocalAndCloud()">💾 Übernehmen & Speichern</button>
@@ -770,7 +779,13 @@
             filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(s => {
                 const item = document.createElement('div');
                 item.className = 'settlement-item' + (s.id === activeSettlementId ? ' active' : '');
-                item.onclick = () => selectSettlement(s.id);
+                item.onclick = () => {
+                    selectSettlement(s.id);
+                    // Auf mobilen Geräten Sidebar nach Auswahl automatisch schließen
+                    if (window.innerWidth <= 768) {
+                        document.getElementById('sidebar').classList.remove('open');
+                    }
+                };
                 
                 let dateDisplay = formatDateDE(s.date);
                 if (s.endDate && s.endDate !== s.date) {
@@ -837,6 +852,10 @@
 
             toggleOwnShareAmount();
             showStep(1);
+
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
         }
 
         function selectSettlement(id) {
@@ -901,7 +920,6 @@
 
             toggleOwnShareAmount();
 
-            // Wenn abgeschlossen, direkt in Schritt 5 öffnen
             const isDone = s.isFinished === true || s.isFinished === "true";
             if (isDone) {
                 showStep(5);
