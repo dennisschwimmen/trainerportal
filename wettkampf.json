@@ -12,12 +12,26 @@
       "referees": "Lisa Kehlitz",
       "departure": "2026-09-13T05:30",
       "arrival": "2026-09-18T20:00",
-      "plates": [
-        "WB XL 2222",
-        "WB WS 2015",
-        "WB AD 25"
+      "carMappings": [
+        {
+          "plate": "WB-XL 2222",
+          "driver": "Dennis Schemmel",
+          "km": 300,
+          "fuel": 60
+        },
+        {
+          "plate": "WB-WS 2015",
+          "driver": "Cornelia Ballas",
+          "km": 300,
+          "fuel": 60
+        },
+        {
+          "plate": "WB-AM 345",
+          "driver": "Andreas Deutschmann",
+          "km": 300,
+          "fuel": 50
+        }
       ],
-      "km": 300,
       "fuelReceiptData": "",
       "feeAmount": 300,
       "paidTo": "1. Dresdner SC",
