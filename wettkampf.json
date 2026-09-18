@@ -2,7 +2,7 @@
   "settlements": [
     {
       "id": "st_1789725024045",
-      "isFinished": false,
+      "isFinished": true,
       "date": "2026-09-13",
       "endDate": "",
       "location": "Dresden",
