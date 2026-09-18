@@ -247,11 +247,10 @@
                 </div>
 
                 <input type="hidden" id="st-id">
-                <input type="hidden" id="st-is-finished" value="false">
 
                 <!-- SCHRITT 1 -->
                 <div class="wizard-step-content active" id="wizard-step-1">
-                    <div class="form-section-title">Veranstaltung, Ort & Verantwortlicher</div>
+                    <div class="form-section-title">1. Veranstaltung, Ort & Verantwortlicher</div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Startdatum *</label>
@@ -286,7 +285,7 @@
 
                 <!-- SCHRITT 2 -->
                 <div class="wizard-step-content" id="wizard-step-2">
-                    <div class="form-section-title">Teilnehmer & Funktionen</div>
+                    <div class="form-section-title">2. Teilnehmer & Funktionen</div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Anzahl Sportler</label>
@@ -315,7 +314,7 @@
 
                 <!-- SCHRITT 3 -->
                 <div class="wizard-step-content" id="wizard-step-3">
-                    <div class="form-section-title">Fahrt, Fahrzeuge & Strecke (ab/bis Wittenberg)</div>
+                    <div class="form-section-title">3. Fahrt, Fahrzeuge & Strecke (ab/bis Wittenberg)</div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Abfahrt Wittenberg</label>
@@ -355,7 +354,7 @@
 
                 <!-- SCHRITT 4 -->
                 <div class="wizard-step-content" id="wizard-step-4">
-                    <div class="form-section-title">Meldegeld & Zahlungen</div>
+                    <div class="form-section-title">4. Meldegeld & Zahlungen</div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Höhe Meldegeld (€)</label>
@@ -393,9 +392,18 @@
                     </div>
                 </div>
 
-                <!-- SCHRITT 5: ABSCHLUSS & EINREICHUNG -->
+                <!-- SCHRITT 5: ABSCHLUSS & STATUS -->
                 <div class="wizard-step-content" id="wizard-step-5">
-                    <div class="form-section-title">Übernachtung, Verpflegung & Abschluss</div>
+                    <div class="form-section-title">5. Übernachtung, Verpflegung & Status</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Abrechnungs-Status</label>
+                            <select id="st-is-finished" style="font-weight: bold; color: var(--primary);">
+                                <option value="false">🔴 Offen / In Bearbeitung</option>
+                                <option value="true">🟢 Abgeschlossen</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Übernachtung?</label>
@@ -431,14 +439,14 @@
                     </div>
 
                     <div class="info-box" style="margin-top:20px;">
-                        <b>Wichtige Hinweise zur Einreichung:</b><br>
-                        • Bitte senden Sie die erstellten Dokumente per E-Mail an den <b>Kassenwart</b>.<br>
-                        • Stellen Sie sicher, dass mindestens ein Beleg (Tankquittung oder Meldegeldquittung) hochgeladen wurde, bevor Sie die Abrechnung abschließen.
+                        <b>Hinweis zum Status:</b><br>
+                        • Sie können den Status hier jederzeit wieder von „Abgeschlossen“ auf „Offen“ zurückstellen, falls Änderungen oder Ergänzungen anfallen.<br>
+                        • Nach dem Ändern bitte auf <b>„Übernehmen & Speichern“</b> klicken.
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
-                        <button class="btn btn-success" style="padding: 12px; font-size: 0.95rem;" onclick="finalizeSettlement()">
-                            ✅ Abrechnung Abschließen
+                        <button class="btn btn-success" style="padding: 12px; font-size: 0.95rem;" onclick="saveFormLocalAndCloud()">
+                            💾 Status & Daten Speichern
                         </button>
                         <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
                             📄 PDF Drucken / Herunterladen
@@ -514,7 +522,7 @@
                 "2. Teilnehmer & Funktionen",
                 "3. Fahrt & Fahrzeuge",
                 "4. Meldegeld & Zahlungen",
-                "5. Übernachtung & Abschluss"
+                "5. Übernachtung & Status"
             ];
             document.getElementById('step-indicator').innerText = `Schritt ${currentWizardStep} von ${totalWizardSteps}: ${titles[currentWizardStep - 1]}`;
             const percentage = (currentWizardStep / totalWizardSteps) * 100;
@@ -657,22 +665,6 @@
             setStatus('Beleg entfernt (ungespeichert)', '#e67e22');
         }
 
-        function finalizeSettlement() {
-            const fuelData = document.getElementById('st-fuel-receipt-data').value;
-            const feeData = document.getElementById('st-fee-receipt-data').value;
-
-            if (!fuelData && !feeData) {
-                const proceed = confirm("Warnung: Es ist kein Anhang (weder Tank- noch Meldegeldquittung) hochgeladen.\n\nMöchten Sie trotzdem fortfahren und die Abrechnung abschließen, oder lieber noch bearbeiten?");
-                if (!proceed) {
-                    return; 
-                }
-            }
-
-            document.getElementById('st-is-finished').value = "true";
-            saveFormLocalAndCloud();
-            alert("Abrechnung wurde erfolgreich als abgeschlossen markiert!");
-        }
-
         async function loadDataFromGitHub() {
             const token = getStoredToken();
             if (!token) { setStatus('Kein Token hinterlegt!', '#dc3545'); return; }
@@ -781,7 +773,6 @@
                 item.className = 'settlement-item' + (s.id === activeSettlementId ? ' active' : '');
                 item.onclick = () => {
                     selectSettlement(s.id);
-                    // Auf mobilen Geräten Sidebar nach Auswahl automatisch schließen
                     if (window.innerWidth <= 768) {
                         document.getElementById('sidebar').classList.remove('open');
                     }
@@ -869,7 +860,10 @@
             document.getElementById('btn-delete-st').style.display = 'inline-block';
 
             document.getElementById('st-id').value = s.id;
-            document.getElementById('st-is-finished').value = s.isFinished || 'false';
+            
+            const isDone = s.isFinished === true || s.isFinished === "true";
+            document.getElementById('st-is-finished').value = isDone ? 'true' : 'false';
+
             document.getElementById('st-date').value = s.date || getTodayISO();
             document.getElementById('st-end-date').value = s.endDate || '';
             document.getElementById('st-location').value = s.location || '';
@@ -919,13 +913,7 @@
             document.getElementById('st-own-share-amount').value = s.ownShareAmount || '';
 
             toggleOwnShareAmount();
-
-            const isDone = s.isFinished === true || s.isFinished === "true";
-            if (isDone) {
-                showStep(5);
-            } else {
-                showStep(1);
-            }
+            showStep(1);
         }
 
         function saveFormLocal() {
