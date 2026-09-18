@@ -241,9 +241,9 @@
                 </div>
 
                 <!-- FORTSCHRITTSLEISTE -->
-                <div class="wizard-step-indicator" id="step-indicator">Schritt 1 von 5: Allgemeine Angaben</div>
+                <div class="wizard-step-indicator" id="step-indicator">Schritt 1 von 6: Allgemeine Angaben</div>
                 <div class="progress-bar-container">
-                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 20%;"></div>
+                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 16.66%;"></div>
                 </div>
 
                 <input type="hidden" id="st-id">
@@ -393,23 +393,10 @@
                     </div>
                 </div>
 
-                <!-- SCHRITT 5: ABSCHLUSS & STATUS -->
+                <!-- SCHRITT 5 -->
                 <div class="wizard-step-content" id="wizard-step-5">
-                    <div class="form-section-title">5. Übernachtung, Verpflegung & Status</div>
-                    
-                    <div class="field-group">
-                        <label>Abrechnungs-Status festlegen:</label>
-                        <div style="display: flex; gap: 10px; margin-top: 4px;">
-                            <button type="button" id="btn-status-open" class="btn btn-danger" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(false)">
-                                🔴 Offen / In Bearbeitung
-                            </button>
-                            <button type="button" id="btn-status-done" class="btn btn-success" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(true)">
-                                🟢 Abgeschlossen
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex-row" style="margin-top: 15px;">
+                    <div class="form-section-title">5. Übernachtung & Verpflegung</div>
+                    <div class="flex-row">
                         <div class="field-group">
                             <label>Übernachtung?</label>
                             <select id="st-overnight">
@@ -442,11 +429,29 @@
                             <input type="number" step="0.01" id="st-own-share-amount" placeholder="10.00">
                         </div>
                     </div>
+                </div>
 
-                    <div class="info-box" style="margin-top:20px;">
-                        <b>Hinweis zum Status:</b><br>
-                        • Über die beiden Buttons oben können Sie jederzeit zwischen „Offen“ und „Abgeschlossen“ wechseln.<br>
-                        • Nach dem Ändern bitte auf <b>„Übernehmen & Speichern“</b> klicken.
+                <!-- SCHRITT 6: ABSCHLUSS & VERSAND -->
+                <div class="wizard-step-content" id="wizard-step-6">
+                    <div class="form-section-title">6. Abschluss, Speichern, Drucken & Versand</div>
+                    
+                    <div class="field-group">
+                        <label>Abrechnungs-Status festlegen:</label>
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <button type="button" id="btn-status-open" class="btn btn-danger" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(false)">
+                                🔴 Offen / In Bearbeitung
+                            </button>
+                            <button type="button" id="btn-status-done" class="btn btn-success" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(true)">
+                                🟢 Abgeschlossen
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-box" style="margin-top:15px;">
+                        <b>Hinweise zum Abschluss:</b><br>
+                        • Über die Buttons oben können Sie den Status jederzeit zwischen „Offen“ und „Abgeschlossen“ umschalten.<br>
+                        • Nach dem Ändern bitte auf <b>„💾 Status & Daten Speichern“</b> klicken.<br>
+                        • Nach dem Speichern können Sie die vollständige Rechnung inklusive aller Belege als PDF drucken oder direkt per E-Mail versenden.
                     </div>
 
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
@@ -455,6 +460,9 @@
                         </button>
                         <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
                             📄 PDF Drucken / Herunterladen
+                        </button>
+                        <button class="btn btn-secondary" style="padding: 12px; background-color: var(--accent);" onclick="sendSettlementByEmail()">
+                            ✉️ Dokumente per E-Mail versenden
                         </button>
                     </div>
                 </div>
@@ -482,7 +490,7 @@
         let settlementsData = [];
         let activeSettlementId = null;
         let currentWizardStep = 1;
-        const totalWizardSteps = 5;
+        const totalWizardSteps = 6;
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -527,7 +535,8 @@
                 "2. Teilnehmer & Funktionen",
                 "3. Fahrt & Fahrzeuge",
                 "4. Meldegeld & Zahlungen",
-                "5. Übernachtung & Status"
+                "5. Übernachtung & Verpflegung",
+                "6. Abschluss & Versand"
             ];
             document.getElementById('step-indicator').innerText = `Schritt ${currentWizardStep} von ${totalWizardSteps}: ${titles[currentWizardStep - 1]}`;
             const percentage = (currentWizardStep / totalWizardSteps) * 100;
@@ -940,9 +949,9 @@
 
             toggleOwnShareAmount();
             
-            // Wenn abgeschlossen, direkt Stufe 5 anzeigen, ansonsten Stufe 1
+            // Wenn abgeschlossen, direkt Schritt 6 anzeigen, ansonsten Schritt 1
             if (isDone) {
-                showStep(5);
+                showStep(6);
             } else {
                 showStep(1);
             }
@@ -1034,6 +1043,28 @@
                 renderSidebarList();
                 setStatus('Abrechnung gelöscht', '#e67e22');
             }
+        }
+
+        function sendSettlementByEmail() {
+            saveFormLocal();
+            const id = document.getElementById('st-id').value;
+            const s = settlementsData.find(x => x.id === id);
+            if (!s) {
+                alert("Bitte wähle oder erstelle zuerst eine Abrechnung.");
+                return;
+            }
+
+            const subject = encodeURIComponent(`Wettkampfabrechnung: ${s.event || 'Wettkampf'} (${s.location || ''})`);
+            const bodyText = encodeURIComponent(
+                `Hallo,\n\nanbei/anliegend die Wettkampfabrechnung für:\n\n` +
+                `Veranstaltung: ${s.event || '-'}\n` +
+                `Ort: ${s.location || '-'}\n` +
+                `Verantwortlicher: ${s.responsible || '-'}\n` +
+                `Datum: ${formatDateDE(s.date)}\n\n` +
+                `Bitte drucken Sie die Abrechnung im Portal (als PDF) aus und fügen Sie die Belege bei.\n\nViele Grüße\n${s.responsible || ''}`
+            );
+
+            window.location.href = `mailto:?subject=${subject}&body=${bodyText}`;
         }
 
         async function printCurrentSettlement() {
