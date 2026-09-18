@@ -1,1 +1,33 @@
-
+{
+  "settlements": [
+    {
+      "id": "st_1789725024045",
+      "date": "2026-09-13",
+      "location": "Dresden",
+      "event": "Elbepokal",
+      "countAthletes": 14,
+      "countCoaches": 4,
+      "drivers": "Andreas Deutschmann, Dennis Schemmel, Cornelia Ballas",
+      "coachesNames": "",
+      "referees": "Lisa Kehlitz",
+      "departure": "2026-09-13T05:30",
+      "arrival": "2026-09-18T20:00",
+      "plates": [
+        "WB XL 2222",
+        "WB WS 2015",
+        "WB AD 25"
+      ],
+      "km": 300,
+      "fuelReceiptData": "",
+      "feeAmount": 300,
+      "paidTo": "1. Dresdner SC",
+      "feeReceiptYesNo": "ja",
+      "feeStatus": "bezahlt",
+      "feeReceiptData": "",
+      "overnight": "nein",
+      "catering": "nein",
+      "ownShareYesNo": "nein",
+      "ownShareAmount": 0
+    }
+  ]
+}
