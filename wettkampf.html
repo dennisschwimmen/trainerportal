@@ -102,11 +102,30 @@
 
         #main-content { flex: 1; padding: 25px; overflow-y: auto; background-color: #ffffff; }
         .form-container { max-width: 900px; margin: 0 auto; }
-        .form-section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); margin: 18px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #e2e8f0; }
+
+        /* WIZARD & FORTSCHRITTSLEISTE */
+        .progress-bar-container {
+            background: #e2e8f0; border-radius: 6px; height: 8px; width: 100%; margin-bottom: 20px; overflow: hidden;
+        }
+        .progress-bar-fill {
+            background: var(--primary); height: 100%; width: 0%; transition: width 0.3s ease;
+        }
+        .wizard-step-indicator {
+            font-size: 0.8rem; font-weight: bold; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px;
+        }
+
+        .wizard-step-content { display: none; }
+        .wizard-step-content.active { display: block; }
+
+        .wizard-nav-buttons {
+            display: flex; justify-content: space-between; margin-top: 25px; padding-top: 15px; border-top: 1px solid var(--border-color);
+        }
+
+        .form-section-title { font-size: 1.05rem; font-weight: bold; color: var(--primary); margin-bottom: 15px; padding-bottom: 6px; border-bottom: 2px solid #e2e8f0; }
 
         .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; width: 100%; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .field-group input, .field-group select, .field-group textarea { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit; width: 100%; box-sizing: border-box; }
+        .field-group input, .field-group select, .field-group textarea { padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit; width: 100%; box-sizing: border-box; }
 
         .flex-row { display: flex; gap: 12px; }
         .flex-row .field-group { flex: 1; }
@@ -184,7 +203,7 @@
         <div class="settlement-list" id="settlement-list"></div>
     </div>
 
-    <!-- HAUPTBEREICH: FORMULAR -->
+    <!-- HAUPTBEREICH: FORMULAR (WIZARD) -->
     <div id="content-wrapper">
         <header>
             <div class="header-left">
@@ -199,196 +218,224 @@
 
         <div id="main-content">
             <div class="form-container">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                     <h2 id="form-heading" style="color:var(--primary);">Abrechnung Erfassen</h2>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
-                        <button class="btn btn-secondary" id="btn-print-st" style="display:none; width:auto; padding:6px 12px;" onclick="printCurrentSettlement()">📄 PDF Drucken</button>
-                        <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocal()">Übernehmen</button>
+                        <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocal()">Zwischenstand Übernehmen</button>
                     </div>
+                </div>
+
+                <!-- FORTSCHRITTSLEISTE -->
+                <div class="wizard-step-indicator" id="step-indicator">Schritt 1 von 6: Allgemeine Angaben</div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 16.6%;"></div>
                 </div>
 
                 <input type="hidden" id="st-id">
 
-                <!-- 1. ALLGEMEINE ANGABEN -->
-                <div class="form-section-title">1. Veranstaltung, Ort & Verantwortlicher</div>
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Startdatum *</label>
-                        <input type="date" id="st-date">
+                <!-- SCHRITT 1 -->
+                <div class="wizard-step-content active" id="wizard-step-1">
+                    <div class="form-section-title">1. Veranstaltung, Ort & Verantwortlicher</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Startdatum *</label>
+                            <input type="date" id="st-date">
+                        </div>
+                        <div class="field-group">
+                            <label>Enddatum (falls mehrtägig)</label>
+                            <input type="date" id="st-end-date">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label>Enddatum (falls mehrtägig)</label>
-                        <input type="date" id="st-end-date">
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Ort / Schwimmhalle *</label>
+                            <input type="text" id="st-location" placeholder="z.B. Chemnitz">
+                        </div>
+                        <div class="field-group">
+                            <label>Verantwortlicher (Name) *</label>
+                            <input type="text" id="st-responsible" placeholder="z.B. Max Mustermann">
+                        </div>
                     </div>
-                </div>
-
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Ort / Schwimmhalle *</label>
-                        <input type="text" id="st-location" placeholder="z.B. Chemnitz">
-                    </div>
-                    <div class="field-group">
-                        <label>Verantwortlicher (Name) *</label>
-                        <input type="text" id="st-responsible" placeholder="z.B. Max Mustermann">
-                    </div>
-                </div>
-
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Veranstaltung *</label>
-                        <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
-                    </div>
-                    <div class="field-group" style="max-width: 220px;">
-                        <label>Kilometerpauschale (€) *</label>
-                        <input type="number" step="0.01" id="st-km-rate" value="0.30">
-                    </div>
-                </div>
-
-                <!-- 2. TEILNEHMER & PERSONENGRUPPEN -->
-                <div class="form-section-title">2. Teilnehmer & Funktionen</div>
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Anzahl Sportler</label>
-                        <input type="number" id="st-count-athletes" value="0" min="0">
-                    </div>
-                    <div class="field-group">
-                        <label>Anzahl Betreuer</label>
-                        <input type="number" id="st-count-coaches" value="0" min="0">
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Veranstaltung / Verein *</label>
+                            <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
+                        </div>
+                        <div class="field-group" style="max-width: 220px;">
+                            <label>Kilometerpauschale (€) *</label>
+                            <input type="number" step="0.01" id="st-km-rate" value="0.30">
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Fahrer (Namen, mit Komma getrennt) *</label>
-                        <input type="text" id="st-drivers" placeholder="z.B. C. Ballas, U. Stephan" oninput="renderCarMappingFields()">
+                <!-- SCHRITT 2 -->
+                <div class="wizard-step-content" id="wizard-step-2">
+                    <div class="form-section-title">2. Teilnehmer & Funktionen</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Anzahl Sportler</label>
+                            <input type="number" id="st-count-athletes" value="0" min="0">
+                        </div>
+                        <div class="field-group">
+                            <label>Anzahl Betreuer</label>
+                            <input type="number" id="st-count-coaches" value="0" min="0">
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label>Betreuer (Namen)</label>
-                        <input type="text" id="st-coaches-names" placeholder="z.B. S. Schmidt">
-                    </div>
-                    <div class="field-group">
-                        <label>Kampfrichter (Namen)</label>
-                        <input type="text" id="st-referees" placeholder="z.B. A. Meier">
-                    </div>
-                </div>
-
-                <!-- 3. FAHRT, AUTOS & ZUORDNUNG -->
-                <div class="form-section-title">3. Fahrt, Fahrzeuge & Strecke (ab/bis Wittenberg)</div>
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Abfahrt Wittenberg</label>
-                        <input type="datetime-local" id="st-departure">
-                    </div>
-                    <div class="field-group">
-                        <label>Ankunft Wittenberg</label>
-                        <input type="datetime-local" id="st-arrival">
-                    </div>
-                </div>
-
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Anzahl KFZ / Autos</label>
-                        <select id="st-car-count" onchange="renderCarMappingFields()">
-                            <option value="1">1 Auto</option>
-                            <option value="2">2 Autos</option>
-                            <option value="3">3 Autos</option>
-                            <option value="4">4 Autos</option>
-                            <option value="5">5 Autos</option>
-                        </select>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Fahrer (Namen, mit Komma getrennt) *</label>
+                            <input type="text" id="st-drivers" placeholder="z.B. C. Ballas, U. Stephan" oninput="renderCarMappingFields()">
+                        </div>
+                        <div class="field-group">
+                            <label>Betreuer (Namen)</label>
+                            <input type="text" id="st-coaches-names" placeholder="z.B. S. Schmidt">
+                        </div>
+                        <div class="field-group">
+                            <label>Kampfrichter (Namen)</label>
+                            <input type="text" id="st-referees" placeholder="z.B. A. Meier">
+                        </div>
                     </div>
                 </div>
 
-                <div class="field-group">
-                    <label>Fahrzeuge, Kilometer & Fahrerzuordnung:</label>
-                    <div id="car-mappings-container"></div>
-                </div>
-
-                <div class="field-group">
-                    <label>Tankquittung hochladen (Bild/PDF)</label>
-                    <input type="file" id="st-fuel-receipt-file" accept="image/*,application/pdf">
-                    <input type="hidden" id="st-fuel-receipt-data">
-                    <div id="fuel-receipt-preview-box" class="receipt-preview-box" style="display:none;">
-                        <span id="fuel-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
-                        <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fuel')">🗑️ Löschen</button>
+                <!-- SCHRITT 3 -->
+                <div class="wizard-step-content" id="wizard-step-3">
+                    <div class="form-section-title">3. Fahrt, Fahrzeuge & Strecke (ab/bis Wittenberg)</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Abfahrt Wittenberg</label>
+                            <input type="datetime-local" id="st-departure">
+                        </div>
+                        <div class="field-group">
+                            <label>Ankunft Wittenberg</label>
+                            <input type="datetime-local" id="st-arrival">
+                        </div>
                     </div>
-                </div>
-
-                <!-- 4. MELDEGELD & ZAHLUNGEN -->
-                <div class="form-section-title">4. Meldegeld & Zahlungen</div>
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Höhe Meldegeld (€)</label>
-                        <input type="number" step="0.01" id="st-fee-amount" placeholder="184.00">
-                    </div>
-                    <div class="field-group">
-                        <label>Gezahlt an (Verein/Verband)</label>
-                        <input type="text" id="st-paid-to" placeholder="z.B. Chemnitzer PSV e.V.">
-                    </div>
-                </div>
-
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Quittung vorhanden?</label>
-                        <select id="st-fee-receipt-yesno">
-                            <option value="ja">Ja</option>
-                            <option value="nein">Nein</option>
-                        </select>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Anzahl KFZ / Autos</label>
+                            <select id="st-car-count" onchange="renderCarMappingFields()">
+                                <option value="1">1 Auto</option>
+                                <option value="2">2 Autos</option>
+                                <option value="3">3 Autos</option>
+                                <option value="4">4 Autos</option>
+                                <option value="5">5 Autos</option>
+                            </select>
+                        </div>
                     </div>
                     <div class="field-group">
-                        <label>Status Meldegeld</label>
-                        <select id="st-fee-status">
-                            <option value="bezahlt">Bezahlt</option>
-                            <option value="offen">Offen</option>
-                        </select>
+                        <label>Fahrzeuge, Kilometer & Fahrerzuordnung:</label>
+                        <div id="car-mappings-container"></div>
+                    </div>
+                    <div class="field-group">
+                        <label>Tankquittung hochladen (Bild/PDF)</label>
+                        <input type="file" id="st-fuel-receipt-file" accept="image/*,application/pdf">
+                        <input type="hidden" id="st-fuel-receipt-data">
+                        <div id="fuel-receipt-preview-box" class="receipt-preview-box" style="display:none;">
+                            <span id="fuel-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
+                            <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fuel')">🗑️ Löschen</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="field-group">
-                    <label>Meldegeldquittung hochladen (Bild/PDF)</label>
-                    <input type="file" id="st-fee-receipt-file" accept="image/*,application/pdf">
-                    <input type="hidden" id="st-fee-receipt-data">
-                    <div id="fee-receipt-preview-box" class="receipt-preview-box" style="display:none;">
-                        <span id="fee-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
-                        <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fee')">🗑️ Löschen</button>
+                <!-- SCHRITT 4 -->
+                <div class="wizard-step-content" id="wizard-step-4">
+                    <div class="form-section-title">4. Meldegeld & Zahlungen</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Höhe Meldegeld (€)</label>
+                            <input type="number" step="0.01" id="st-fee-amount" placeholder="184.00">
+                        </div>
+                        <div class="field-group">
+                            <label>Gezahlt an (Verein/Verband)</label>
+                            <input type="text" id="st-paid-to" placeholder="z.B. Chemnitzer PSV e.V.">
+                        </div>
+                    </div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Quittung vorhanden?</label>
+                            <select id="st-fee-receipt-yesno">
+                                <option value="ja">Ja</option>
+                                <option value="nein">Nein</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Status Meldegeld</label>
+                            <select id="st-fee-status">
+                                <option value="bezahlt">Bezahlt</option>
+                                <option value="offen">Offen</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <label>Meldegeldquittung hochladen (Bild/PDF)</label>
+                        <input type="file" id="st-fee-receipt-file" accept="image/*,application/pdf">
+                        <input type="hidden" id="st-fee-receipt-data">
+                        <div id="fee-receipt-preview-box" class="receipt-preview-box" style="display:none;">
+                            <span id="fee-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
+                            <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fee')">🗑️ Löschen</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 5. ÜBERNACHTUNG & EIGENANTEIL -->
-                <div class="form-section-title">5. Übernachtung, Verpflegung & Eigenanteil</div>
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Übernachtung?</label>
-                        <select id="st-overnight">
-                            <option value="nein">Nein</option>
-                            <option value="ja">Ja</option>
-                        </select>
+                <!-- SCHRITT 5 -->
+                <div class="wizard-step-content" id="wizard-step-5">
+                    <div class="form-section-title">5. Übernachtung, Verpflegung & Eigenanteil</div>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Übernachtung?</label>
+                            <select id="st-overnight">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
+                        <div class="field-group">
+                            <label>Verpflegung inklusive?</label>
+                            <select id="st-catering">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="field-group">
-                        <label>Verpflegung inklusive?</label>
-                        <select id="st-catering">
-                            <option value="nein">Nein</option>
-                            <option value="ja">Ja</option>
-                        </select>
+                    <div class="flex-row">
+                        <div class="field-group">
+                            <label>Eigenanteil erforderlich?</label>
+                            <select id="st-own-share-yesno" onchange="toggleOwnShareAmount()">
+                                <option value="nein">Nein</option>
+                                <option value="ja">Ja</option>
+                            </select>
+                        </div>
+                        <div class="field-group own-share-fields" style="display:none;">
+                            <label>Anzahl Personen mit Eigenanteil</label>
+                            <input type="number" id="st-own-share-persons" value="0" min="0">
+                        </div>
+                        <div class="field-group own-share-fields" style="display:none;">
+                            <label>Eigenanteil pro Person (€)</label>
+                            <input type="number" step="0.01" id="st-own-share-amount" placeholder="10.00">
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex-row">
-                    <div class="field-group">
-                        <label>Eigenanteil erforderlich?</label>
-                        <select id="st-own-share-yesno" onchange="toggleOwnShareAmount()">
-                            <option value="nein">Nein</option>
-                            <option value="ja">Ja</option>
-                        </select>
+                <!-- SCHRITT 6: FERTIGSTELLUNG & VERSAND -->
+                <div class="wizard-step-content" id="wizard-step-6">
+                    <div class="form-section-title">6. Fertigstellung, Druck & E-Mail-Versand</div>
+                    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                        Deine Abrechnung ist bereit! Du kannst sie jetzt als PDF drucken/speichern oder einen E-Mail-Entwurf vorbereiten.
+                    </p>
+                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
+                        <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
+                            📄 PDF Drucken / Herunterladen
+                        </button>
+                        <button class="btn btn-secondary" style="background: #0284c7; padding: 12px;" onclick="sendEmailDraft()">
+                            ✉️ Per E-Mail versenden (E-Mail-Programm öffnen)
+                        </button>
                     </div>
-                    <div class="field-group own-share-fields" style="display:none;">
-                        <label>Anzahl Personen mit Eigenanteil</label>
-                        <input type="number" id="st-own-share-persons" value="0" min="0">
-                    </div>
-                    <div class="field-group own-share-fields" style="display:none;">
-                        <label>Eigenanteil pro Person (€)</label>
-                        <input type="number" step="0.01" id="st-own-share-amount" placeholder="10.00">
-                    </div>
+                </div>
+
+                <!-- WIZARD NAVIGATION BUTTONS -->
+                <div class="wizard-nav-buttons">
+                    <button class="btn btn-secondary" id="btn-prev" style="width: auto; padding: 8px 20px;" onclick="changeStep(-1)">⬅️ Zurück</button>
+                    <button class="btn btn-primary" id="btn-next" style="width: auto; padding: 8px 20px;" onclick="changeStep(1)">Weiter ➡️</button>
                 </div>
 
             </div>
@@ -407,6 +454,8 @@
 
         let settlementsData = [];
         let activeSettlementId = null;
+        let currentWizardStep = 1;
+        const totalWizardSteps = 6;
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -426,6 +475,7 @@
 
         window.onload = function() {
             setupFileEncoders();
+            showStep(1);
             const token = getStoredToken();
             if (!token) {
                 editGithubToken();
@@ -433,6 +483,53 @@
                 loadDataFromGitHub();
             }
         };
+
+        function showStep(step) {
+            if (step < 1 || step > totalWizardSteps) return;
+            currentWizardStep = step;
+
+            // Schritte umschalten
+            for (let i = 1; i <= totalWizardSteps; i++) {
+                document.getElementById(`wizard-step-${i}`).classList.toggle('active', i === currentWizardStep);
+            }
+
+            // Buttons anpassen
+            document.getElementById('btn-prev').style.display = currentWizardStep === 1 ? 'none' : 'inline-flex';
+            document.getElementById('btn-next').style.display = currentWizardStep === totalWizardSteps ? 'none' : 'inline-flex';
+
+            // Fortschrittsleiste aktualisieren
+            const titles = [
+                "1. Allgemeine Angaben",
+                "2. Teilnehmer & Funktionen",
+                "3. Fahrt & Fahrzeuge",
+                "4. Meldegeld & Zahlungen",
+                "5. Übernachtung & Eigenanteil",
+                "6. Abschluss & Versand"
+            ];
+            document.getElementById('step-indicator').innerText = `Schritt ${currentWizardStep} von ${totalWizardSteps}: ${titles[currentWizardStep - 1]}`;
+            const percentage = (currentWizardStep / totalWizardSteps) * 100;
+            document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
+            
+            // Zum Seitenanfang des Inhalts scrollen
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function changeStep(direction) {
+            if (direction === 1) {
+                // Vor dem Weiterblättern Kurvencheck auf Schritt 1
+                if (currentWizardStep === 1) {
+                    const date = document.getElementById('st-date').value;
+                    const location = document.getElementById('st-location').value.trim();
+                    const event = document.getElementById('st-event').value.trim();
+                    if (!date || !location || !event) {
+                        alert("Bitte fülle Datum, Ort und Veranstaltung aus, bevor du fortfährst.");
+                        return;
+                    }
+                }
+                saveFormLocal(); // Zwischenspeichern bei jedem Weiterklicken
+            }
+            showStep(currentWizardStep + direction);
+        }
 
         function editGithubToken() {
             const currentToken = getStoredToken();
@@ -558,19 +655,11 @@
             const feeReceiptYesNo = document.getElementById('st-fee-receipt-yesno').value;
 
             let missingFiles = [];
-
-            if (!fuelData) {
-                missingFiles.push("• Tankquittung / Kraftstoffbeleg");
-            }
-            if (feeReceiptYesNo === 'ja' && !feeData) {
-                missingFiles.push("• Meldegeldquittung");
-            }
+            if (!fuelData) missingFiles.push("• Tankquittung / Kraftstoffbeleg");
+            if (feeReceiptYesNo === 'ja' && !feeData) missingFiles.push("• Meldegeldquittung");
 
             if (missingFiles.length > 0) {
-                const msg = "Achtung! Folgende Belege fehlen derzeit noch:\n\n" + 
-                            missingFiles.join("\n") + 
-                            "\n\nMöchtest du trotzdem ohne diese Belege fortfahren oder abbrechen, um Dateien hochzuladen?";
-                return confirm(msg);
+                return confirm("Achtung! Folgende Belege fehlen derzeit noch:\n\n" + missingFiles.join("\n") + "\nMöchtest du trotzdem ohne diese Belege fortfahren?");
             }
             return true;
         }
@@ -704,7 +793,6 @@
 
             document.getElementById('form-heading').innerText = "Neue Abrechnung Erfassen";
             document.getElementById('btn-delete-st').style.display = 'none';
-            document.getElementById('btn-print-st').style.display = 'none';
 
             document.getElementById('st-id').value = '';
             document.getElementById('st-date').value = getTodayISO();
@@ -744,6 +832,7 @@
             document.getElementById('st-own-share-amount').value = '';
 
             toggleOwnShareAmount();
+            showStep(1);
         }
 
         function selectSettlement(id) {
@@ -755,7 +844,6 @@
 
             document.getElementById('form-heading').innerText = "Abrechnung Bearbeiten";
             document.getElementById('btn-delete-st').style.display = 'inline-block';
-            document.getElementById('btn-print-st').style.display = 'inline-block';
 
             document.getElementById('st-id').value = s.id;
             document.getElementById('st-date').value = s.date || getTodayISO();
@@ -807,6 +895,7 @@
             document.getElementById('st-own-share-amount').value = s.ownShareAmount || '';
 
             toggleOwnShareAmount();
+            showStep(1);
         }
 
         function saveFormLocal() {
@@ -815,10 +904,7 @@
             const location = document.getElementById('st-location').value.trim();
             const event = document.getElementById('st-event').value.trim();
 
-            if (!date || !location || !event) {
-                alert("Bitte Datum, Ort und Veranstaltung angeben.");
-                return;
-            }
+            if (!date || !location || !event) return;
 
             const mappingCards = document.querySelectorAll('.car-mapping-card');
             const carMappings = [];
@@ -870,8 +956,7 @@
             }
 
             renderSidebarList();
-            selectSettlement(activeSettlementId);
-            setStatus('Änderungen ungespeichert', '#e67e22');
+            setStatus('Zwischenstand gespeichert', '#28a745');
         }
 
         function deleteSettlement() {
@@ -882,14 +967,26 @@
                 settlementsData = settlementsData.filter(x => x.id !== id);
                 createNewSettlement();
                 renderSidebarList();
-                setStatus('Abrechnung gelöscht (noch nicht gespeichert)', '#e67e22');
+                setStatus('Abrechnung gelöscht', '#e67e22');
             }
+        }
+
+        function sendEmailDraft() {
+            const eventName = document.getElementById('st-event').value || 'Wettkampf';
+            const location = document.getElementById('st-location').value || '';
+            const responsible = document.getElementById('st-responsible').value || '';
+            
+            const subject = encodeURIComponent(`Abrechnung: ${eventName} (${location})`);
+            const body = encodeURIComponent(
+                `Hallo,\n\nim Anhang findest du die Wettkampfabrechnung für "${eventName}" in ${location}.\n\nVerantwortlich: ${responsible}\n\nViele Grüße`
+            );
+            
+            window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
         /* ERSTELLUNG DER MEHRSEITIGEN FORMULAR-PDF */
         async function printCurrentSettlement() {
-            if (!checkUploadedFilesAlert()) return;
-
+            saveFormLocal();
             const id = document.getElementById('st-id').value;
             const s = settlementsData.find(x => x.id === id);
             if (!s) return;
