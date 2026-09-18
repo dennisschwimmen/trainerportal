@@ -40,8 +40,8 @@
       "feeReceiptData": "",
       "overnight": "nein",
       "catering": "nein",
-      "ownShareYesNo": "nein",
-      "ownShareAmount": 0
+      "ownShareYesNo": "ja",
+      "ownShareAmount": 15
     }
   ]
 }
