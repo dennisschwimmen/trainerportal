@@ -80,13 +80,19 @@
         .settlement-item {
             background: white; border: 1px solid var(--border-color); border-radius: 6px;
             padding: 10px; cursor: pointer; transition: all 0.15s; border-left: 4px solid var(--accent);
-            box-sizing: border-box; width: 100%; max-width: 100%; overflow-wrap: break-word; word-break: break-word;
+            box-sizing: border-box; width: 100%; position: relative;
         }
         .settlement-item:hover, .settlement-item.active {
             border-color: var(--primary); background: #f0f7ff; transform: translateX(2px);
         }
-        .settlement-item .item-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; line-height: 1.25; }
+        .settlement-item .item-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; line-height: 1.25; padding-right: 20px; }
         .settlement-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+        
+        .status-dot {
+            position: absolute; top: 10px; right: 10px; width: 10px; height: 10px; border-radius: 50%;
+        }
+        .status-dot.open { background-color: var(--danger); }
+        .status-dot.done { background-color: var(--success); }
 
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
@@ -199,10 +205,6 @@
             <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
         </div>
 
-        <div class="btn-row">
-            <button class="btn btn-primary" style="background-color: var(--accent);" onclick="printCurrentSettlement()">📄 PDF Download</button>
-        </div>
-
         <div class="btn-row" style="margin-bottom: 12px;">
             <button class="btn btn-secondary" style="background:#475569;" onclick="editGithubToken()">🔑 Token anpassen</button>
         </div>
@@ -237,12 +239,13 @@
                 </div>
 
                 <!-- FORTSCHRITTSLEISTE -->
-                <div class="wizard-step-indicator" id="step-indicator">Schritt 1 von 6: Allgemeine Angaben</div>
+                <div class="wizard-step-indicator" id="step-indicator">Schritt 1 von 5: Allgemeine Angaben</div>
                 <div class="progress-bar-container">
-                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 16.6%;"></div>
+                    <div class="progress-bar-fill" id="progress-bar-fill" style="width: 20%;"></div>
                 </div>
 
                 <input type="hidden" id="st-id">
+                <input type="hidden" id="st-is-finished" value="false">
 
                 <!-- SCHRITT 1 -->
                 <div class="wizard-step-content active" id="wizard-step-1">
@@ -388,9 +391,9 @@
                     </div>
                 </div>
 
-                <!-- SCHRITT 5 -->
+                <!-- SCHRITT 5: ABSCHLUSS & EINREICHUNG -->
                 <div class="wizard-step-content" id="wizard-step-5">
-                    <div class="form-section-title">5. Übernachtung, Verpflegung & Eigenanteil</div>
+                    <div class="form-section-title">5. Übernachtung, Verpflegung & Abschluss</div>
                     <div class="flex-row">
                         <div class="field-group">
                             <label>Übernachtung?</label>
@@ -424,28 +427,19 @@
                             <input type="number" step="0.01" id="st-own-share-amount" placeholder="10.00">
                         </div>
                     </div>
-                </div>
 
-                <!-- SCHRITT 6: FERTIGSTELLUNG & HINWEISE -->
-                <div class="wizard-step-content" id="wizard-step-6">
-                    <div class="form-section-title">6. Fertigstellung, Druck & Einreichung</div>
-                    
-                    <div class="info-box">
+                    <div class="info-box" style="margin-top:20px;">
                         <b>Wichtige Hinweise zur Einreichung:</b><br>
                         • Bitte senden Sie die erstellten Dokumente per E-Mail an den <b>Kassenwart</b>.<br>
-                        • Bei Wettkämpfen mit <b>Übernachtung</b> müssen zwingend auch die Rechnungen vom Hotel bzw. der Jugendherberge eingereicht werden!
+                        • Stellen Sie sicher, dass mindestens ein Beleg (Tankquittung oder Meldegeldquittung) hochgeladen wurde, bevor Sie die Abrechnung abschließen.
                     </div>
 
-                    <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
-                        Ihre Abrechnung ist komplett erfasst. Sie können das Dokument jetzt als PDF drucken/speichern und die Daten in der Cloud abspeichern.
-                    </p>
-
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
+                        <button class="btn btn-success" style="padding: 12px; font-size: 0.95rem;" onclick="finalizeSettlement()">
+                            ✅ Abrechnung Abschließen
+                        </button>
                         <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
                             📄 PDF Drucken / Herunterladen
-                        </button>
-                        <button class="btn btn-success" style="padding: 12px;" onclick="saveFormLocalAndCloud()">
-                            💾 Abrechnung jetzt speichern
                         </button>
                     </div>
                 </div>
@@ -473,7 +467,7 @@
         let settlementsData = [];
         let activeSettlementId = null;
         let currentWizardStep = 1;
-        const totalWizardSteps = 6;
+        const totalWizardSteps = 5;
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('open');
@@ -518,8 +512,7 @@
                 "2. Teilnehmer & Funktionen",
                 "3. Fahrt & Fahrzeuge",
                 "4. Meldegeld & Zahlungen",
-                "5. Übernachtung & Eigenanteil",
-                "6. Abschluss & Einreichung"
+                "5. Übernachtung & Abschluss"
             ];
             document.getElementById('step-indicator').innerText = `Schritt ${currentWizardStep} von ${totalWizardSteps}: ${titles[currentWizardStep - 1]}`;
             const percentage = (currentWizardStep / totalWizardSteps) * 100;
@@ -662,19 +655,21 @@
             setStatus('Beleg entfernt (ungespeichert)', '#e67e22');
         }
 
-        function checkUploadedFilesAlert() {
+        function finalizeSettlement() {
             const fuelData = document.getElementById('st-fuel-receipt-data').value;
             const feeData = document.getElementById('st-fee-receipt-data').value;
-            const feeReceiptYesNo = document.getElementById('st-fee-receipt-yesno').value;
 
-            let missingFiles = [];
-            if (!fuelData) missingFiles.push("• Tankquittung / Kraftstoffbeleg");
-            if (feeReceiptYesNo === 'ja' && !feeData) missingFiles.push("• Meldegeldquittung");
-
-            if (missingFiles.length > 0) {
-                return confirm("Achtung! Folgende Belege fehlen derzeit noch:\n\n" + missingFiles.join("\n") + "\nMöchtest du trotzdem ohne diese Belege fortfahren?");
+            // Prüfung: Mindestens 1 Anhang muss vorhanden sein
+            if (!fuelData && !feeData) {
+                const proceed = confirm("Warnung: Es ist kein Anhang (weder Tank- noch Meldegeldquittung) hochgeladen.\n\nMöchten Sie trotzdem fortfahren und die Abrechnung abschließen, oder lieber noch bearbeiten?");
+                if (!proceed) {
+                    return; // Abbrechen, Benutzer kann Anhänge ergänzen
+                }
             }
-            return true;
+
+            document.getElementById('st-is-finished').value = "true";
+            saveFormLocalAndCloud();
+            alert("Abrechnung wurde erfolgreich als abgeschlossen markiert!");
         }
 
         async function loadDataFromGitHub() {
@@ -718,8 +713,6 @@
         }
 
         async function saveDataToGitHub() {
-            if (!checkUploadedFilesAlert()) return;
-
             const token = getStoredToken();
             if (!token) { alert("Bitte erst einen Token eingeben!"); editGithubToken(); return; }
 
@@ -792,7 +785,12 @@
                     dateDisplay += ` - ${formatDateDE(s.endDate)}`;
                 }
 
+                const isDone = s.isFinished === true || s.isFinished === "true";
+                const dotClass = isDone ? "done" : "open";
+                const dotTitle = isDone ? "Abgeschlossen" : "Offen";
+
                 item.innerHTML = `
+                    <div class="status-dot ${dotClass}" title="${dotTitle}"></div>
                     <div class="item-title">${s.event || 'Unbenannter Wettkampf'}</div>
                     <div class="item-sub">📍 ${s.location || '-'} | 📅 ${dateDisplay}</div>
                 `;
@@ -808,6 +806,7 @@
             document.getElementById('btn-delete-st').style.display = 'none';
 
             document.getElementById('st-id').value = '';
+            document.getElementById('st-is-finished').value = 'false';
             document.getElementById('st-date').value = getTodayISO();
             document.getElementById('st-end-date').value = '';
             document.getElementById('st-location').value = '';
@@ -859,6 +858,7 @@
             document.getElementById('btn-delete-st').style.display = 'inline-block';
 
             document.getElementById('st-id').value = s.id;
+            document.getElementById('st-is-finished').value = s.isFinished || 'false';
             document.getElementById('st-date').value = s.date || getTodayISO();
             document.getElementById('st-end-date').value = s.endDate || '';
             document.getElementById('st-location').value = s.location || '';
@@ -933,6 +933,7 @@
 
             const dataObj = {
                 id: id || 'st_' + Date.now(),
+                isFinished: document.getElementById('st-is-finished').value === 'true',
                 date,
                 endDate: document.getElementById('st-end-date').value,
                 location,
