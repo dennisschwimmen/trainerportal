@@ -46,6 +46,41 @@
       "ownShareYesNo": "ja",
       "ownSharePersons": 13,
       "ownShareAmount": 15
+    },
+    {
+      "id": "st_1789734353821",
+      "date": "2026-09-18",
+      "endDate": "",
+      "location": "Leipzig",
+      "responsible": "Dennis Schemmel",
+      "event": "Leipziger Schwimmen",
+      "kmRate": 0.3,
+      "countAthletes": 0,
+      "countCoaches": 0,
+      "drivers": "",
+      "coachesNames": "",
+      "referees": "",
+      "departure": "",
+      "arrival": "",
+      "carMappings": [
+        {
+          "plate": "WB-XL 2222",
+          "driver": "",
+          "km": 300,
+          "fuel": 60
+        }
+      ],
+      "fuelReceiptData": "",
+      "feeAmount": 0,
+      "paidTo": "",
+      "feeReceiptYesNo": "ja",
+      "feeStatus": "bezahlt",
+      "feeReceiptData": "",
+      "overnight": "nein",
+      "catering": "nein",
+      "ownShareYesNo": "nein",
+      "ownSharePersons": 0,
+      "ownShareAmount": 0
     }
   ]
 }
