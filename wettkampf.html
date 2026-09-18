@@ -235,7 +235,7 @@
         </div>
 
         <div class="btn-row" style="margin-bottom: 12px;">
-            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
+            <button class="btn btn-secondary" style="background:#475569;" onclick="editGithubToken()">🔑 Token anpassen</button>
         </div>
 
         <input type="text" id="search-input" class="search-box" placeholder="Suchen nach Ort, Event..." oninput="renderSidebarList()">
@@ -438,24 +438,6 @@
         <table class="print-table" id="pr-table"></table>
     </div>
 
-    <!-- TOKEN MODAL -->
-    <div id="token-modal" class="modal-overlay">
-        <div class="modal" style="background:white; padding:25px; border-radius:8px; width:90%; max-width:480px;">
-            <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Token eingeben</h3>
-            <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
-                Gib hier deinen Personal Access Token (Classic mit Scope 'repo') ein.
-            </p>
-            <div class="field-group" style="margin-bottom:20px;">
-                <label>Personal Access Token</label>
-                <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
-            </div>
-            <div style="display:flex; gap:10px; justify-content:flex-end;">
-                <button class="btn btn-secondary" style="width:auto; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
-                <button class="btn btn-success" style="width:auto; padding:8px 14px;" onclick="saveGithubToken()">Speichern</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const REPO_OWNER = "dennisschwimmen";
         const REPO_NAME = "trainerportal";
@@ -476,29 +458,21 @@
             setupFileEncoders();
             const token = getStoredToken();
             if (!token) {
-                openTokenModal();
+                editGithubToken();
             } else {
                 loadDataFromGitHub();
             }
         };
 
-        function openTokenModal() {
-            document.getElementById('github-token-input').value = getStoredToken();
-            document.getElementById('token-modal').classList.add('active');
-        }
-
-        function closeTokenModal() {
-            document.getElementById('token-modal').classList.remove('active');
-        }
-
-        function saveGithubToken() {
-            const val = document.getElementById('github-token-input').value.trim();
-            if (val) {
-                localStorage.setItem('trainerportal_github_token', val);
-                closeTokenModal();
+        function editGithubToken() {
+            const currentToken = getStoredToken();
+            const newToken = prompt("Bitte Personal Access Token (Classic mit Scope 'repo') eingeben:", currentToken);
+            
+            if (newToken !== null && newToken.trim() !== "") {
+                localStorage.setItem('trainerportal_github_token', newToken.trim());
                 loadDataFromGitHub();
-            } else {
-                alert("Bitte einen gültigen Token eingeben.");
+            } else if (!currentToken) {
+                setStatus('Kein Token hinterlegt!', '#dc3545');
             }
         }
 
@@ -587,7 +561,6 @@
             const token = getStoredToken();
             if (!token) {
                 setStatus('Kein Token hinterlegt!', '#dc3545');
-                openTokenModal();
                 return;
             }
 
@@ -600,7 +573,7 @@
 
                 if (response.status === 401 || response.status === 403) {
                     alert("Token ungültig oder abgelaufen!");
-                    openTokenModal();
+                    editGithubToken();
                     throw new Error("Authentifizierungsfehler");
                 }
 
@@ -631,7 +604,7 @@
             const token = getStoredToken();
             if (!token) {
                 alert("Bitte erst einen Token eingeben!");
-                openTokenModal();
+                editGithubToken();
                 return;
             }
 
