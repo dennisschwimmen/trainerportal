@@ -451,18 +451,15 @@
                         <b>Hinweise zum Abschluss:</b><br>
                         • Über die Buttons oben können Sie den Status jederzeit zwischen „Offen“ und „Abgeschlossen“ umschalten.<br>
                         • Nach dem Ändern bitte auf <b>„💾 Status & Daten Speichern“</b> klicken.<br>
-                        • Nach dem Speichern können Sie die vollständige Rechnung inklusive aller Belege als PDF drucken oder direkt per E-Mail versenden.
+                        • Die Dokumente (Rechnung & Belege) sollen per E-Mail an den Kassenwart gesendet werden.
                     </div>
 
-                    <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
-                        <button class="btn btn-success" style="padding: 12px; font-size: 0.95rem;" onclick="saveFormLocalAndCloud()">
+                    <div style="display: flex; gap: 12px; max-width: 600px; margin: 20px 0;">
+                        <button class="btn btn-success" style="padding: 12px; font-size: 0.95rem; flex: 1;" onclick="saveFormLocalAndCloud()">
                             💾 Status & Daten Speichern
                         </button>
-                        <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
+                        <button class="btn btn-primary" style="padding: 12px; font-size: 0.95rem; flex: 1;" onclick="printCurrentSettlement()">
                             📄 PDF Drucken / Herunterladen
-                        </button>
-                        <button class="btn btn-secondary" style="padding: 12px; background-color: var(--accent);" onclick="sendSettlementByEmail()">
-                            ✉️ Dokumente per E-Mail versenden
                         </button>
                     </div>
                 </div>
@@ -949,7 +946,6 @@
 
             toggleOwnShareAmount();
             
-            // Wenn abgeschlossen, direkt Schritt 6 anzeigen, ansonsten Schritt 1
             if (isDone) {
                 showStep(6);
             } else {
@@ -1043,28 +1039,6 @@
                 renderSidebarList();
                 setStatus('Abrechnung gelöscht', '#e67e22');
             }
-        }
-
-        function sendSettlementByEmail() {
-            saveFormLocal();
-            const id = document.getElementById('st-id').value;
-            const s = settlementsData.find(x => x.id === id);
-            if (!s) {
-                alert("Bitte wähle oder erstelle zuerst eine Abrechnung.");
-                return;
-            }
-
-            const subject = encodeURIComponent(`Wettkampfabrechnung: ${s.event || 'Wettkampf'} (${s.location || ''})`);
-            const bodyText = encodeURIComponent(
-                `Hallo,\n\nanbei/anliegend die Wettkampfabrechnung für:\n\n` +
-                `Veranstaltung: ${s.event || '-'}\n` +
-                `Ort: ${s.location || '-'}\n` +
-                `Verantwortlicher: ${s.responsible || '-'}\n` +
-                `Datum: ${formatDateDE(s.date)}\n\n` +
-                `Bitte drucken Sie die Abrechnung im Portal (als PDF) aus und fügen Sie die Belege bei.\n\nViele Grüße\n${s.responsible || ''}`
-            );
-
-            window.location.href = `mailto:?subject=${subject}&body=${bodyText}`;
         }
 
         async function printCurrentSettlement() {
