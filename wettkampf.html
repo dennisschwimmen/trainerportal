@@ -234,9 +234,15 @@
                     </div>
                 </div>
 
-                <div class="field-group">
-                    <label>Veranstaltung / Verein *</label>
-                    <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
+                <div class="flex-row">
+                    <div class="field-group">
+                        <label>Veranstaltung / Verein *</label>
+                        <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
+                    </div>
+                    <div class="field-group" style="max-width: 220px;">
+                        <label>Kilometerpauschale (€) *</label>
+                        <input type="number" step="0.01" id="st-km-rate" value="0.30">
+                    </div>
                 </div>
 
                 <!-- 2. TEILNEHMER & PERSONENGRUPPEN -->
@@ -706,6 +712,7 @@
             document.getElementById('st-location').value = '';
             document.getElementById('st-responsible').value = '';
             document.getElementById('st-event').value = '';
+            document.getElementById('st-km-rate').value = '0.30';
             document.getElementById('st-count-athletes').value = 0;
             document.getElementById('st-count-coaches').value = 0;
             
@@ -756,6 +763,7 @@
             document.getElementById('st-location').value = s.location || '';
             document.getElementById('st-responsible').value = s.responsible || '';
             document.getElementById('st-event').value = s.event || '';
+            document.getElementById('st-km-rate').value = s.kmRate !== undefined ? s.kmRate : 0.30;
             document.getElementById('st-count-athletes').value = s.countAthletes || 0;
             document.getElementById('st-count-coaches').value = s.countCoaches || 0;
 
@@ -831,6 +839,7 @@
                 location,
                 responsible: document.getElementById('st-responsible').value.trim(),
                 event,
+                kmRate: parseFloat(document.getElementById('st-km-rate').value) || 0.30,
                 countAthletes: parseInt(document.getElementById('st-count-athletes').value, 10) || 0,
                 countCoaches: parseInt(document.getElementById('st-count-coaches').value, 10) || 0,
                 drivers: document.getElementById('st-drivers').value.trim(),
@@ -894,6 +903,7 @@
             }
 
             const todayFormatted = formatDateDE(getTodayISO());
+            const kmRate = s.kmRate !== undefined ? s.kmRate : 0.30;
 
             const ownSharePersons = s.ownSharePersons || 0;
             const ownShareSingle = s.ownShareAmount || 0;
@@ -906,11 +916,11 @@
             let carRowsHtml = '';
             if (s.carMappings && s.carMappings.length > 0) {
                 s.carMappings.forEach((c, idx) => {
-                    const kmCalc = (c.km || 0) * 0.30;
+                    const kmCalc = (c.km || 0) * kmRate;
                     carRowsHtml += `
                         <tr>
                             <td><b>Auto ${idx + 1}:</b> ${c.plate || '-'} (Fahrer: ${c.driver || '-'})</td>
-                            <td>${c.km || 0} km × 0,30 € = <b>${kmCalc.toFixed(2)} €</b> (Tankbeleg: ${(c.fuel || 0).toFixed(2)} €)</td>
+                            <td>${c.km || 0} km × ${kmRate.toFixed(2)} € = <b>${kmCalc.toFixed(2)} €</b> (Tankbeleg: ${(c.fuel || 0).toFixed(2)} €)</td>
                         </tr>
                     `;
                 });
@@ -964,7 +974,7 @@
                     </tr>
                 </table>
 
-                <div class="pdf-section-title">Fahrkosten & KFZ-Übersicht</div>
+                <div class="pdf-section-title">Fahrkosten & KFZ-Übersicht (Pauschale: ${kmRate.toFixed(2)} € / km)</div>
                 <table class="pdf-table">
                     ${carRowsHtml}
                 </table>
@@ -998,7 +1008,7 @@
 
                 let autoBlocksHtml = '';
                 s.carMappings.forEach(c => {
-                    const kmCalc = (c.km || 0) * 0.30;
+                    const kmCalc = (c.km || 0) * kmRate;
                     autoBlocksHtml += `
                         <div style="border: 1px solid #000; padding: 10px; margin-bottom: 15px;">
                             <h3 style="margin: 0 0 8px 0; font-size: 11pt; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 4px;">
@@ -1015,7 +1025,7 @@
                                 </tr>
                                 <tr>
                                     <td colspan="2" style="padding: 6px 0; font-size: 11pt;">
-                                        <b>${c.km || 0} km × 0,30 € = ${kmCalc.toFixed(2)} €</b>
+                                        <b>${c.km || 0} km × ${kmRate.toFixed(2)} € = ${kmCalc.toFixed(2)} €</b>
                                     </td>
                                 </tr>
                                 <tr>
