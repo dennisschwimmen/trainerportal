@@ -29,7 +29,6 @@
             overflow: hidden;
         }
 
-        /* SIDEBAR LINKS */
         #sidebar {
             width: 340px;
             background-color: var(--bg-sidebar);
@@ -51,27 +50,12 @@
             border-bottom: 2px solid var(--primary);
         }
 
-        .btn-row {
-            display: flex;
-            gap: 6px;
-            margin-bottom: 6px;
-        }
+        .btn-row { display: flex; gap: 6px; margin-bottom: 6px; }
 
         .btn {
-            width: 100%;
-            color: white;
-            border: none;
-            padding: 8px 6px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 4px;
-            text-align: center;
-            text-decoration: none;
+            width: 100%; color: white; border: none; padding: 8px 6px; border-radius: 6px;
+            cursor: pointer; font-weight: bold; font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center; gap: 4px; text-align: center; text-decoration: none;
         }
         .btn-primary { background-color: var(--primary); }
         .btn-primary:hover { background-color: var(--primary-hover); }
@@ -83,135 +67,81 @@
         .btn-secondary:hover { background: #475569; }
 
         .search-box {
-            width: 100%;
-            padding: 8px 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 10px;
-            font-size: 0.85rem;
-            outline: none;
+            width: 100%; padding: 8px 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; margin-bottom: 10px; font-size: 0.85rem; outline: none;
         }
 
-        .settlement-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            overflow-y: auto;
-            flex: 1;
-            margin-top: 5px;
-        }
+        .settlement-list { display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex: 1; margin-top: 5px; }
 
         .settlement-item {
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.15s;
-            border-left: 4px solid var(--accent);
+            background: white; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 10px; cursor: pointer; transition: all 0.15s; border-left: 4px solid var(--accent);
         }
         .settlement-item:hover, .settlement-item.active {
-            border-color: var(--primary);
-            background: #f0f7ff;
-            transform: translateX(2px);
+            border-color: var(--primary); background: #f0f7ff; transform: translateX(2px);
         }
         .settlement-item .item-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; }
         .settlement-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
 
-        /* RECHTER BEREICH - EINGABEMASKE */
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
         header {
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #fafbfc;
+            padding: 12px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
         .header-left { display: flex; align-items: center; gap: 10px; }
-        
-        .menu-toggle-btn {
-            display: none;
-            background: white;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 5px 10px;
-            font-size: 1.1rem;
-            cursor: pointer;
-        }
-
-        .home-btn {
-            display: inline-flex; align-items: center; justify-content: center;
-            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
-            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
-            text-decoration: none; transition: all 0.2s;
-        }
+        .menu-toggle-btn { display: none; background: white; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; font-size: 1.1rem; cursor: pointer; }
+        .home-btn { display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary); text-decoration: none; transition: all 0.2s; }
         .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
         .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
 
         #main-content { flex: 1; padding: 25px; overflow-y: auto; background-color: #ffffff; }
-
-        .form-container {
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .form-section-title {
-            font-size: 0.95rem;
-            font-weight: bold;
-            color: var(--primary);
-            margin: 18px 0 10px 0;
-            padding-bottom: 4px;
-            border-bottom: 2px solid #e2e8f0;
-        }
+        .form-container { max-width: 900px; margin: 0 auto; }
+        .form-section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); margin: 18px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #e2e8f0; }
 
         .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .field-group input, .field-group select, .field-group textarea {
-            padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit;
-        }
-        .field-group input:focus, .field-group select:focus, .field-group textarea:focus {
-            border-color: var(--accent);
-        }
+        .field-group input, .field-group select, .field-group textarea { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit; }
 
         .flex-row { display: flex; gap: 12px; }
         .flex-row .field-group { flex: 1; }
 
         .car-mapping-card {
-            background: #f8fafc;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 10px;
-            margin-bottom: 8px;
-            display: flex;
-            gap: 10px;
-            align-items: center;
+            background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;
         }
 
-        /* PRINT STYLES */
+        /* DRUCK- / PDF-STYLES (DIN A4 DESIGN) */
         #print-area { display: none; }
+
         @media print {
             body * { visibility: hidden; }
             #print-area, #print-area * { visibility: visible; }
-            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; }
-            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; font-size: 11px; }
-            .print-table th { background-color: #f2f2f2; }
+            #print-area {
+                display: block !important; position: absolute; left: 0; top: 0; width: 100%;
+                background: white; color: black; font-family: Arial, sans-serif; font-size: 11pt;
+            }
+
+            .pdf-page { page-break-after: always; padding: 10mm; box-sizing: border-box; }
+            .pdf-header { text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 15px; }
+            .pdf-header h2 { margin: 0; font-size: 16pt; color: #000; text-transform: uppercase; }
+            .pdf-header p { margin: 2px 0 0 0; font-size: 10pt; color: #444; }
+
+            .pdf-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+            .pdf-table th, .pdf-table td { border: 1px solid #000; padding: 6px 8px; font-size: 10pt; vertical-align: top; }
+            .pdf-table th { background-color: #f0f0f0; text-align: left; }
+
+            .pdf-section-title { font-weight: bold; font-size: 11pt; margin-top: 15px; margin-bottom: 5px; background: #eee; padding: 4px; border: 1px solid #000; }
+            
+            .receipt-img { max-width: 100%; max-height: 23cm; display: block; margin: 10px auto; border: 1px solid #ccc; }
         }
 
-        /* MOBILE RESPONSIVE */
         @media (max-width: 768px) {
             body { flex-direction: column; position: relative; }
             header { padding: 8px 12px; }
             .menu-toggle-btn { display: block; }
             .breadcrumb { display: none; }
-
-            #sidebar {
-                position: absolute; top: 48px; left: 0; width: 300px;
-                height: calc(100vh - 48px); transform: translateX(-100%);
-                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
-            }
+            #sidebar { position: absolute; top: 48px; left: 0; width: 300px; height: calc(100vh - 48px); transform: translateX(-100%); box-shadow: 4px 0 10px rgba(0,0,0,0.1); }
             #sidebar.open { transform: translateX(0); }
             #main-content { padding: 12px; }
             .flex-row { flex-direction: column; gap: 0; }
@@ -243,7 +173,7 @@
         <div class="settlement-list" id="settlement-list"></div>
     </div>
 
-    <!-- RECHTER HAUPTBEREICH: FORMULAR -->
+    <!-- HAUPTBEREICH: FORMULAR -->
     <div id="content-wrapper">
         <header>
             <div class="header-left">
@@ -262,7 +192,7 @@
                     <h2 id="form-heading" style="color:var(--primary);">Abrechnung Erfassen</h2>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
-                        <button class="btn btn-secondary" id="btn-print-st" style="display:none; width:auto; padding:6px 12px;" onclick="printCurrentSettlement()">📄 Drucken</button>
+                        <button class="btn btn-secondary" id="btn-print-st" style="display:none; width:auto; padding:6px 12px;" onclick="printCurrentSettlement()">📄 PDF Drucken</button>
                         <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocal()">Übernehmen</button>
                     </div>
                 </div>
@@ -278,13 +208,13 @@
                     </div>
                     <div class="field-group">
                         <label>Ort / Schwimmhalle *</label>
-                        <input type="text" id="st-location" placeholder="z.B. Magdeburg">
+                        <input type="text" id="st-location" placeholder="z.B. Chemnitz">
                     </div>
                 </div>
 
                 <div class="field-group">
-                    <label>Veranstaltung *</label>
-                    <input type="text" id="st-event" placeholder="z.B. Landesmeisterschaften 2026">
+                    <label>Veranstaltung / Verein *</label>
+                    <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
                 </div>
 
                 <!-- 2. TEILNEHMER & PERSONENGRUPPEN -->
@@ -303,20 +233,20 @@
                 <div class="flex-row">
                     <div class="field-group">
                         <label>Fahrer (Namen, mit Komma getrennt) *</label>
-                        <input type="text" id="st-drivers" placeholder="z.B. Max Mustermann, Peter Müller" oninput="renderCarMappingFields()">
+                        <input type="text" id="st-drivers" placeholder="z.B. C. Ballas, U. Stephan" oninput="renderCarMappingFields()">
                     </div>
                     <div class="field-group">
                         <label>Betreuer (Namen)</label>
-                        <input type="text" id="st-coaches-names" placeholder="z.B. Sabine Schmidt">
+                        <input type="text" id="st-coaches-names" placeholder="z.B. S. Schmidt">
                     </div>
                     <div class="field-group">
                         <label>Kampfrichter (Namen)</label>
-                        <input type="text" id="st-referees" placeholder="z.B. Anna Meier">
+                        <input type="text" id="st-referees" placeholder="z.B. A. Meier">
                     </div>
                 </div>
 
                 <!-- 3. FAHRT, AUTOS & ZUORDNUNG -->
-                <div class="form-section-title">3. Fahrt & KFZ-Zuordnung (ab/bis Wittenberg)</div>
+                <div class="form-section-title">3. Fahrt, Fahrzeuge & Strecke (ab/bis Wittenberg)</div>
                 <div class="flex-row">
                     <div class="field-group">
                         <label>Abfahrt Wittenberg</label>
@@ -339,14 +269,10 @@
                             <option value="5">5 Autos</option>
                         </select>
                     </div>
-                    <div class="field-group">
-                        <label>Gefahrene Kilometer (gesamt)</label>
-                        <input type="number" id="st-km" placeholder="z.B. 180" min="0">
-                    </div>
                 </div>
 
                 <div class="field-group">
-                    <label>Fahrzeuge & Fahrerzuordnung:</label>
+                    <label>Fahrzeuge, Kilometer & Fahrerzuordnung:</label>
                     <div id="car-mappings-container"></div>
                 </div>
 
@@ -362,11 +288,11 @@
                 <div class="flex-row">
                     <div class="field-group">
                         <label>Höhe Meldegeld (€)</label>
-                        <input type="number" step="0.01" id="st-fee-amount" placeholder="0.00">
+                        <input type="number" step="0.01" id="st-fee-amount" placeholder="184.00">
                     </div>
                     <div class="field-group">
                         <label>Gezahlt an (Verein/Verband)</label>
-                        <input type="text" id="st-paid-to" placeholder="z.B. SV Magdeburg e.V.">
+                        <input type="text" id="st-paid-to" placeholder="z.B. Chemnitzer PSV e.V.">
                     </div>
                 </div>
 
@@ -374,15 +300,15 @@
                     <div class="field-group">
                         <label>Quittung vorhanden?</label>
                         <select id="st-fee-receipt-yesno">
-                            <option value="nein">Nein</option>
                             <option value="ja">Ja</option>
+                            <option value="nein">Nein</option>
                         </select>
                     </div>
                     <div class="field-group">
                         <label>Status Meldegeld</label>
                         <select id="st-fee-status">
-                            <option value="offen">Offen</option>
                             <option value="bezahlt">Bezahlt</option>
+                            <option value="offen">Offen</option>
                         </select>
                     </div>
                 </div>
@@ -431,12 +357,8 @@
         </div>
     </div>
 
-    <!-- DRUCKBEREICH -->
-    <div id="print-area">
-        <h2 id="pr-title" style="margin-bottom: 5px;">Wettkampfabrechnung</h2>
-        <div id="pr-subtitle" style="font-size: 12px; color: #555; margin-bottom: 15px;"></div>
-        <table class="print-table" id="pr-table"></table>
-    </div>
+    <!-- DRUCKBEREICH (PDF-GENERIERUNG) -->
+    <div id="print-area"></div>
 
     <script>
         const REPO_OWNER = "dennisschwimmen";
@@ -467,7 +389,6 @@
         function editGithubToken() {
             const currentToken = getStoredToken();
             const newToken = prompt("Bitte Personal Access Token (Classic mit Scope 'repo') eingeben:", currentToken);
-            
             if (newToken !== null && newToken.trim() !== "") {
                 localStorage.setItem('trainerportal_github_token', newToken.trim());
                 loadDataFromGitHub();
@@ -494,13 +415,14 @@
 
             const container = document.getElementById('car-mappings-container');
             
-            // Vorherige Werte sichern
             const currentInputs = container.querySelectorAll('.car-mapping-card');
             const currentValues = [];
             currentInputs.forEach(card => {
                 const plate = card.querySelector('.car-plate-input').value;
                 const driver = card.querySelector('.car-driver-select').value;
-                currentValues.push({ plate, driver });
+                const km = card.querySelector('.car-km-input').value;
+                const fuel = card.querySelector('.car-fuel-input').value;
+                currentValues.push({ plate, driver, km, fuel });
             });
 
             container.innerHTML = '';
@@ -509,6 +431,8 @@
                 const prev = existingMappings[i - 1] || currentValues[i - 1] || {};
                 const plateVal = prev.plate || '';
                 const driverVal = prev.driver || '';
+                const kmVal = prev.km || '';
+                const fuelVal = prev.fuel || '';
 
                 const card = document.createElement('div');
                 card.className = 'car-mapping-card';
@@ -520,14 +444,22 @@
                 });
 
                 card.innerHTML = `
-                    <div style="font-weight:bold; font-size:0.8rem; color:var(--primary); min-width:60px;">Auto ${i}:</div>
+                    <div style="font-weight:bold; font-size:0.8rem; color:var(--primary); min-width:55px;">Auto ${i}:</div>
                     <div class="field-group" style="flex:1; margin-bottom:0;">
                         <label style="font-size:0.72rem;">Kennzeichen</label>
-                        <input type="text" class="car-plate-input" placeholder="WB-XX ${100 + i}" value="${plateVal}">
+                        <input type="text" class="car-plate-input" placeholder="WB-XX 123" value="${plateVal}">
                     </div>
                     <div class="field-group" style="flex:1; margin-bottom:0;">
                         <label style="font-size:0.72rem;">Fahrer</label>
                         <select class="car-driver-select">${driverOptionsHtml}</select>
+                    </div>
+                    <div class="field-group" style="flex:1; margin-bottom:0;">
+                        <label style="font-size:0.72rem;">Kilometer</label>
+                        <input type="number" class="car-km-input" placeholder="350" value="${kmVal}">
+                    </div>
+                    <div class="field-group" style="flex:1; margin-bottom:0;">
+                        <label style="font-size:0.72rem;">Tankbeleg (€)</label>
+                        <input type="number" step="0.01" class="car-fuel-input" placeholder="55.00" value="${fuelVal}">
                     </div>
                 `;
                 container.appendChild(card);
@@ -559,10 +491,7 @@
 
         async function loadDataFromGitHub() {
             const token = getStoredToken();
-            if (!token) {
-                setStatus('Kein Token hinterlegt!', '#dc3545');
-                return;
-            }
+            if (!token) { setStatus('Kein Token hinterlegt!', '#dc3545'); return; }
 
             setStatus('Lade Wettkämpfe von GitHub...', '#2b5c8f');
 
@@ -602,42 +531,25 @@
 
         async function saveDataToGitHub() {
             const token = getStoredToken();
-            if (!token) {
-                alert("Bitte erst einen Token eingeben!");
-                editGithubToken();
-                return;
-            }
+            if (!token) { alert("Bitte erst einen Token eingeben!"); editGithubToken(); return; }
 
             setStatus('Speichere auf GitHub...', '#2b5c8f');
             const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
 
             try {
-                const getRes = await fetch(apiUrl, {
-                    headers: { "Authorization": `token ${token}` }
-                });
-                
-                let currentSha = "";
-                if (getRes.ok) {
-                    const fileData = await getRes.json();
-                    currentSha = fileData.sha;
-                }
+                const getRes = await fetch(apiUrl, { headers: { "Authorization": `token ${token}` } });
+                let currentSha = getRes.ok ? (await getRes.json()).sha : "";
 
                 const payloadData = { settlements: settlementsData };
                 const jsonString = JSON.stringify(payloadData, null, 2);
                 const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
 
-                const bodyPayload = {
-                    message: "Wettkampfabrechnungen via Web-App aktualisiert",
-                    content: contentBase64
-                };
+                const bodyPayload = { message: "Wettkampfabrechnungen via Web-App aktualisiert", content: contentBase64 };
                 if (currentSha) bodyPayload.sha = currentSha;
 
                 const putRes = await fetch(apiUrl, {
                     method: "PUT",
-                    headers: {
-                        "Authorization": `token ${token}`,
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Authorization": `token ${token}`, "Content-Type": "application/json" },
                     body: JSON.stringify(bodyPayload)
                 });
 
@@ -667,7 +579,6 @@
         function renderSidebarList() {
             const list = document.getElementById('settlement-list');
             list.innerHTML = '';
-
             const searchVal = document.getElementById('search-input').value.toLowerCase();
 
             const filtered = settlementsData.filter(s => {
@@ -685,7 +596,6 @@
                 const item = document.createElement('div');
                 item.className = 'settlement-item' + (s.id === activeSettlementId ? ' active' : '');
                 item.onclick = () => selectSettlement(s.id);
-
                 item.innerHTML = `
                     <div class="item-title">${s.event || 'Unbenannter Wettkampf'}</div>
                     <div class="item-sub">📍 ${s.location || '-'} | 📅 ${formatDateDE(s.date)}</div>
@@ -718,14 +628,13 @@
             document.getElementById('st-car-count').value = '1';
             renderCarMappingFields();
 
-            document.getElementById('st-km').value = '';
             document.getElementById('st-fuel-receipt-data').value = '';
             document.getElementById('fuel-receipt-preview').innerText = '';
 
             document.getElementById('st-fee-amount').value = '';
             document.getElementById('st-paid-to').value = '';
-            document.getElementById('st-fee-receipt-yesno').value = 'nein';
-            document.getElementById('st-fee-status').value = 'offen';
+            document.getElementById('st-fee-receipt-yesno').value = 'ja';
+            document.getElementById('st-fee-status').value = 'bezahlt';
             document.getElementById('st-fee-receipt-data').value = '';
             document.getElementById('fee-receipt-preview').innerText = '';
 
@@ -766,14 +675,13 @@
             document.getElementById('st-car-count').value = carMappings.length || 1;
             renderCarMappingFields(carMappings);
 
-            document.getElementById('st-km').value = s.km || '';
             document.getElementById('st-fuel-receipt-data').value = s.fuelReceiptData || '';
             document.getElementById('fuel-receipt-preview').innerText = s.fuelReceiptData ? '📎 Beleg geladen' : '';
 
             document.getElementById('st-fee-amount').value = s.feeAmount || '';
             document.getElementById('st-paid-to').value = s.paidTo || '';
-            document.getElementById('st-fee-receipt-yesno').value = s.feeReceiptYesNo || 'nein';
-            document.getElementById('st-fee-status').value = s.feeStatus || 'offen';
+            document.getElementById('st-fee-receipt-yesno').value = s.feeReceiptYesNo || 'ja';
+            document.getElementById('st-fee-status').value = s.feeStatus || 'bezahlt';
             document.getElementById('st-fee-receipt-data').value = s.feeReceiptData || '';
             document.getElementById('fee-receipt-preview').innerText = s.feeReceiptData ? '📎 Beleg geladen' : '';
 
@@ -801,8 +709,10 @@
             mappingCards.forEach(card => {
                 const plate = card.querySelector('.car-plate-input').value.trim();
                 const driver = card.querySelector('.car-driver-select').value.trim();
-                if (plate || driver) {
-                    carMappings.push({ plate, driver });
+                const km = parseFloat(card.querySelector('.car-km-input').value) || 0;
+                const fuel = parseFloat(card.querySelector('.car-fuel-input').value) || 0;
+                if (plate || driver || km > 0) {
+                    carMappings.push({ plate, driver, km, fuel });
                 }
             });
 
@@ -817,7 +727,6 @@
                 departure: document.getElementById('st-departure').value,
                 arrival: document.getElementById('st-arrival').value,
                 carMappings: carMappings,
-                km: parseFloat(document.getElementById('st-km').value) || 0,
                 fuelReceiptData: document.getElementById('st-fuel-receipt-data').value,
                 feeAmount: parseFloat(document.getElementById('st-fee-amount').value) || 0,
                 paidTo: document.getElementById('st-paid-to').value.trim(),
@@ -855,34 +764,168 @@
             }
         }
 
+        /* ERSTELLUNG DER MEHRSEITIGEN FORMULAR-PDF */
         function printCurrentSettlement() {
             const id = document.getElementById('st-id').value;
             const s = settlementsData.find(x => x.id === id);
             if (!s) return;
 
-            document.getElementById('pr-title').innerText = `Wettkampfabrechnung: ${s.event}`;
-            document.getElementById('pr-subtitle').innerText = `Ort: ${s.location} | Datum: ${formatDateDE(s.date)} | Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
+            const printArea = document.getElementById('print-area');
+            printArea.innerHTML = '';
 
-            let carStr = '-';
+            // SEITE 1: HAUPTABRECHNUNGS-FORMULAR (Wettkämpfe / Trainingslager Schwimmen)
+            const page1 = document.createElement('div');
+            page1.className = 'pdf-page';
+
+            let carRowsHtml = '';
             if (s.carMappings && s.carMappings.length > 0) {
-                carStr = s.carMappings.map((c, i) => `Auto ${i+1}: ${c.plate || 'Unbekannt'} (Fahrer: ${c.driver || 'Keiner'})`).join('<br>');
+                s.carMappings.forEach((c, idx) => {
+                    const kmCalc = (c.km || 0) * 0.30;
+                    carRowsHtml += `
+                        <tr>
+                            <td><b>Auto ${idx + 1}:</b> ${c.plate || '-'} (Fahrer: ${c.driver || '-'})</td>
+                            <td>${c.km || 0} km × 0,30 € = <b>${kmCalc.toFixed(2)} €</b> (Tankbeleg: ${(c.fuel || 0).toFixed(2)} €)</td>
+                        </tr>
+                    `;
+                });
+            } else {
+                carRowsHtml = `<tr><td colspan="2">Keine KFZ-Daten erfasst.</td></tr>`;
             }
 
-            const table = document.getElementById('pr-table');
-            table.innerHTML = `
-                <tr><th>Angabe</th><th>Wert</th></tr>
-                <tr><td><b>Veranstaltung / Ort</b></td><td>${s.event} (${s.location})</td></tr>
-                <tr><td><b>Datum</b></td><td>${formatDateDE(s.date)}</td></tr>
-                <tr><td><b>Teilnehmer</b></td><td>${s.countAthletes} Sportler, ${s.countCoaches} Betreuer</td></tr>
-                <tr><td><b>Fahrer</b></td><td>${s.drivers || '-'}</td></tr>
-                <tr><td><b>Betreuer</b></td><td>${s.coachesNames || '-'}</td></tr>
-                <tr><td><b>Kampfrichter</b></td><td>${s.referees || '-'}</td></tr>
-                <tr><td><b>Fahrzeuge & Fahrer</b></td><td>${carStr} <br><b>Gesamtstrecke:</b> ${s.km} km</td></tr>
-                <tr><td><b>Abfahrt / Ankunft (Wittenberg)</b></td><td>Abfahrt: ${formatDateTimeDE(s.departure)} <br> Ankunft: ${formatDateTimeDE(s.arrival)}</td></tr>
-                <tr><td><b>Meldegeld</b></td><td>Höhe: ${s.feeAmount} € | Bezahlt an: ${s.paidTo || '-'} <br> Status: ${s.feeStatus} | Quittung vorh.: ${s.feeReceiptYesNo}</td></tr>
-                <tr><td><b>Übernachtung / Verpflegung</b></td><td>Übernachtung: ${s.overnight} | Verpflegung: ${s.catering}</td></tr>
-                <tr><td><b>Eigenanteil</b></td><td>Erforderlich: ${s.ownShareYesNo} ${s.ownShareYesNo === 'ja' ? '(' + s.ownShareAmount + ' € / Person)' : ''}</td></tr>
+            page1.innerHTML = `
+                <div class="pdf-header">
+                    <h2>Wettkämpfe / Trainingslager Schwimmen</h2>
+                    <p>Zentrale Fahr- und Spesenabrechnung</p>
+                </div>
+
+                <table class="pdf-table">
+                    <tr>
+                        <td style="width:30%;"><b>Wann:</b></td>
+                        <td>${formatDateDE(s.date)}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Wo / Verein:</b></td>
+                        <td>${s.location || '-'} (${s.event || '-'})</td>
+                    </tr>
+                    <tr>
+                        <td><b>Fahrer / Betreuer / Kampfrichter:</b></td>
+                        <td>
+                            <b>Fahrer:</b> ${s.drivers || '-'}<br>
+                            <b>Betreuer:</b> ${s.coachesNames || '-'}<br>
+                            <b>Kampfrichter:</b> ${s.referees || '-'}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Teilnehmer, Anzahl:</b></td>
+                        <td>${s.countAthletes || 0} Sportler / ${s.countCoaches || 0} Betreuer</td>
+                    </tr>
+                    <tr>
+                        <td><b>Abfahrt in WB:</b></td>
+                        <td>${formatDateTimeDE(s.departure) || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Ankunft in WB:</b></td>
+                        <td>${formatDateTimeDE(s.arrival) || '-'}</td>
+                    </tr>
+                </table>
+
+                <div class="pdf-section-title">Fahrkosten & KFZ-Übersicht</div>
+                <table class="pdf-table">
+                    ${carRowsHtml}
+                </table>
+
+                <div class="pdf-section-title">Meldegeld & Abrechnung</div>
+                <table class="pdf-table">
+                    <tr>
+                        <td style="width:50%;"><b>Höhe Meldegeld:</b> ${s.feeAmount ? s.feeAmount.toFixed(2) + ' €' : '0,00 €'}</td>
+                        <td><b>Status / Quittung:</b> ${s.feeStatus || 'bezahlt'} (${s.feeReceiptYesNo === 'ja' ? 'Quittung vorhanden' : 'Keine Quittung'})</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><b>Gezahlt an:</b> ${s.paidTo || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td><b>Übernachtung / Verpflegung:</b> Übernachtung: ${s.overnight || 'nein'} | Verpflegung: ${s.catering || 'nein'}</td>
+                        <td><b>Eigenanteil:</b> ${s.ownShareYesNo === 'ja' ? s.ownShareAmount + ' € / Person' : 'Nein'}</td>
+                    </tr>
+                </table>
+
+                <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:10pt;">
+                    <div>Datum: ______________________</div>
+                    <div>Unterschrift Verantwortlicher: ______________________</div>
+                </div>
             `;
+            printArea.appendChild(page1);
+
+            // SEITE 2: FAHRKOSTENABRECHNUNG AUTO (PRO FAHRZEUG FORMULARBLATT)
+            if (s.carMappings && s.carMappings.length > 0) {
+                const page2 = document.createElement('div');
+                page2.className = 'pdf-page';
+
+                let autoBlocksHtml = '';
+                s.carMappings.forEach(c => {
+                    const kmCalc = (c.km || 0) * 0.30;
+                    autoBlocksHtml += `
+                        <div style="border: 1px solid #000; padding: 10px; margin-bottom: 15px;">
+                            <h3 style="margin: 0 0 8px 0; font-size: 11pt; text-transform: uppercase; border-bottom: 1px solid #000; padding-bottom: 4px;">
+                                Fahrkostenabrechnung Auto
+                            </h3>
+                            <table style="width: 100%; font-size: 10pt; line-height: 1.5;">
+                                <tr>
+                                    <td style="width: 50%;"><b>Datum:</b> ${formatDateDE(s.date)}</td>
+                                    <td><b>Veranstaltung:</b> ${s.event || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Verein:</b> ${s.paidTo || '-'}</td>
+                                    <td><b>Ort:</b> ${s.location || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="padding: 6px 0; font-size: 11pt;">
+                                        <b>${c.km || 0} km × 0,30 € = ${kmCalc.toFixed(2)} €</b>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><b>Fahrer:</b> ${c.driver || '-'}</td>
+                                    <td><b>Kennzeichen:</b> ${c.plate || '-'}</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2" style="font-size: 9pt; font-style: italic; margin-top: 4px;">
+                                        Die Erstattung der Reisekosten erfolgt in Höhe der beigefügten Tankquittung: <b>${(c.fuel || 0).toFixed(2)} €</b>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    `;
+                });
+
+                page2.innerHTML = `
+                    <div class="pdf-header">
+                        <h2>Fahrkostenabrechnung - Einzelnachweise</h2>
+                        <p>Anlage zur Wettkampfabrechnung ${s.event || ''}</p>
+                    </div>
+                    ${autoBlocksHtml}
+                `;
+                printArea.appendChild(page2);
+            }
+
+            // SEITE 3 FF.: BELEGE & QUITTUNGEN ANHÄNGEN (TANK- & MELDEGELDBELEGE)
+            const appendReceiptPage = (title, dataUrl) => {
+                if (!dataUrl) return;
+                const rPage = document.createElement('div');
+                rPage.className = 'pdf-page';
+                rPage.innerHTML = `
+                    <div class="pdf-header">
+                        <h2>Anhang: ${title}</h2>
+                        <p>${s.event || ''} (${formatDateDE(s.date)})</p>
+                    </div>
+                    <div style="text-align: center;">
+                        <img src="${dataUrl}" class="receipt-img" alt="${title}">
+                    </div>
+                `;
+                printArea.appendChild(rPage);
+            };
+
+            appendReceiptPage('Tankquittung', s.fuelReceiptData);
+            appendReceiptPage('Meldegeldquittung', s.feeReceiptData);
 
             setTimeout(() => { window.print(); }, 200);
         }
