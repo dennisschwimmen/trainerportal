@@ -1,3 +1,100 @@
-<html>
-    <iframe src="https://lsvsa.de/aktuelle-bildungsangebote/" width="100%" height="600px" style="border:none;"></iframe>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Meine Seite mit LSVSA-Einbindung</title>
+    <style>
+        /* Grundlayout für die gesamte Seite */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+
+        /* Linke Sidebar */
+        aside {
+            width: 250px;
+            background-color: #004080;
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+        aside h2 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 10px;
+        }
+        aside ul {
+            list-style: none;
+        }
+        aside li {
+            margin-bottom: 12px;
+        }
+        aside a {
+            color: white;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        aside a:hover {
+            background-color: rgba(255,255,255,0.15);
+        }
+
+        /* Rechter Inhaltsbereich */
+        main {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+        header {
+            padding: 20px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #ddd;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .content-frame {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Linke Sidebar mit Navigation -->
+    <aside>
+        <h2>Navigation</h2>
+        <ul>
+            <li><a href="#">Startseite</a></li>
+            <li><a href="https://lsvsa.de/aktuelle-bildungsangebote/" target="ansichts-fenster">LSVSA Bildungsangebote</a></li>
+            <!-- Du kannst hier weitere Links hinzufügen, die im iFrame geladen werden -->
+            <li><a href="#">Über mich</a></li>
+        </ul>
+    </aside>
+
+    <!-- Rechter Hauptbereich -->
+    <main>
+        <header>
+            LSVSA Kampfrichter-Termine
+        </header>
+        
+        <!-- Das iFrame, das standardmäßig die LSVSA-Seite anzeigt -->
+        <!-- target="ansichts-fenster" aus der Sidebar steuert dieses Fenster -->
+        <iframe name="ansichts-fenster" src="https://lsvsa.de/aktuelle-bildungsangebote/" class="content-frame"></iframe>
+    </main>
+
+</body>
 </html>
