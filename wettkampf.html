@@ -247,6 +247,7 @@
                 </div>
 
                 <input type="hidden" id="st-id">
+                <input type="hidden" id="st-is-finished" value="false">
 
                 <!-- SCHRITT 1 -->
                 <div class="wizard-step-content active" id="wizard-step-1">
@@ -395,16 +396,20 @@
                 <!-- SCHRITT 5: ABSCHLUSS & STATUS -->
                 <div class="wizard-step-content" id="wizard-step-5">
                     <div class="form-section-title">5. Übernachtung, Verpflegung & Status</div>
-                    <div class="flex-row">
-                        <div class="field-group">
-                            <label>Abrechnungs-Status</label>
-                            <select id="st-is-finished" style="font-weight: bold; color: var(--primary);">
-                                <option value="false">🔴 Offen / In Bearbeitung</option>
-                                <option value="true">🟢 Abgeschlossen</option>
-                            </select>
+                    
+                    <div class="field-group">
+                        <label>Abrechnungs-Status festlegen:</label>
+                        <div style="display: flex; gap: 10px; margin-top: 4px;">
+                            <button type="button" id="btn-status-open" class="btn btn-danger" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(false)">
+                                🔴 Offen / In Bearbeitung
+                            </button>
+                            <button type="button" id="btn-status-done" class="btn btn-success" style="flex:1; opacity:0.6;" onclick="setFinishedStatus(true)">
+                                🟢 Abgeschlossen
+                            </button>
                         </div>
                     </div>
-                    <div class="flex-row">
+
+                    <div class="flex-row" style="margin-top: 15px;">
                         <div class="field-group">
                             <label>Übernachtung?</label>
                             <select id="st-overnight">
@@ -440,7 +445,7 @@
 
                     <div class="info-box" style="margin-top:20px;">
                         <b>Hinweis zum Status:</b><br>
-                        • Sie können den Status hier jederzeit wieder von „Abgeschlossen“ auf „Offen“ zurückstellen, falls Änderungen oder Ergänzungen anfallen.<br>
+                        • Über die beiden Buttons oben können Sie jederzeit zwischen „Offen“ und „Abgeschlossen“ wechseln.<br>
                         • Nach dem Ändern bitte auf <b>„Übernehmen & Speichern“</b> klicken.
                     </div>
 
@@ -545,6 +550,27 @@
                 saveFormLocal(); 
             }
             showStep(currentWizardStep + direction);
+        }
+
+        function setFinishedStatus(isDone) {
+            document.getElementById('st-is-finished').value = isDone ? 'true' : 'false';
+            updateStatusButtonStyles(isDone);
+        }
+
+        function updateStatusButtonStyles(isDone) {
+            const btnOpen = document.getElementById('btn-status-open');
+            const btnDone = document.getElementById('btn-status-done');
+            if (isDone) {
+                btnOpen.style.opacity = '0.4';
+                btnDone.style.opacity = '1.0';
+                btnDone.style.boxShadow = '0 0 0 3px rgba(40,167,69,0.3)';
+                btnOpen.style.boxShadow = 'none';
+            } else {
+                btnOpen.style.opacity = '1.0';
+                btnDone.style.opacity = '0.4';
+                btnOpen.style.boxShadow = '0 0 0 3px rgba(220,53,69,0.3)';
+                btnDone.style.boxShadow = 'none';
+            }
         }
 
         function editGithubToken() {
@@ -804,7 +830,7 @@
             document.getElementById('btn-delete-st').style.display = 'none';
 
             document.getElementById('st-id').value = '';
-            document.getElementById('st-is-finished').value = 'false';
+            setFinishedStatus(false);
             document.getElementById('st-date').value = getTodayISO();
             document.getElementById('st-end-date').value = '';
             document.getElementById('st-location').value = '';
@@ -862,7 +888,7 @@
             document.getElementById('st-id').value = s.id;
             
             const isDone = s.isFinished === true || s.isFinished === "true";
-            document.getElementById('st-is-finished').value = isDone ? 'true' : 'false';
+            setFinishedStatus(isDone);
 
             document.getElementById('st-date').value = s.date || getTodayISO();
             document.getElementById('st-end-date').value = s.endDate || '';
@@ -913,7 +939,13 @@
             document.getElementById('st-own-share-amount').value = s.ownShareAmount || '';
 
             toggleOwnShareAmount();
-            showStep(1);
+            
+            // Wenn abgeschlossen, direkt Stufe 5 anzeigen, ansonsten Stufe 1
+            if (isDone) {
+                showStep(5);
+            } else {
+                showStep(1);
+            }
         }
 
         function saveFormLocal() {
