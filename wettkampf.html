@@ -200,15 +200,26 @@
                 <input type="hidden" id="st-id">
 
                 <!-- 1. ALLGEMEINE ANGABEN -->
-                <div class="form-section-title">1. Veranstaltung & Ort</div>
+                <div class="form-section-title">1. Veranstaltung, Ort & Verantwortlicher</div>
                 <div class="flex-row">
                     <div class="field-group">
-                        <label>Datum *</label>
+                        <label>Startdatum *</label>
                         <input type="date" id="st-date">
                     </div>
                     <div class="field-group">
+                        <label>Enddatum (falls mehrtägig)</label>
+                        <input type="date" id="st-end-date">
+                    </div>
+                </div>
+
+                <div class="flex-row">
+                    <div class="field-group">
                         <label>Ort / Schwimmhalle *</label>
                         <input type="text" id="st-location" placeholder="z.B. Chemnitz">
+                    </div>
+                    <div class="field-group">
+                        <label>Verantwortlicher (Name) *</label>
+                        <input type="text" id="st-responsible" placeholder="z.B. Max Mustermann">
                     </div>
                 </div>
 
@@ -347,9 +358,13 @@
                             <option value="ja">Ja</option>
                         </select>
                     </div>
-                    <div class="field-group" id="own-share-amount-group" style="display:none;">
-                        <label>Höhe Eigenanteil pro Person (€)</label>
-                        <input type="number" step="0.01" id="st-own-share-amount" placeholder="0.00">
+                    <div class="field-group own-share-fields" style="display:none;">
+                        <label>Anzahl Personen mit Eigenanteil</label>
+                        <input type="number" id="st-own-share-persons" value="0" min="0">
+                    </div>
+                    <div class="field-group own-share-fields" style="display:none;">
+                        <label>Eigenanteil pro Person (€)</label>
+                        <input type="number" step="0.01" id="st-own-share-amount" placeholder="10.00">
                     </div>
                 </div>
 
@@ -405,7 +420,8 @@
 
         function toggleOwnShareAmount() {
             const val = document.getElementById('st-own-share-yesno').value;
-            document.getElementById('own-share-amount-group').style.display = val === 'ja' ? 'flex' : 'none';
+            const fields = document.querySelectorAll('.own-share-fields');
+            fields.forEach(f => f.style.display = val === 'ja' ? 'flex' : 'none');
         }
 
         function renderCarMappingFields(existingMappings = []) {
@@ -596,9 +612,15 @@
                 const item = document.createElement('div');
                 item.className = 'settlement-item' + (s.id === activeSettlementId ? ' active' : '');
                 item.onclick = () => selectSettlement(s.id);
+                
+                let dateDisplay = formatDateDE(s.date);
+                if (s.endDate && s.endDate !== s.date) {
+                    dateDisplay += ` - ${formatDateDE(s.endDate)}`;
+                }
+
                 item.innerHTML = `
                     <div class="item-title">${s.event || 'Unbenannter Wettkampf'}</div>
-                    <div class="item-sub">📍 ${s.location || '-'} | 📅 ${formatDateDE(s.date)}</div>
+                    <div class="item-sub">📍 ${s.location || '-'} | 📅 ${dateDisplay}</div>
                 `;
                 list.appendChild(item);
             });
@@ -614,7 +636,9 @@
 
             document.getElementById('st-id').value = '';
             document.getElementById('st-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('st-end-date').value = '';
             document.getElementById('st-location').value = '';
+            document.getElementById('st-responsible').value = '';
             document.getElementById('st-event').value = '';
             document.getElementById('st-count-athletes').value = 0;
             document.getElementById('st-count-coaches').value = 0;
@@ -641,6 +665,7 @@
             document.getElementById('st-overnight').value = 'nein';
             document.getElementById('st-catering').value = 'nein';
             document.getElementById('st-own-share-yesno').value = 'nein';
+            document.getElementById('st-own-share-persons').value = '0';
             document.getElementById('st-own-share-amount').value = '';
 
             toggleOwnShareAmount();
@@ -659,7 +684,9 @@
 
             document.getElementById('st-id').value = s.id;
             document.getElementById('st-date').value = s.date || '';
+            document.getElementById('st-end-date').value = s.endDate || '';
             document.getElementById('st-location').value = s.location || '';
+            document.getElementById('st-responsible').value = s.responsible || '';
             document.getElementById('st-event').value = s.event || '';
             document.getElementById('st-count-athletes').value = s.countAthletes || 0;
             document.getElementById('st-count-coaches').value = s.countCoaches || 0;
@@ -688,6 +715,7 @@
             document.getElementById('st-overnight').value = s.overnight || 'nein';
             document.getElementById('st-catering').value = s.catering || 'nein';
             document.getElementById('st-own-share-yesno').value = s.ownShareYesNo || 'nein';
+            document.getElementById('st-own-share-persons').value = s.ownSharePersons || 0;
             document.getElementById('st-own-share-amount').value = s.ownShareAmount || '';
 
             toggleOwnShareAmount();
@@ -718,7 +746,11 @@
 
             const dataObj = {
                 id: id || 'st_' + Date.now(),
-                date, location, event,
+                date,
+                endDate: document.getElementById('st-end-date').value,
+                location,
+                responsible: document.getElementById('st-responsible').value.trim(),
+                event,
                 countAthletes: parseInt(document.getElementById('st-count-athletes').value, 10) || 0,
                 countCoaches: parseInt(document.getElementById('st-count-coaches').value, 10) || 0,
                 drivers: document.getElementById('st-drivers').value.trim(),
@@ -736,6 +768,7 @@
                 overnight: document.getElementById('st-overnight').value,
                 catering: document.getElementById('st-catering').value,
                 ownShareYesNo: document.getElementById('st-own-share-yesno').value,
+                ownSharePersons: parseInt(document.getElementById('st-own-share-persons').value, 10) || 0,
                 ownShareAmount: parseFloat(document.getElementById('st-own-share-amount').value) || 0
             };
 
@@ -773,7 +806,18 @@
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = '';
 
-            // SEITE 1: HAUPTABRECHNUNGS-FORMULAR (Wettkämpfe / Trainingslager Schwimmen)
+            // Datumsausgabe (1-tägig vs. mehrtägig)
+            let dateDisplay = formatDateDE(s.date);
+            if (s.endDate && s.endDate !== s.date) {
+                dateDisplay += ` bis ${formatDateDE(s.endDate)}`;
+            }
+
+            // Eigenanteil-Summe berechnen
+            const ownSharePersons = s.ownSharePersons || 0;
+            const ownShareSingle = s.ownShareAmount || 0;
+            const ownShareTotal = ownSharePersons * ownShareSingle;
+
+            // SEITE 1: HAUPTABRECHNUNGS-FORMULAR
             const page1 = document.createElement('div');
             page1.className = 'pdf-page';
 
@@ -792,6 +836,11 @@
                 carRowsHtml = `<tr><td colspan="2">Keine KFZ-Daten erfasst.</td></tr>`;
             }
 
+            let ownShareHtml = 'Nein';
+            if (s.ownShareYesNo === 'ja') {
+                ownShareHtml = `<b>Ja</b> — ${ownSharePersons} Person(en) × ${ownShareSingle.toFixed(2)} € = <b>Summe: ${ownShareTotal.toFixed(2)} €</b>`;
+            }
+
             page1.innerHTML = `
                 <div class="pdf-header">
                     <h2>Wettkämpfe / Trainingslager Schwimmen</h2>
@@ -801,11 +850,15 @@
                 <table class="pdf-table">
                     <tr>
                         <td style="width:30%;"><b>Wann:</b></td>
-                        <td>${formatDateDE(s.date)}</td>
+                        <td>${dateDisplay}</td>
                     </tr>
                     <tr>
                         <td><b>Wo / Verein:</b></td>
                         <td>${s.location || '-'} (${s.event || '-'})</td>
+                    </tr>
+                    <tr>
+                        <td><b>Verantwortlicher:</b></td>
+                        <td><b>${s.responsible || '-'}</b></td>
                     </tr>
                     <tr>
                         <td><b>Fahrer / Betreuer / Kampfrichter:</b></td>
@@ -845,18 +898,18 @@
                     </tr>
                     <tr>
                         <td><b>Übernachtung / Verpflegung:</b> Übernachtung: ${s.overnight || 'nein'} | Verpflegung: ${s.catering || 'nein'}</td>
-                        <td><b>Eigenanteil:</b> ${s.ownShareYesNo === 'ja' ? s.ownShareAmount + ' € / Person' : 'Nein'}</td>
+                        <td><b>Eigenanteil:</b> ${ownShareHtml}</td>
                     </tr>
                 </table>
 
-                <div style="margin-top:30px; display:flex; justify-content:space-between; font-size:10pt;">
+                <div style="margin-top:35px; display:flex; justify-content:space-between; font-size:10pt;">
                     <div>Datum: ______________________</div>
-                    <div>Unterschrift Verantwortlicher: ______________________</div>
+                    <div>Verantwortlicher: <b>${s.responsible || '______________________'}</b><br><span style="font-size:8pt; color:#555;">(Unterschrift)</span></div>
                 </div>
             `;
             printArea.appendChild(page1);
 
-            // SEITE 2: FAHRKOSTENABRECHNUNG AUTO (PRO FAHRZEUG FORMULARBLATT)
+            // SEITE 2: FAHRKOSTENABRECHNUNG AUTO
             if (s.carMappings && s.carMappings.length > 0) {
                 const page2 = document.createElement('div');
                 page2.className = 'pdf-page';
@@ -871,7 +924,7 @@
                             </h3>
                             <table style="width: 100%; font-size: 10pt; line-height: 1.5;">
                                 <tr>
-                                    <td style="width: 50%;"><b>Datum:</b> ${formatDateDE(s.date)}</td>
+                                    <td style="width: 50%;"><b>Datum:</b> ${dateDisplay}</td>
                                     <td><b>Veranstaltung:</b> ${s.event || '-'}</td>
                                 </tr>
                                 <tr>
@@ -907,7 +960,7 @@
                 printArea.appendChild(page2);
             }
 
-            // SEITE 3 FF.: BELEGE & QUITTUNGEN ANHÄNGEN (TANK- & MELDEGELDBELEGE)
+            // BELEGE ANHÄNGEN
             const appendReceiptPage = (title, dataUrl) => {
                 if (!dataUrl) return;
                 const rPage = document.createElement('div');
@@ -915,7 +968,7 @@
                 rPage.innerHTML = `
                     <div class="pdf-header">
                         <h2>Anhang: ${title}</h2>
-                        <p>${s.event || ''} (${formatDateDE(s.date)})</p>
+                        <p>${s.event || ''} (${dateDisplay})</p>
                     </div>
                     <div style="text-align: center;">
                         <img src="${dataUrl}" class="receipt-img" alt="${title}">
