@@ -391,6 +391,14 @@
             return localStorage.getItem('trainerportal_github_token') || '';
         }
 
+        function getTodayISO() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         window.onload = function() {
             setupFileEncoders();
             const token = getStoredToken();
@@ -635,7 +643,7 @@
             document.getElementById('btn-print-st').style.display = 'none';
 
             document.getElementById('st-id').value = '';
-            document.getElementById('st-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('st-date').value = getTodayISO();
             document.getElementById('st-end-date').value = '';
             document.getElementById('st-location').value = '';
             document.getElementById('st-responsible').value = '';
@@ -683,7 +691,7 @@
             document.getElementById('btn-print-st').style.display = 'inline-block';
 
             document.getElementById('st-id').value = s.id;
-            document.getElementById('st-date').value = s.date || '';
+            document.getElementById('st-date').value = s.date || getTodayISO();
             document.getElementById('st-end-date').value = s.endDate || '';
             document.getElementById('st-location').value = s.location || '';
             document.getElementById('st-responsible').value = s.responsible || '';
@@ -723,7 +731,7 @@
 
         function saveFormLocal() {
             const id = document.getElementById('st-id').value;
-            const date = document.getElementById('st-date').value;
+            const date = document.getElementById('st-date').value || getTodayISO();
             const location = document.getElementById('st-location').value.trim();
             const event = document.getElementById('st-event').value.trim();
 
@@ -806,13 +814,13 @@
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = '';
 
-            // Datumsausgabe (1-tägig vs. mehrtägig)
             let dateDisplay = formatDateDE(s.date);
             if (s.endDate && s.endDate !== s.date) {
                 dateDisplay += ` bis ${formatDateDE(s.endDate)}`;
             }
 
-            // Eigenanteil-Summe berechnen
+            const todayFormatted = formatDateDE(getTodayISO());
+
             const ownSharePersons = s.ownSharePersons || 0;
             const ownShareSingle = s.ownShareAmount || 0;
             const ownShareTotal = ownSharePersons * ownShareSingle;
@@ -903,7 +911,7 @@
                 </table>
 
                 <div style="margin-top:35px; display:flex; justify-content:space-between; font-size:10pt;">
-                    <div>Datum: ______________________</div>
+                    <div>Datum: <b>${todayFormatted}</b></div>
                     <div>Verantwortlicher: <b>${s.responsible || '______________________'}</b><br><span style="font-size:8pt; color:#555;">(Unterschrift)</span></div>
                 </div>
             `;
@@ -924,7 +932,7 @@
                             </h3>
                             <table style="width: 100%; font-size: 10pt; line-height: 1.5;">
                                 <tr>
-                                    <td style="width: 50%;"><b>Datum:</b> ${dateDisplay}</td>
+                                    <td style="width: 50%;"><b>Datum:</b> ${todayFormatted}</td>
                                     <td><b>Veranstaltung:</b> ${s.event || '-'}</td>
                                 </tr>
                                 <tr>
