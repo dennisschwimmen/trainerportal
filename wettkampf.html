@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vereinsportal - Wettkampfabrechnung</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <style>
         :root {
             --primary: #2b5c8f;
@@ -79,13 +80,13 @@
         .settlement-item {
             background: white; border: 1px solid var(--border-color); border-radius: 6px;
             padding: 10px; cursor: pointer; transition: all 0.15s; border-left: 4px solid var(--accent);
-            box-sizing: border-box; width: 100%; word-break: break-word;
+            box-sizing: border-box; width: 100%; max-width: 100%; overflow-wrap: break-word; word-break: break-word;
         }
         .settlement-item:hover, .settlement-item.active {
             border-color: var(--primary); background: #f0f7ff; transform: translateX(2px);
         }
-        .settlement-item .item-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; }
-        .settlement-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 2px; }
+        .settlement-item .item-title { font-weight: bold; font-size: 0.88rem; color: #1e293b; line-height: 1.25; }
+        .settlement-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
 
         #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
 
@@ -103,19 +104,19 @@
         .form-container { max-width: 900px; margin: 0 auto; }
         .form-section-title { font-size: 0.95rem; font-weight: bold; color: var(--primary); margin: 18px 0 10px 0; padding-bottom: 4px; border-bottom: 2px solid #e2e8f0; }
 
-        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; width: 100%; }
         .field-group label { font-size: 0.8rem; font-weight: 600; color: #475569; }
-        .field-group input, .field-group select, .field-group textarea { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit; }
+        .field-group input, .field-group select, .field-group textarea { padding: 8px 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.88rem; outline: none; font-family: inherit; width: 100%; box-sizing: border-box; }
 
         .flex-row { display: flex; gap: 12px; }
         .flex-row .field-group { flex: 1; }
 
         .car-mapping-card {
             background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px;
-            padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center;
+            padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;
         }
 
-        /* DRUCK- / PDF-STYLES (DIN A4 DESIGN) */
+        /* DRUCK- / PDF-STYLES */
         #print-area { display: none; }
 
         @media print {
@@ -137,8 +138,8 @@
 
             .pdf-section-title { font-weight: bold; font-size: 11pt; margin-top: 15px; margin-bottom: 5px; background: #eee; padding: 4px; border: 1px solid #000; }
             
-            .receipt-img { max-width: 100%; max-height: 23cm; display: block; margin: 10px auto; border: 1px solid #ccc; }
-            .receipt-pdf { width: 100%; height: 23cm; border: none; margin-top: 10px; }
+            .receipt-img { max-width: 100%; max-height: 22cm; display: block; margin: 10px auto; border: 1px solid #ccc; }
+            .receipt-canvas { max-width: 100%; max-height: 22cm; display: block; margin: 10px auto; border: 1px solid #ccc; }
         }
 
         @media (max-width: 768px) {
@@ -377,10 +378,12 @@
         </div>
     </div>
 
-    <!-- DRUCKBEREICH (PDF-GENERIERUNG) -->
+    <!-- DRUCKBEREICH -->
     <div id="print-area"></div>
 
     <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
         const REPO_OWNER = "dennisschwimmen";
         const REPO_NAME = "trainerportal";
         const FILE_PATH = "wettkampf.json";
@@ -500,8 +503,8 @@
                 document.getElementById(fileInputId).addEventListener('change', function(e) {
                     const file = e.target.files[0];
                     if (!file) return;
-                    if (file.size > 3 * 1024 * 1024) {
-                        alert("Datei zu groß! Bitte max. 3MB hochladen.");
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert("Datei zu groß! Bitte max. 5MB hochladen.");
                         this.value = '';
                         return;
                     }
@@ -516,6 +519,30 @@
 
             setupFile('st-fuel-receipt-file', 'st-fuel-receipt-data', 'fuel-receipt-preview');
             setupFile('st-fee-receipt-file', 'st-fee-receipt-data', 'fee-receipt-preview');
+        }
+
+        /* PRÜFUNG: WURDEN DATEIEN HOCHGELADEN? */
+        function checkUploadedFilesAlert() {
+            const fuelData = document.getElementById('st-fuel-receipt-data').value;
+            const feeData = document.getElementById('st-fee-receipt-data').value;
+            const feeReceiptYesNo = document.getElementById('st-fee-receipt-yesno').value;
+
+            let missingFiles = [];
+
+            if (!fuelData) {
+                missingFiles.push("• Tankquittung / Kraftstoffbeleg");
+            }
+            if (feeReceiptYesNo === 'ja' && !feeData) {
+                missingFiles.push("• Meldegeldquittung");
+            }
+
+            if (missingFiles.length > 0) {
+                const msg = "Achtung! Folgende Belege fehlen derzeit noch:\n\n" + 
+                            missingFiles.join("\n") + 
+                            "\n\nMöchtest du trotzdem ohne diese Belege fortfahren oder abbrechen, um Dateien hochzuladen?";
+                return confirm(msg);
+            }
+            return true;
         }
 
         async function loadDataFromGitHub() {
@@ -559,6 +586,8 @@
         }
 
         async function saveDataToGitHub() {
+            if (!checkUploadedFilesAlert()) return;
+
             const token = getStoredToken();
             if (!token) { alert("Bitte erst einen Token eingeben!"); editGithubToken(); return; }
 
@@ -811,7 +840,9 @@
         }
 
         /* ERSTELLUNG DER MEHRSEITIGEN FORMULAR-PDF */
-        function printCurrentSettlement() {
+        async function printCurrentSettlement() {
+            if (!checkUploadedFilesAlert()) return;
+
             const id = document.getElementById('st-id').value;
             const s = settlementsData.find(x => x.id === id);
             if (!s) return;
@@ -973,33 +1004,57 @@
                 printArea.appendChild(page2);
             }
 
-            // BELEGE ANHÄNGEN (Bild oder PDF)
-            const appendReceiptPage = (title, dataUrl) => {
+            // HILFSFUNKTION FÜR BELEGE (KONVERTIERT AUCH PDFs IN BILDER)
+            const appendReceiptPage = async (title, dataUrl) => {
                 if (!dataUrl) return;
+
                 const rPage = document.createElement('div');
                 rPage.className = 'pdf-page';
 
-                const isPdf = dataUrl.startsWith('data:application/pdf');
-                const contentHtml = isPdf 
-                    ? `<object data="${dataUrl}" type="application/pdf" class="receipt-pdf"><embed src="${dataUrl}" type="application/pdf" class="receipt-pdf" /></object>`
-                    : `<img src="${dataUrl}" class="receipt-img" alt="${title}">`;
-
-                rPage.innerHTML = `
+                const headerHtml = `
                     <div class="pdf-header">
                         <h2>Anhang: ${title}</h2>
                         <p>${s.event || ''} (${dateDisplay})</p>
                     </div>
-                    <div style="text-align: center;">
-                        ${contentHtml}
-                    </div>
                 `;
-                printArea.appendChild(rPage);
+
+                if (dataUrl.startsWith('data:application/pdf')) {
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'receipt-canvas';
+                    rPage.innerHTML = headerHtml + `<div style="text-align: center;"></div>`;
+                    rPage.querySelector('div').appendChild(canvas);
+                    printArea.appendChild(rPage);
+
+                    try {
+                        const pdfData = atob(dataUrl.split(',')[1]);
+                        const loadingTask = pdfjsLib.getDocument({ data: pdfData });
+                        const pdf = await loadingTask.promise;
+                        const page = await pdf.getPage(1);
+                        
+                        const viewport = page.getViewport({ scale: 1.5 });
+                        const context = canvas.getContext('2d');
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        await page.render({ canvasContext: context, viewport: viewport }).promise;
+                    } catch (err) {
+                        console.error("Fehler beim Rendern der PDF:", err);
+                        rPage.querySelector('div').innerHTML = `<p style="margin-top:20px;">[Angehängtes PDF-Dokument: ${title}]</p>`;
+                    }
+                } else {
+                    rPage.innerHTML = headerHtml + `
+                        <div style="text-align: center;">
+                            <img src="${dataUrl}" class="receipt-img" alt="${title}">
+                        </div>
+                    `;
+                    printArea.appendChild(rPage);
+                }
             };
 
-            appendReceiptPage('Tankquittung', s.fuelReceiptData);
-            appendReceiptPage('Meldegeldquittung', s.feeReceiptData);
+            await appendReceiptPage('Tankquittung', s.fuelReceiptData);
+            await appendReceiptPage('Meldegeldquittung', s.feeReceiptData);
 
-            setTimeout(() => { window.print(); }, 300);
+            setTimeout(() => { window.print(); }, 500);
         }
     </script>
 </body>
