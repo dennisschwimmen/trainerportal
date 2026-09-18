@@ -199,6 +199,10 @@
             <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
         </div>
 
+        <div class="btn-row">
+            <button class="btn btn-primary" style="background-color: var(--accent);" onclick="printCurrentSettlement()">📄 PDF Download</button>
+        </div>
+
         <div class="btn-row" style="margin-bottom: 12px;">
             <button class="btn btn-secondary" style="background:#475569;" onclick="editGithubToken()">🔑 Token anpassen</button>
         </div>
@@ -227,6 +231,7 @@
                     <h2 id="form-heading" style="color:var(--primary);">Abrechnung Erfassen</h2>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
+                        <button class="btn btn-primary" style="width:auto; padding:6px 14px; background-color:var(--accent);" onclick="printCurrentSettlement()">📄 PDF</button>
                         <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocalAndCloud()">💾 Übernehmen & Speichern</button>
                     </div>
                 </div>
@@ -966,7 +971,6 @@
             renderSidebarList();
         }
 
-        // Übernehmen & direkt in GitHub speichern
         async function saveFormLocalAndCloud() {
             const date = document.getElementById('st-date').value;
             const location = document.getElementById('st-location').value.trim();
@@ -999,7 +1003,10 @@
             saveFormLocal();
             const id = document.getElementById('st-id').value;
             const s = settlementsData.find(x => x.id === id);
-            if (!s) return;
+            if (!s) {
+                alert("Bitte wähle oder erstelle zuerst eine Abrechnung.");
+                return;
+            }
 
             const printArea = document.getElementById('print-area');
             printArea.innerHTML = '';
