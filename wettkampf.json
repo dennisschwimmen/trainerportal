@@ -50,6 +50,7 @@
     },
     {
       "id": "st_1789734353821",
+      "isFinished": false,
       "date": "2026-09-18",
       "endDate": "",
       "location": "Leipzig",
@@ -59,7 +60,7 @@
       "countAthletes": 0,
       "countCoaches": 0,
       "drivers": "",
-      "coachesNames": "",
+      "coachesNames": "neu",
       "referees": "",
       "departure": "",
       "arrival": "",
