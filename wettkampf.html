@@ -116,6 +116,11 @@
             padding: 10px; margin-bottom: 8px; display: flex; gap: 10px; align-items: center; width: 100%; box-sizing: border-box;
         }
 
+        .receipt-preview-box {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 4px; font-size: 0.78rem; background: #f1f5f9; padding: 6px 10px; border-radius: 6px;
+        }
+
         /* DRUCK- / PDF-STYLES */
         #print-area { display: none; }
 
@@ -297,7 +302,10 @@
                     <label>Tankquittung hochladen (Bild/PDF)</label>
                     <input type="file" id="st-fuel-receipt-file" accept="image/*,application/pdf">
                     <input type="hidden" id="st-fuel-receipt-data">
-                    <div id="fuel-receipt-preview" style="font-size:0.75rem; color:#64748b; margin-top:2px;"></div>
+                    <div id="fuel-receipt-preview-box" class="receipt-preview-box" style="display:none;">
+                        <span id="fuel-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
+                        <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fuel')">🗑️ Löschen</button>
+                    </div>
                 </div>
 
                 <!-- 4. MELDEGELD & ZAHLUNGEN -->
@@ -334,7 +342,10 @@
                     <label>Meldegeldquittung hochladen (Bild/PDF)</label>
                     <input type="file" id="st-fee-receipt-file" accept="image/*,application/pdf">
                     <input type="hidden" id="st-fee-receipt-data">
-                    <div id="fee-receipt-preview" style="font-size:0.75rem; color:#64748b; margin-top:2px;"></div>
+                    <div id="fee-receipt-preview-box" class="receipt-preview-box" style="display:none;">
+                        <span id="fee-receipt-text" style="color:#0f172a; font-weight:500;">📎 Beleg geladen</span>
+                        <button type="button" class="btn btn-danger" style="width:auto; padding:3px 8px; font-size:0.75rem;" onclick="clearReceipt('fee')">🗑️ Löschen</button>
+                    </div>
                 </div>
 
                 <!-- 5. ÜBERNACHTUNG & EIGENANTEIL -->
@@ -396,7 +407,7 @@
         }
 
         function getStoredToken() {
-            return localStorage.getItem('trainerportal_github_token') || '';
+            return localStorage.getItem('trainerportal_github_token'] || '';
         }
 
         function getTodayISO() {
@@ -409,7 +420,7 @@
 
         window.onload = function() {
             setupFileEncoders();
-            const token = getStoredToken();
+            const token = localStorage.getItem('trainerportal_github_token') || '';
             if (!token) {
                 editGithubToken();
             } else {
@@ -418,7 +429,7 @@
         };
 
         function editGithubToken() {
-            const currentToken = getStoredToken();
+            const currentToken = localStorage.getItem('trainerportal_github_token') || '';
             const newToken = prompt("Bitte Personal Access Token (Classic mit Scope 'repo') eingeben:", currentToken);
             if (newToken !== null && newToken.trim() !== "") {
                 localStorage.setItem('trainerportal_github_token', newToken.trim());
@@ -499,7 +510,7 @@
         }
 
         function setupFileEncoders() {
-            const setupFile = (fileInputId, hiddenDataId, previewId) => {
+            const setupFile = (fileInputId, hiddenDataId, boxId, textId) => {
                 document.getElementById(fileInputId).addEventListener('change', function(e) {
                     const file = e.target.files[0];
                     if (!file) return;
@@ -511,17 +522,30 @@
                     const reader = new FileReader();
                     reader.onload = function(evt) {
                         document.getElementById(hiddenDataId).value = evt.target.result;
-                        document.getElementById(previewId).innerText = `📎 ${file.name} geladen`;
+                        document.getElementById(textId).innerText = `📎 ${file.name}`;
+                        document.getElementById(boxId).style.display = 'flex';
                     };
                     reader.readAsDataURL(file);
                 });
             };
 
-            setupFile('st-fuel-receipt-file', 'st-fuel-receipt-data', 'fuel-receipt-preview');
-            setupFile('st-fee-receipt-file', 'st-fee-receipt-data', 'fee-receipt-preview');
+            setupFile('st-fuel-receipt-file', 'st-fuel-receipt-data', 'fuel-receipt-preview-box', 'fuel-receipt-text');
+            setupFile('st-fee-receipt-file', 'st-fee-receipt-data', 'fee-receipt-preview-box', 'fee-receipt-text');
         }
 
-        /* PRÜFUNG: WURDEN DATEIEN HOCHGELADEN? */
+        function clearReceipt(type) {
+            if (type === 'fuel') {
+                document.getElementById('st-fuel-receipt-file').value = '';
+                document.getElementById('st-fuel-receipt-data').value = '';
+                document.getElementById('fuel-receipt-preview-box').style.display = 'none';
+            } else if (type === 'fee') {
+                document.getElementById('st-fee-receipt-file').value = '';
+                document.getElementById('st-fee-receipt-data').value = '';
+                document.getElementById('fee-receipt-preview-box').style.display = 'none';
+            }
+            setStatus('Beleg entfernt (ungespeichert)', '#e67e22');
+        }
+
         function checkUploadedFilesAlert() {
             const fuelData = document.getElementById('st-fuel-receipt-data').value;
             const feeData = document.getElementById('st-fee-receipt-data').value;
@@ -546,7 +570,7 @@
         }
 
         async function loadDataFromGitHub() {
-            const token = getStoredToken();
+            const token = localStorage.getItem('trainerportal_github_token') || '';
             if (!token) { setStatus('Kein Token hinterlegt!', '#dc3545'); return; }
 
             setStatus('Lade Wettkämpfe von GitHub...', '#2b5c8f');
@@ -588,7 +612,7 @@
         async function saveDataToGitHub() {
             if (!checkUploadedFilesAlert()) return;
 
-            const token = getStoredToken();
+            const token = localStorage.getItem('trainerportal_github_token') || '';
             if (!token) { alert("Bitte erst einen Token eingeben!"); editGithubToken(); return; }
 
             setStatus('Speichere auf GitHub...', '#2b5c8f');
@@ -694,15 +718,17 @@
             document.getElementById('st-car-count').value = '1';
             renderCarMappingFields();
 
+            document.getElementById('st-fuel-receipt-file').value = '';
             document.getElementById('st-fuel-receipt-data').value = '';
-            document.getElementById('fuel-receipt-preview').innerText = '';
+            document.getElementById('fuel-receipt-preview-box').style.display = 'none';
 
             document.getElementById('st-fee-amount').value = '';
             document.getElementById('st-paid-to').value = '';
             document.getElementById('st-fee-receipt-yesno').value = 'ja';
             document.getElementById('st-fee-status').value = 'bezahlt';
+            document.getElementById('st-fee-receipt-file').value = '';
             document.getElementById('st-fee-receipt-data').value = '';
-            document.getElementById('fee-receipt-preview').innerText = '';
+            document.getElementById('fee-receipt-preview-box').style.display = 'none';
 
             document.getElementById('st-overnight').value = 'nein';
             document.getElementById('st-catering').value = 'nein';
@@ -744,15 +770,27 @@
             document.getElementById('st-car-count').value = carMappings.length || 1;
             renderCarMappingFields(carMappings);
 
+            document.getElementById('st-fuel-receipt-file').value = '';
             document.getElementById('st-fuel-receipt-data').value = s.fuelReceiptData || '';
-            document.getElementById('fuel-receipt-preview').innerText = s.fuelReceiptData ? '📎 Beleg geladen' : '';
+            if (s.fuelReceiptData) {
+                document.getElementById('fuel-receipt-text').innerText = '📎 Tankquittung hinterlegt';
+                document.getElementById('fuel-receipt-preview-box').style.display = 'flex';
+            } else {
+                document.getElementById('fuel-receipt-preview-box').style.display = 'none';
+            }
 
             document.getElementById('st-fee-amount').value = s.feeAmount || '';
             document.getElementById('st-paid-to').value = s.paidTo || '';
             document.getElementById('st-fee-receipt-yesno').value = s.feeReceiptYesNo || 'ja';
             document.getElementById('st-fee-status').value = s.feeStatus || 'bezahlt';
+            document.getElementById('st-fee-receipt-file').value = '';
             document.getElementById('st-fee-receipt-data').value = s.feeReceiptData || '';
-            document.getElementById('fee-receipt-preview').innerText = s.feeReceiptData ? '📎 Beleg geladen' : '';
+            if (s.feeReceiptData) {
+                document.getElementById('fee-receipt-text').innerText = '📎 Meldegeldquittung hinterlegt';
+                document.getElementById('fee-receipt-preview-box').style.display = 'flex';
+            } else {
+                document.getElementById('fee-receipt-preview-box').style.display = 'none';
+            }
 
             document.getElementById('st-overnight').value = s.overnight || 'nein';
             document.getElementById('st-catering').value = s.catering || 'nein';
@@ -1004,7 +1042,7 @@
                 printArea.appendChild(page2);
             }
 
-            // HILFSFUNKTION FÜR BELEGE (KONVERTIERT AUCH PDFs IN BILDER)
+            // BELEGE ANHÄNGEN (BILDPIS / PDF-RENDER)
             const appendReceiptPage = async (title, dataUrl) => {
                 if (!dataUrl) return;
 
