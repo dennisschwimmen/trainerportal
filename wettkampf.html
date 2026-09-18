@@ -1,1 +1,826 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vereinsportal - Wettkampfabrechnung</title>
+    <style>
+        :root {
+            --primary: #2b5c8f;
+            --primary-hover: #1d4067;
+            --accent: #4a90e2;
+            --bg-sidebar: #f4f6f9;
+            --bg-content: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e4e8;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #e67e22;
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            background-color: var(--bg-content);
+            overflow: hidden;
+        }
+
+        /* SIDEBAR LINKS */
+        #sidebar {
+            width: 320px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            padding: 15px 12px;
+            overflow-y: auto;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
+        }
+
+        #sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 6px;
+        }
+
+        .btn {
+            width: 100%;
+            color: white;
+            border: none;
+            padding: 8px 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-success { background-color: var(--success); }
+        .btn-success:hover { background-color: #218838; }
+        .btn-danger { background-color: var(--danger); }
+        .btn-danger:hover { background-color: #c82333; }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        .search-box {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 12px;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        /* RECHTER BEREICH */
+        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+
+        header {
+            padding: 12px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #fafbfc;
+        }
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        
+        .menu-toggle-btn {
+            display: none;
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 5px 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+        }
+
+        .home-btn {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px;
+            padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary);
+            text-decoration: none; transition: all 0.2s;
+        }
+        .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
+        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+
+        #main-content { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* KARTEN-RUNDUNG UND GRID */
+        .settlement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 15px;
+        }
+
+        .settlement-card {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+            position: relative;
+        }
+        .settlement-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); border-color: var(--accent); }
+        
+        .settlement-title { font-size: 1.05rem; font-weight: bold; color: var(--primary); margin-bottom: 4px; }
+        .settlement-meta { font-size: 0.82rem; font-weight: 600; color: #64748b; margin-bottom: 10px; }
+        
+        .details-list { font-size: 0.82rem; display: flex; flex-direction: column; gap: 4px; color: #334155; }
+        .badge { display: inline-block; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .badge-yes { background: #dcfce7; color: #166534; }
+        .badge-no { background: #fee2e2; color: #991b1b; }
+
+        .card-actions {
+            margin-top: 12px;
+            padding-top: 8px;
+            border-top: 1px dashed var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+        }
+
+        /* MODAL FORMULAR */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; z-index: 1000; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 8px; padding: 20px; width: 95%; max-width: 650px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        
+        .form-section-title {
+            font-size: 0.9rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 12px 0 6px 0;
+            padding-bottom: 3px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .field-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+        .field-group label { font-size: 0.78rem; font-weight: 600; color: #475569; }
+        .field-group input, .field-group select, .field-group textarea {
+            padding: 7px 9px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; outline: none; font-family: inherit;
+        }
+
+        .flex-row { display: flex; gap: 10px; }
+        .flex-row .field-group { flex: 1; }
+
+        /* PRINT STYLES */
+        #print-area { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #print-area, #print-area * { visibility: visible; }
+            #print-area { display: block !important; position: absolute; left: 0; top: 0; width: 100%; padding: 20px; background: white; color: black; }
+            .print-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            .print-table th, .print-table td { border: 1px solid #000; padding: 6px 8px; text-align: left; font-size: 11px; }
+            .print-table th { background-color: #f2f2f2; }
+        }
+
+        /* MOBILE RESPONSIVE */
+        @media (max-width: 768px) {
+            body { flex-direction: column; position: relative; }
+            header { padding: 8px 12px; }
+            .menu-toggle-btn { display: block; }
+            .breadcrumb { display: none; }
+
+            #sidebar {
+                position: absolute; top: 48px; left: 0; width: 280px;
+                height: calc(100vh - 48px); transform: translateX(-100%);
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+            }
+            #sidebar.open { transform: translateX(0); }
+            #main-content { padding: 10px; }
+            .settlement-grid { grid-template-columns: 1fr; }
+            .flex-row { flex-direction: column; gap: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+        <h2>Wettkämpfe</h2>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" onclick="openSettlementModal()">➕ Abrechnung erstellen</button>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-secondary" onclick="loadDataFromGitHub()">🔄 Laden</button>
+            <button class="btn btn-success" onclick="saveDataToGitHub()">💾 Speichern</button>
+        </div>
+
+        <div class="btn-row" style="margin-bottom: 12px;">
+            <button class="btn btn-secondary" style="background:#475569;" onclick="openTokenModal()">🔑 Token anpassen</button>
+        </div>
+
+        <h2>Suche</h2>
+        <input type="text" id="search-input" class="search-box" placeholder="Veranstaltung, Ort, Fahrer..." oninput="renderSettlements()">
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="content-wrapper">
+        <header>
+            <div class="header-left">
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+                <div id="breadcrumb" class="breadcrumb">Portal / <b>Wettkampfabrechnung</b></div>
+            </div>
+            <div>
+                <span id="save-status" style="color: #6c757d; font-weight: 600; font-size: 0.8rem;">Status: Bereit</span>
+            </div>
+        </header>
+
+        <div id="main-content">
+            <div class="settlement-grid" id="settlement-grid"></div>
+        </div>
+    </div>
+
+    <!-- FORMULAR MODAL -->
+    <div id="settlement-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 id="modal-title" style="color:var(--primary);">Wettkampfabrechnung erfassen</h3>
+            <input type="hidden" id="st-id">
+
+            <div class="form-section-title">1. Allgemeine Angaben</div>
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Datum *</label>
+                    <input type="date" id="st-date">
+                </div>
+                <div class="field-group">
+                    <label>Ort / Schwimmhalle *</label>
+                    <input type="text" id="st-location" placeholder="z.B. Magdeburg">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Veranstaltung *</label>
+                <input type="text" id="st-event" placeholder="z.B. Landesmeisterschaften 2026">
+            </div>
+
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Anzahl Sportler</label>
+                    <input type="number" id="st-count-athletes" value="0" min="0">
+                </div>
+                <div class="field-group">
+                    <label>Anzahl Betreuer</label>
+                    <input type="number" id="st-count-coaches" value="0" min="0">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Fahrer / Betreuer / Kampfrichter (Namen)</label>
+                <input type="text" id="st-personnel" placeholder="z.B. Max (Fahrer/Betreuer), Anna (Kampfrichter)">
+            </div>
+
+            <div class="form-section-title">2. Fahrt & KFZ (ab/bis Wittenberg)</div>
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Abfahrt Wittenberg</label>
+                    <input type="datetime-local" id="st-departure">
+                </div>
+                <div class="field-group">
+                    <label>Ankunft Wittenberg</label>
+                    <input type="datetime-local" id="st-arrival">
+                </div>
+            </div>
+
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>KFZ-Kennzeichen</label>
+                    <input type="text" id="st-plate" placeholder="WB-XX 123">
+                </div>
+                <div class="field-group">
+                    <label>Gefahrene Kilometer (gesamt)</label>
+                    <input type="number" id="st-km" placeholder="z.B. 180" min="0">
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Tankquittung hochladen (Bild/PDF)</label>
+                <input type="file" id="st-fuel-receipt-file" accept="image/*,application/pdf">
+                <input type="hidden" id="st-fuel-receipt-data">
+                <div id="fuel-receipt-preview" style="font-size:0.75rem; color:#64748b; margin-top:2px;"></div>
+            </div>
+
+            <div class="form-section-title">3. Meldegeld & Zahlungen</div>
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Höhe Meldegeld (€)</label>
+                    <input type="number" step="0.01" id="st-fee-amount" placeholder="0.00">
+                </div>
+                <div class="field-group">
+                    <label>Gezahlt an (Verein/Verband)</label>
+                    <input type="text" id="st-paid-to" placeholder="z.B. SV Magdeburg e.V.">
+                </div>
+            </div>
+
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Quittung vorhanden?</label>
+                    <select id="st-fee-receipt-yesno">
+                        <option value="nein">Nein</option>
+                        <option value="ja">Ja</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Status Meldegeld</label>
+                    <select id="st-fee-status">
+                        <option value="offen">Offen</option>
+                        <option value="bezahlt">Bezahlt</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label>Meldegeldquittung hochladen (Bild/PDF)</label>
+                <input type="file" id="st-fee-receipt-file" accept="image/*,application/pdf">
+                <input type="hidden" id="st-fee-receipt-data">
+                <div id="fee-receipt-preview" style="font-size:0.75rem; color:#64748b; margin-top:2px;"></div>
+            </div>
+
+            <div class="form-section-title">4. Übernachtung, Verpflegung & Eigenanteil</div>
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Übernachtung?</label>
+                    <select id="st-overnight">
+                        <option value="nein">Nein</option>
+                        <option value="ja">Ja</option>
+                    </select>
+                </div>
+                <div class="field-group">
+                    <label>Verpflegung inklusive?</label>
+                    <select id="st-catering">
+                        <option value="nein">Nein</option>
+                        <option value="ja">Ja</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex-row">
+                <div class="field-group">
+                    <label>Eigenanteil erforderlich?</label>
+                    <select id="st-own-share-yesno" onchange="toggleOwnShareAmount()">
+                        <option value="nein">Nein</option>
+                        <option value="ja">Ja</option>
+                    </select>
+                </div>
+                <div class="field-group" id="own-share-amount-group" style="display:none;">
+                    <label>Höhe Eigenanteil pro Person (€)</label>
+                    <input type="number" step="0.01" id="st-own-share-amount" placeholder="0.00">
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px;">
+                <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
+                <div style="display:flex; gap:8px; margin-left:auto;">
+                    <button class="btn btn-secondary" style="width:auto; padding:6px 12px;" onclick="closeSettlementModal()">Abbrechen</button>
+                    <button class="btn btn-success" style="width:auto; padding:6px 12px;" onclick="saveSettlementLocal()">Übernehmen</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PRINT / EXPORT -->
+    <div id="print-area">
+        <h2 id="pr-title" style="margin-bottom: 5px;">Wettkampfabrechnung</h2>
+        <div id="pr-subtitle" style="font-size: 12px; color: #555; margin-bottom: 15px;"></div>
+        <table class="print-table" id="pr-table"></table>
+    </div>
+
+    <!-- TOKEN MODAL -->
+    <div id="token-modal" class="modal-overlay">
+        <div class="modal">
+            <h3 style="margin-bottom:15px; color:var(--primary);">🔑 GitHub Token eingeben</h3>
+            <p style="font-size:0.85rem; color:#64748b; margin-bottom:15px;">
+                Gib hier deinen Personal Access Token (Classic mit Scope 'repo') ein.
+            </p>
+            <div class="field-group" style="margin-bottom:20px;">
+                <label>Personal Access Token</label>
+                <input type="password" id="github-token-input" placeholder="ghp_xxxxxxxxxxxx">
+            </div>
+            <div style="display:flex; gap:10px; justify-content:flex-end;">
+                <button class="btn btn-secondary" style="width:auto; padding:8px 14px;" onclick="closeTokenModal()">Abbrechen</button>
+                <button class="btn btn-success" style="width:auto; padding:8px 14px;" onclick="saveGithubToken()">Speichern</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const REPO_OWNER = "dennisschwimmen";
+        const REPO_NAME = "trainerportal";
+        const FILE_PATH = "wettkampf.json";
+
+        let settlementsData = [];
+
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function getStoredToken() {
+            return localStorage.getItem('trainerportal_github_token') || '';
+        }
+
+        window.onload = function() {
+            setupFileEncoders();
+            const token = getStoredToken();
+            if (!token) {
+                openTokenModal();
+            } else {
+                loadDataFromGitHub();
+            }
+        };
+
+        function openTokenModal() {
+            document.getElementById('github-token-input').value = getStoredToken();
+            document.getElementById('token-modal').classList.add('active');
+        }
+
+        function closeTokenModal() {
+            document.getElementById('token-modal').classList.remove('active');
+        }
+
+        function saveGithubToken() {
+            const val = document.getElementById('github-token-input').value.trim();
+            if (val) {
+                localStorage.setItem('trainerportal_github_token', val);
+                closeTokenModal();
+                loadDataFromGitHub();
+            } else {
+                alert("Bitte einen gültigen Token eingeben.");
+            }
+        }
+
+        function setStatus(text, color) {
+            const el = document.getElementById('save-status');
+            el.innerText = text;
+            el.style.color = color;
+        }
+
+        function toggleOwnShareAmount() {
+            const val = document.getElementById('st-own-share-yesno').value;
+            document.getElementById('own-share-amount-group').style.display = val === 'ja' ? 'flex' : 'none';
+        }
+
+        function setupFileEncoders() {
+            const setupFile = (fileInputId, hiddenDataId, previewId) => {
+                document.getElementById(fileInputId).addEventListener('change', function(e) {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (file.size > 3 * 1024 * 1024) {
+                        alert("Datei zu groß! Bitte max. 3MB hochladen.");
+                        this.value = '';
+                        return;
+                    }
+                    const reader = new FileReader();
+                    reader.onload = function(evt) {
+                        document.getElementById(hiddenDataId).value = evt.target.result;
+                        document.getElementById(previewId).innerText = `📎 ${file.name} geladen`;
+                    };
+                    reader.readAsDataURL(file);
+                });
+            };
+
+            setupFile('st-fuel-receipt-file', 'st-fuel-receipt-data', 'fuel-receipt-preview');
+            setupFile('st-fee-receipt-file', 'st-fee-receipt-data', 'fee-receipt-preview');
+        }
+
+        async function loadDataFromGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                setStatus('Kein Token hinterlegt!', '#dc3545');
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Lade Wettkämpfe von GitHub...', '#2b5c8f');
+
+            try {
+                const response = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    alert("Token ungültig oder abgelaufen!");
+                    openTokenModal();
+                    throw new Error("Authentifizierungsfehler");
+                }
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const jsonText = decodeURIComponent(escape(atob(data.content)));
+                    const parsed = JSON.parse(jsonText);
+                    settlementsData = parsed.settlements || (Array.isArray(parsed) ? parsed : []);
+                } else if (response.status === 404) {
+                    settlementsData = [];
+                }
+
+                renderSettlements();
+                setStatus(`Synchronisiert (${settlementsData.length} Wettkämpfe)`, '#28a745');
+
+            } catch (error) {
+                console.error(error);
+                setStatus('Fehler beim Laden!', '#dc3545');
+            }
+        }
+
+        async function saveDataToGitHub() {
+            const token = getStoredToken();
+            if (!token) {
+                alert("Bitte erst einen Token eingeben!");
+                openTokenModal();
+                return;
+            }
+
+            setStatus('Speichere auf GitHub...', '#2b5c8f');
+            const apiUrl = `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`;
+
+            try {
+                const getRes = await fetch(apiUrl, {
+                    headers: { "Authorization": `token ${token}` }
+                });
+                
+                let currentSha = "";
+                if (getRes.ok) {
+                    const fileData = await getRes.json();
+                    currentSha = fileData.sha;
+                }
+
+                const payloadData = { settlements: settlementsData };
+                const jsonString = JSON.stringify(payloadData, null, 2);
+                const contentBase64 = btoa(unescape(encodeURIComponent(jsonString)));
+
+                const bodyPayload = {
+                    message: "Wettkampfabrechnungen via Web-App aktualisiert",
+                    content: contentBase64
+                };
+                if (currentSha) bodyPayload.sha = currentSha;
+
+                const putRes = await fetch(apiUrl, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `token ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(bodyPayload)
+                });
+
+                if (putRes.ok) {
+                    setStatus('Erfolgreich gespeichert!', '#28a745');
+                } else {
+                    throw new Error("Fehler beim Commit");
+                }
+            } catch (err) {
+                console.error(err);
+                setStatus('Fehler beim Speichern!', '#dc3545');
+            }
+        }
+
+        function formatDateDE(str) {
+            if(!str) return '';
+            const p = str.split('-');
+            return `${p[2]}.${p[1]}.${p[0]}`;
+        }
+
+        function formatDateTimeDE(str) {
+            if(!str) return '';
+            const dt = new Date(str);
+            return dt.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderSettlements() {
+            const grid = document.getElementById('settlement-grid');
+            grid.innerHTML = '';
+
+            const searchVal = document.getElementById('search-input').value.toLowerCase();
+
+            const filtered = settlementsData.filter(s => {
+                return (s.event || '').toLowerCase().includes(searchVal) ||
+                       (s.location || '').toLowerCase().includes(searchVal) ||
+                       (s.personnel || '').toLowerCase().includes(searchVal) ||
+                       (s.plate || '').toLowerCase().includes(searchVal);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<div style="color:#94a3b8; font-size:0.9rem; grid-column: 1/-1; text-align:center; padding:30px;">Keine Abrechnungen gefunden.</div>';
+                return;
+            }
+
+            filtered.sort((a,b) => new Date(b.date) - new Date(a.date)).forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'settlement-card';
+
+                const feeStatusBadge = s.feeStatus === 'bezahlt' 
+                    ? `<span class="badge badge-yes">Meldegeld bezahlt</span>` 
+                    : `<span class="badge badge-no">Meldegeld offen</span>`;
+
+                card.innerHTML = `
+                    <div class="settlement-title">${s.event}</div>
+                    <div class="settlement-meta">📍 ${s.location} | 📅 ${formatDateDE(s.date)}</div>
+
+                    <div class="details-list">
+                        <div>👥 <b>Teilnehmer:</b> ${s.countAthletes || 0} Sportler / ${s.countCoaches || 0} Betreuer</div>
+                        <div>🚗 <b>KFZ:</b> ${s.plate || '-'} (${s.km || 0} km)</div>
+                        <div>👥 <b>Personal:</b> ${s.personnel || '-'}</div>
+                        <div>⏱️ <b>Abfahrt:</b> ${formatDateTimeDE(s.departure)} | <b>Ankunft:</b> ${formatDateTimeDE(s.arrival)}</div>
+                        <div>💶 <b>Meldegeld:</b> ${s.feeAmount ? s.feeAmount + ' €' : '0 €'} (${s.paidTo || '-'}) ${feeStatusBadge}</div>
+                        <div>🏢 <b>Übernachtung:</b> ${s.overnight === 'ja' ? 'Ja' : 'Nein'} | <b>Verpflegung:</b> ${s.catering === 'ja' ? 'Ja' : 'Nein'}</div>
+                        <div>🏷️ <b>Eigenanteil:</b> ${s.ownShareYesNo === 'ja' ? s.ownShareAmount + ' € / Person' : 'Nein'}</div>
+                        
+                        <div style="margin-top:6px; display:flex; gap:8px;">
+                            ${s.fuelReceiptData ? `<a href="${s.fuelReceiptData}" target="_blank" style="color:var(--accent); text-decoration:none;">🧾 Tankbeleg</a>` : ''}
+                            ${s.feeReceiptData ? `<a href="${s.feeReceiptData}" target="_blank" style="color:var(--accent); text-decoration:none;">🧾 Meldegeldbeleg</a>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <button class="btn btn-secondary" style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="printSingleSettlement('${s.id}')">📄 Drucken</button>
+                        <button class="btn btn-primary" style="width:auto; padding:4px 8px; font-size:0.75rem;" onclick="openSettlementModal('${s.id}')">✏️ Bearbeiten</button>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function openSettlementModal(id = null) {
+            const modal = document.getElementById('settlement-modal');
+            const deleteBtn = document.getElementById('btn-delete-st');
+
+            document.getElementById('fuel-receipt-preview').innerText = '';
+            document.getElementById('fee-receipt-preview').innerText = '';
+            document.getElementById('st-fuel-receipt-file').value = '';
+            document.getElementById('st-fee-receipt-file').value = '';
+
+            if (id) {
+                const s = settlementsData.find(x => x.id === id);
+                if (!s) return;
+
+                document.getElementById('modal-title').innerText = "Wettkampfabrechnung bearbeiten";
+                document.getElementById('st-id').value = s.id;
+                document.getElementById('st-date').value = s.date || '';
+                document.getElementById('st-location').value = s.location || '';
+                document.getElementById('st-event').value = s.event || '';
+                document.getElementById('st-count-athletes').value = s.countAthletes || 0;
+                document.getElementById('st-count-coaches').value = s.countCoaches || 0;
+                document.getElementById('st-personnel').value = s.personnel || '';
+                document.getElementById('st-departure').value = s.departure || '';
+                document.getElementById('st-arrival').value = s.arrival || '';
+                document.getElementById('st-plate').value = s.plate || '';
+                document.getElementById('st-km').value = s.km || '';
+                document.getElementById('st-fuel-receipt-data').value = s.fuelReceiptData || '';
+                if(s.fuelReceiptData) document.getElementById('fuel-receipt-preview').innerText = '📎 Beleg bereits vorhanden';
+
+                document.getElementById('st-fee-amount').value = s.feeAmount || '';
+                document.getElementById('st-paid-to').value = s.paidTo || '';
+                document.getElementById('st-fee-receipt-yesno').value = s.feeReceiptYesNo || 'nein';
+                document.getElementById('st-fee-status').value = s.feeStatus || 'offen';
+                document.getElementById('st-fee-receipt-data').value = s.feeReceiptData || '';
+                if(s.feeReceiptData) document.getElementById('fee-receipt-preview').innerText = '📎 Beleg bereits vorhanden';
+
+                document.getElementById('st-overnight').value = s.overnight || 'nein';
+                document.getElementById('st-catering').value = s.catering || 'nein';
+                document.getElementById('st-own-share-yesno').value = s.ownShareYesNo || 'nein';
+                document.getElementById('st-own-share-amount').value = s.ownShareAmount || '';
+
+                deleteBtn.style.display = 'block';
+            } else {
+                document.getElementById('modal-title').innerText = "Wettkampfabrechnung erfassen";
+                document.getElementById('st-id').value = '';
+                document.getElementById('st-date').value = new Date().toISOString().split('T')[0];
+                document.getElementById('st-location').value = '';
+                document.getElementById('st-event').value = '';
+                document.getElementById('st-count-athletes').value = 0;
+                document.getElementById('st-count-coaches').value = 0;
+                document.getElementById('st-personnel').value = '';
+                document.getElementById('st-departure').value = '';
+                document.getElementById('st-arrival').value = '';
+                document.getElementById('st-plate').value = '';
+                document.getElementById('st-km').value = '';
+                document.getElementById('st-fuel-receipt-data').value = '';
+
+                document.getElementById('st-fee-amount').value = '';
+                document.getElementById('st-paid-to').value = '';
+                document.getElementById('st-fee-receipt-yesno').value = 'nein';
+                document.getElementById('st-fee-status').value = 'offen';
+                document.getElementById('st-fee-receipt-data').value = '';
+
+                document.getElementById('st-overnight').value = 'nein';
+                document.getElementById('st-catering').value = 'nein';
+                document.getElementById('st-own-share-yesno').value = 'nein';
+                document.getElementById('st-own-share-amount').value = '';
+
+                deleteBtn.style.display = 'none';
+            }
+
+            toggleOwnShareAmount();
+            modal.classList.add('active');
+        }
+
+        function closeSettlementModal() {
+            document.getElementById('settlement-modal').classList.remove('active');
+        }
+
+        function saveSettlementLocal() {
+            const id = document.getElementById('st-id').value;
+            const date = document.getElementById('st-date').value;
+            const location = document.getElementById('st-location').value.trim();
+            const event = document.getElementById('st-event').value.trim();
+
+            if (!date || !location || !event) {
+                alert("Bitte Datum, Ort und Veranstaltung angeben.");
+                return;
+            }
+
+            const dataObj = {
+                id: id || 'st_' + Date.now(),
+                date, location, event,
+                countAthletes: parseInt(document.getElementById('st-count-athletes').value, 10) || 0,
+                countCoaches: parseInt(document.getElementById('st-count-coaches').value, 10) || 0,
+                personnel: document.getElementById('st-personnel').value.trim(),
+                departure: document.getElementById('st-departure').value,
+                arrival: document.getElementById('st-arrival').value,
+                plate: document.getElementById('st-plate').value.trim(),
+                km: parseFloat(document.getElementById('st-km').value) || 0,
+                fuelReceiptData: document.getElementById('st-fuel-receipt-data').value,
+                feeAmount: parseFloat(document.getElementById('st-fee-amount').value) || 0,
+                paidTo: document.getElementById('st-paid-to').value.trim(),
+                feeReceiptYesNo: document.getElementById('st-fee-receipt-yesno').value,
+                feeStatus: document.getElementById('st-fee-status').value,
+                feeReceiptData: document.getElementById('st-fee-receipt-data').value,
+                overnight: document.getElementById('st-overnight').value,
+                catering: document.getElementById('st-catering').value,
+                ownShareYesNo: document.getElementById('st-own-share-yesno').value,
+                ownShareAmount: parseFloat(document.getElementById('st-own-share-amount').value) || 0
+            };
+
+            if (id) {
+                const idx = settlementsData.findIndex(x => x.id === id);
+                if (idx !== -1) settlementsData[idx] = dataObj;
+            } else {
+                settlementsData.push(dataObj);
+            }
+
+            closeSettlementModal();
+            renderSettlements();
+            setStatus('Änderungen ungespeichert', '#e67e22');
+        }
+
+        function deleteSettlement() {
+            const id = document.getElementById('st-id').value;
+            if (!id) return;
+
+            if (confirm("Möchtest du diese Abrechnung wirklich löschen?")) {
+                settlementsData = settlementsData.filter(x => x.id !== id);
+                closeSettlementModal();
+                renderSettlements();
+                setStatus('Abrechnung gelöscht (noch nicht gespeichert)', '#e67e22');
+            }
+        }
+
+        function printSingleSettlement(id) {
+            const s = settlementsData.find(x => x.id === id);
+            if (!s) return;
+
+            document.getElementById('pr-title').innerText = `Wettkampfabrechnung: ${s.event}`;
+            document.getElementById('pr-subtitle').innerText = `Ort: ${s.location} | Datum: ${formatDateDE(s.date)} | Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
+
+            const table = document.getElementById('pr-table');
+            table.innerHTML = `
+                <tr><th>Angabe</th><th>Wert</th></tr>
+                <tr><td><b>Veranstaltung / Ort</b></td><td>${s.event} (${s.location})</td></tr>
+                <tr><td><b>Datum</b></td><td>${formatDateDE(s.date)}</td></tr>
+                <tr><td><b>Teilnehmer</b></td><td>${s.countAthletes} Sportler, ${s.countCoaches} Betreuer</td></tr>
+                <tr><td><b>Fahrer / Betreuer / Kampfrichter</b></td><td>${s.personnel || '-'}</td></tr>
+                <tr><td><b>KFZ & Strecke</b></td><td>Kennzeichen: ${s.plate || '-'} | Strecke: ${s.km} km</td></tr>
+                <tr><td><b>Abfahrt / Ankunft (Wittenberg)</b></td><td>Abfahrt: ${formatDateTimeDE(s.departure)} <br> Ankunft: ${formatDateTimeDE(s.arrival)}</td></tr>
+                <tr><td><b>Meldegeld</b></td><td>Höhe: ${s.feeAmount} € | Bezahlt an: ${s.paidTo || '-'} <br> Status: ${s.feeStatus} | Quittung vorh.: ${s.feeReceiptYesNo}</td></tr>
+                <tr><td><b>Übernachtung / Verpflegung</b></td><td>Übernachtung: ${s.overnight} | Verpflegung: ${s.catering}</td></tr>
+                <tr><td><b>Eigenanteil</b></td><td>Erforderlich: ${s.ownShareYesNo} ${s.ownShareYesNo === 'ja' ? '(' + s.ownShareAmount + ' € / Person)' : ''}</td></tr>
+            `;
+
+            setTimeout(() => { window.print(); }, 200);
+        }
+    </script>
+</body>
+</html>
