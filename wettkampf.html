@@ -407,7 +407,7 @@
         }
 
         function getStoredToken() {
-            return localStorage.getItem('trainerportal_github_token'] || '';
+            return localStorage.getItem('trainerportal_github_token') || '';
         }
 
         function getTodayISO() {
@@ -420,7 +420,7 @@
 
         window.onload = function() {
             setupFileEncoders();
-            const token = localStorage.getItem('trainerportal_github_token') || '';
+            const token = getStoredToken();
             if (!token) {
                 editGithubToken();
             } else {
@@ -429,7 +429,7 @@
         };
 
         function editGithubToken() {
-            const currentToken = localStorage.getItem('trainerportal_github_token') || '';
+            const currentToken = getStoredToken();
             const newToken = prompt("Bitte Personal Access Token (Classic mit Scope 'repo') eingeben:", currentToken);
             if (newToken !== null && newToken.trim() !== "") {
                 localStorage.setItem('trainerportal_github_token', newToken.trim());
@@ -570,7 +570,7 @@
         }
 
         async function loadDataFromGitHub() {
-            const token = localStorage.getItem('trainerportal_github_token') || '';
+            const token = getStoredToken();
             if (!token) { setStatus('Kein Token hinterlegt!', '#dc3545'); return; }
 
             setStatus('Lade Wettkämpfe von GitHub...', '#2b5c8f');
@@ -612,7 +612,7 @@
         async function saveDataToGitHub() {
             if (!checkUploadedFilesAlert()) return;
 
-            const token = localStorage.getItem('trainerportal_github_token') || '';
+            const token = getStoredToken();
             if (!token) { alert("Bitte erst einen Token eingeben!"); editGithubToken(); return; }
 
             setStatus('Speichere auf GitHub...', '#2b5c8f');
@@ -1042,7 +1042,7 @@
                 printArea.appendChild(page2);
             }
 
-            // BELEGE ANHÄNGEN (BILDPIS / PDF-RENDER)
+            // BELEGE ANHÄNGEN (BILDER ODER PDFs)
             const appendReceiptPage = async (title, dataUrl) => {
                 if (!dataUrl) return;
 
@@ -1064,7 +1064,8 @@
                     printArea.appendChild(rPage);
 
                     try {
-                        const pdfData = atob(dataUrl.split(',')[1]);
+                        const base64Data = dataUrl.split(',')[1];
+                        const pdfData = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
                         const loadingTask = pdfjsLib.getDocument({ data: pdfData });
                         const pdf = await loadingTask.promise;
                         const page = await pdf.getPage(1);
