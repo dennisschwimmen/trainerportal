@@ -29,7 +29,7 @@
             overflow: hidden;
         }
 
-        /* SIDEBAR LINKS - LISTE ALLER ABRECHNUNGEN */
+        /* SIDEBAR LINKS */
         #sidebar {
             width: 340px;
             background-color: var(--bg-sidebar);
@@ -178,15 +178,15 @@
         .flex-row { display: flex; gap: 12px; }
         .flex-row .field-group { flex: 1; }
 
-        .plate-inputs-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 10px;
+        .car-mapping-card {
             background: #f8fafc;
-            padding: 10px;
-            border-radius: 6px;
             border: 1px solid var(--border-color);
-            margin-top: 5px;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
         }
 
         /* PRINT STYLES */
@@ -215,12 +215,13 @@
             #sidebar.open { transform: translateX(0); }
             #main-content { padding: 12px; }
             .flex-row { flex-direction: column; gap: 0; }
+            .car-mapping-card { flex-direction: column; align-items: stretch; }
         }
     </style>
 </head>
 <body>
 
-    <!-- SIDEBAR LINKS: LISTE DER ABRECHNUNGEN -->
+    <!-- SIDEBAR LINKS -->
     <div id="sidebar">
         <h2>Abrechnungen</h2>
 
@@ -301,8 +302,8 @@
 
                 <div class="flex-row">
                     <div class="field-group">
-                        <label>Fahrer (Namen)</label>
-                        <input type="text" id="st-drivers" placeholder="z.B. Max Mustermann, Peter Müller">
+                        <label>Fahrer (Namen, mit Komma getrennt) *</label>
+                        <input type="text" id="st-drivers" placeholder="z.B. Max Mustermann, Peter Müller" oninput="renderCarMappingFields()">
                     </div>
                     <div class="field-group">
                         <label>Betreuer (Namen)</label>
@@ -314,8 +315,8 @@
                     </div>
                 </div>
 
-                <!-- 3. FAHRT & AUTOS -->
-                <div class="form-section-title">3. Fahrt & KFZ (ab/bis Wittenberg)</div>
+                <!-- 3. FAHRT, AUTOS & ZUORDNUNG -->
+                <div class="form-section-title">3. Fahrt & KFZ-Zuordnung (ab/bis Wittenberg)</div>
                 <div class="flex-row">
                     <div class="field-group">
                         <label>Abfahrt Wittenberg</label>
@@ -330,7 +331,7 @@
                 <div class="flex-row">
                     <div class="field-group">
                         <label>Anzahl KFZ / Autos</label>
-                        <select id="st-car-count" onchange="renderCarPlateFields()">
+                        <select id="st-car-count" onchange="renderCarMappingFields()">
                             <option value="1">1 Auto</option>
                             <option value="2">2 Autos</option>
                             <option value="3">3 Autos</option>
@@ -345,8 +346,8 @@
                 </div>
 
                 <div class="field-group">
-                    <label>KFZ-Kennzeichen der gewählten Fahrzeuge:</label>
-                    <div class="plate-inputs-container" id="plate-inputs-container"></div>
+                    <label>Fahrzeuge & Fahrerzuordnung:</label>
+                    <div id="car-mappings-container"></div>
                 </div>
 
                 <div class="field-group">
@@ -512,21 +513,50 @@
             document.getElementById('own-share-amount-group').style.display = val === 'ja' ? 'flex' : 'none';
         }
 
-        function renderCarPlateFields(existingPlates = []) {
+        function renderCarMappingFields(existingMappings = []) {
             const count = parseInt(document.getElementById('st-car-count').value, 10) || 1;
-            const container = document.getElementById('plate-inputs-container');
+            const driversInput = document.getElementById('st-drivers').value;
+            const driversList = driversInput.split(',').map(d => d.trim()).filter(d => d.length > 0);
+
+            const container = document.getElementById('car-mappings-container');
+            
+            // Vorherige Werte sichern
+            const currentInputs = container.querySelectorAll('.car-mapping-card');
+            const currentValues = [];
+            currentInputs.forEach(card => {
+                const plate = card.querySelector('.car-plate-input').value;
+                const driver = card.querySelector('.car-driver-select').value;
+                currentValues.push({ plate, driver });
+            });
+
             container.innerHTML = '';
 
             for (let i = 1; i <= count; i++) {
-                const val = existingPlates[i - 1] || '';
-                const div = document.createElement('div');
-                div.className = 'field-group';
-                div.style.marginBottom = '0';
-                div.innerHTML = `
-                    <label style="font-size:0.72rem;">Kennzeichen Auto ${i}</label>
-                    <input type="text" class="st-plate-input" placeholder="WB-XX ${100 + i}" value="${val}">
+                const prev = existingMappings[i - 1] || currentValues[i - 1] || {};
+                const plateVal = prev.plate || '';
+                const driverVal = prev.driver || '';
+
+                const card = document.createElement('div');
+                card.className = 'car-mapping-card';
+
+                let driverOptionsHtml = `<option value="">-- Fahrer wählen --</option>`;
+                driversList.forEach(driver => {
+                    const sel = driver === driverVal ? 'selected' : '';
+                    driverOptionsHtml += `<option value="${driver}" ${sel}>${driver}</option>`;
+                });
+
+                card.innerHTML = `
+                    <div style="font-weight:bold; font-size:0.8rem; color:var(--primary); min-width:60px;">Auto ${i}:</div>
+                    <div class="field-group" style="flex:1; margin-bottom:0;">
+                        <label style="font-size:0.72rem;">Kennzeichen</label>
+                        <input type="text" class="car-plate-input" placeholder="WB-XX ${100 + i}" value="${plateVal}">
+                    </div>
+                    <div class="field-group" style="flex:1; margin-bottom:0;">
+                        <label style="font-size:0.72rem;">Fahrer</label>
+                        <select class="car-driver-select">${driverOptionsHtml}</select>
+                    </div>
                 `;
-                container.appendChild(div);
+                container.appendChild(card);
             }
         }
 
@@ -713,7 +743,7 @@
             document.getElementById('st-departure').value = '';
             document.getElementById('st-arrival').value = '';
             document.getElementById('st-car-count').value = '1';
-            renderCarPlateFields();
+            renderCarMappingFields();
 
             document.getElementById('st-km').value = '';
             document.getElementById('st-fuel-receipt-data').value = '';
@@ -759,9 +789,9 @@
             document.getElementById('st-departure').value = s.departure || '';
             document.getElementById('st-arrival').value = s.arrival || '';
             
-            const plates = s.plates || (s.plate ? [s.plate] : []);
-            document.getElementById('st-car-count').value = plates.length || 1;
-            renderCarPlateFields(plates);
+            const carMappings = s.carMappings || [];
+            document.getElementById('st-car-count').value = carMappings.length || 1;
+            renderCarMappingFields(carMappings);
 
             document.getElementById('st-km').value = s.km || '';
             document.getElementById('st-fuel-receipt-data').value = s.fuelReceiptData || '';
@@ -793,8 +823,15 @@
                 return;
             }
 
-            const plateInputs = document.querySelectorAll('.st-plate-input');
-            const plates = Array.from(plateInputs).map(inp => inp.value.trim()).filter(val => val !== '');
+            const mappingCards = document.querySelectorAll('.car-mapping-card');
+            const carMappings = [];
+            mappingCards.forEach(card => {
+                const plate = card.querySelector('.car-plate-input').value.trim();
+                const driver = card.querySelector('.car-driver-select').value.trim();
+                if (plate || driver) {
+                    carMappings.push({ plate, driver });
+                }
+            });
 
             const dataObj = {
                 id: id || 'st_' + Date.now(),
@@ -806,7 +843,7 @@
                 referees: document.getElementById('st-referees').value.trim(),
                 departure: document.getElementById('st-departure').value,
                 arrival: document.getElementById('st-arrival').value,
-                plates: plates,
+                carMappings: carMappings,
                 km: parseFloat(document.getElementById('st-km').value) || 0,
                 fuelReceiptData: document.getElementById('st-fuel-receipt-data').value,
                 feeAmount: parseFloat(document.getElementById('st-fee-amount').value) || 0,
@@ -853,7 +890,10 @@
             document.getElementById('pr-title').innerText = `Wettkampfabrechnung: ${s.event}`;
             document.getElementById('pr-subtitle').innerText = `Ort: ${s.location} | Datum: ${formatDateDE(s.date)} | Erstellt am: ${new Date().toLocaleDateString('de-DE')}`;
 
-            const platesStr = (s.plates && s.plates.length > 0) ? s.plates.join(', ') : '-';
+            let carStr = '-';
+            if (s.carMappings && s.carMappings.length > 0) {
+                carStr = s.carMappings.map((c, i) => `Auto ${i+1}: ${c.plate || 'Unbekannt'} (Fahrer: ${c.driver || 'Keiner'})`).join('<br>');
+            }
 
             const table = document.getElementById('pr-table');
             table.innerHTML = `
@@ -864,7 +904,7 @@
                 <tr><td><b>Fahrer</b></td><td>${s.drivers || '-'}</td></tr>
                 <tr><td><b>Betreuer</b></td><td>${s.coachesNames || '-'}</td></tr>
                 <tr><td><b>Kampfrichter</b></td><td>${s.referees || '-'}</td></tr>
-                <tr><td><b>KFZ & Strecke</b></td><td>Fahrzeuge (${(s.plates || []).length}): ${platesStr} | Gesamtstrecke: ${s.km} km</td></tr>
+                <tr><td><b>Fahrzeuge & Fahrer</b></td><td>${carStr} <br><b>Gesamtstrecke:</b> ${s.km} km</td></tr>
                 <tr><td><b>Abfahrt / Ankunft (Wittenberg)</b></td><td>Abfahrt: ${formatDateTimeDE(s.departure)} <br> Ankunft: ${formatDateTimeDE(s.arrival)}</td></tr>
                 <tr><td><b>Meldegeld</b></td><td>Höhe: ${s.feeAmount} € | Bezahlt an: ${s.paidTo || '-'} <br> Status: ${s.feeStatus} | Quittung vorh.: ${s.feeReceiptYesNo}</td></tr>
                 <tr><td><b>Übernachtung / Verpflegung</b></td><td>Übernachtung: ${s.overnight} | Verpflegung: ${s.catering}</td></tr>
