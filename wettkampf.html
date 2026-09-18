@@ -140,6 +140,11 @@
             margin-top: 4px; font-size: 0.78rem; background: #f1f5f9; padding: 6px 10px; border-radius: 6px;
         }
 
+        .info-box {
+            background-color: #f0f7ff; border-left: 4px solid var(--primary); padding: 12px 15px;
+            border-radius: 0 6px 6px 0; font-size: 0.88rem; color: #1e293b; margin-bottom: 20px; line-height: 1.5;
+        }
+
         /* DRUCK- / PDF-STYLES */
         #print-area { display: none; }
 
@@ -222,7 +227,7 @@
                     <h2 id="form-heading" style="color:var(--primary);">Abrechnung Erfassen</h2>
                     <div style="display:flex; gap:8px;">
                         <button class="btn btn-danger" id="btn-delete-st" style="display:none; width:auto; padding:6px 12px;" onclick="deleteSettlement()">Löschen</button>
-                        <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocal()">Zwischenstand Übernehmen</button>
+                        <button class="btn btn-success" style="width:auto; padding:6px 16px;" onclick="saveFormLocalAndCloud()">💾 Übernehmen & Speichern</button>
                     </div>
                 </div>
 
@@ -259,7 +264,7 @@
                     </div>
                     <div class="flex-row">
                         <div class="field-group">
-                            <label>Veranstaltung *</label>
+                            <label>Veranstaltung / Verein *</label>
                             <input type="text" id="st-event" placeholder="z.B. Sprintertag 2025 / Chemnitzer PSV e.V.">
                         </div>
                         <div class="field-group" style="max-width: 220px;">
@@ -416,18 +421,26 @@
                     </div>
                 </div>
 
-                <!-- SCHRITT 6: FERTIGSTELLUNG & VERSAND -->
+                <!-- SCHRITT 6: FERTIGSTELLUNG & HINWEISE -->
                 <div class="wizard-step-content" id="wizard-step-6">
-                    <div class="form-section-title">6. Fertigstellung, Druck & E-Mail-Versand</div>
+                    <div class="form-section-title">6. Fertigstellung, Druck & Einreichung</div>
+                    
+                    <div class="info-box">
+                        <b>Wichtige Hinweise zur Einreichung:</b><br>
+                        • Bitte senden Sie die erstellten Dokumente per E-Mail an den <b>Kassenwart</b>.<br>
+                        • Bei Wettkämpfen mit <b>Übernachtung</b> müssen zwingend auch die Rechnungen vom Hotel bzw. der Jugendherberge eingereicht werden!
+                    </div>
+
                     <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
-                        Deine Abrechnung ist bereit! Du kannst sie jetzt als PDF drucken/speichern oder einen E-Mail-Entwurf vorbereiten.
+                        Ihre Abrechnung ist komplett erfasst. Sie können das Dokument jetzt als PDF drucken/speichern und die Daten in der Cloud abspeichern.
                     </p>
+
                     <div style="display: flex; flex-direction: column; gap: 12px; max-width: 400px; margin: 20px 0;">
                         <button class="btn btn-primary" style="padding: 12px;" onclick="printCurrentSettlement()">
                             📄 PDF Drucken / Herunterladen
                         </button>
-                        <button class="btn btn-secondary" style="background: #0284c7; padding: 12px;" onclick="sendEmailDraft()">
-                            ✉️ Per E-Mail versenden (E-Mail-Programm öffnen)
+                        <button class="btn btn-success" style="padding: 12px;" onclick="saveFormLocalAndCloud()">
+                            💾 Abrechnung jetzt speichern
                         </button>
                     </div>
                 </div>
@@ -488,35 +501,30 @@
             if (step < 1 || step > totalWizardSteps) return;
             currentWizardStep = step;
 
-            // Schritte umschalten
             for (let i = 1; i <= totalWizardSteps; i++) {
                 document.getElementById(`wizard-step-${i}`).classList.toggle('active', i === currentWizardStep);
             }
 
-            // Buttons anpassen
             document.getElementById('btn-prev').style.display = currentWizardStep === 1 ? 'none' : 'inline-flex';
             document.getElementById('btn-next').style.display = currentWizardStep === totalWizardSteps ? 'none' : 'inline-flex';
 
-            // Fortschrittsleiste aktualisieren
             const titles = [
                 "1. Allgemeine Angaben",
                 "2. Teilnehmer & Funktionen",
                 "3. Fahrt & Fahrzeuge",
                 "4. Meldegeld & Zahlungen",
                 "5. Übernachtung & Eigenanteil",
-                "6. Abschluss & Versand"
+                "6. Abschluss & Einreichung"
             ];
             document.getElementById('step-indicator').innerText = `Schritt ${currentWizardStep} von ${totalWizardSteps}: ${titles[currentWizardStep - 1]}`;
             const percentage = (currentWizardStep / totalWizardSteps) * 100;
             document.getElementById('progress-bar-fill').style.width = `${percentage}%`;
             
-            // Zum Seitenanfang des Inhalts scrollen
             document.getElementById('main-content').scrollTop = 0;
         }
 
         function changeStep(direction) {
             if (direction === 1) {
-                // Vor dem Weiterblättern Kurvencheck auf Schritt 1
                 if (currentWizardStep === 1) {
                     const date = document.getElementById('st-date').value;
                     const location = document.getElementById('st-location').value.trim();
@@ -526,7 +534,7 @@
                         return;
                     }
                 }
-                saveFormLocal(); // Zwischenspeichern bei jedem Weiterklicken
+                saveFormLocal(); 
             }
             showStep(currentWizardStep + direction);
         }
@@ -956,7 +964,22 @@
             }
 
             renderSidebarList();
-            setStatus('Zwischenstand gespeichert', '#28a745');
+        }
+
+        // Übernehmen & direkt in GitHub speichern
+        async function saveFormLocalAndCloud() {
+            const date = document.getElementById('st-date').value;
+            const location = document.getElementById('st-location').value.trim();
+            const event = document.getElementById('st-event').value.trim();
+
+            if (!date || !location || !event) {
+                alert("Bitte fülle mindestens Datum, Ort und Veranstaltung (Schritt 1) aus.");
+                showStep(1);
+                return;
+            }
+
+            saveFormLocal();
+            await saveDataToGitHub();
         }
 
         function deleteSettlement() {
@@ -969,19 +992,6 @@
                 renderSidebarList();
                 setStatus('Abrechnung gelöscht', '#e67e22');
             }
-        }
-
-        function sendEmailDraft() {
-            const eventName = document.getElementById('st-event').value || 'Wettkampf';
-            const location = document.getElementById('st-location').value || '';
-            const responsible = document.getElementById('st-responsible').value || '';
-            
-            const subject = encodeURIComponent(`Abrechnung: ${eventName} (${location})`);
-            const body = encodeURIComponent(
-                `Hallo,\n\nim Anhang findest du die Wettkampfabrechnung für "${eventName}" in ${location}.\n\nVerantwortlich: ${responsible}\n\nViele Grüße`
-            );
-            
-            window.location.href = `mailto:?subject=${subject}&body=${body}`;
         }
 
         /* ERSTELLUNG DER MEHRSEITIGEN FORMULAR-PDF */
