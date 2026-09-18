@@ -1,8 +1,15 @@
 {
+  "categories": [
+    "Verband",
+    "Trainer",
+    "Halle",
+    "Partner/Sponsor",
+    "Sonstiges"
+  ],
   "contacts": [
     {
       "id": "cnt_1789681664993",
-      "category": "Partner",
+      "category": "Partner/Sponsor",
       "name": "Kevin van IJperen",
       "org": "Wittenberg Gemüse GmbH",
       "email": "kevin.ijperen@wbg.de",
