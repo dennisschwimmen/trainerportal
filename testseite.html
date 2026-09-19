@@ -2,99 +2,173 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Meine Seite mit LSVSA-Einbindung</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vereinsportal - LSVSA Bildungsangebote</title>
     <style>
-        /* Grundlayout für die gesamte Seite */
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
+        :root {
+            --primary: #2b5c8f;
+            --primary-hover: #1d4067;
+            --accent: #4a90e2;
+            --bg-sidebar: #f4f6f9;
+            --bg-content: #ffffff;
+            --text-color: #333333;
+            --border-color: #e0e4e8;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #e67e22;
         }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-color);
             display: flex;
             height: 100vh;
-            background-color: #f4f4f9;
+            background-color: var(--bg-content);
+            overflow: hidden;
         }
 
-        /* Linke Sidebar */
-        aside {
-            width: 250px;
-            background-color: #004080;
-            color: white;
-            padding: 20px;
+        /* SIDEBAR LINKS */
+        #sidebar {
+            width: 340px;
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-        }
-        aside h2 {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-            padding-bottom: 10px;
-        }
-        aside ul {
-            list-style: none;
-        }
-        aside li {
-            margin-bottom: 12px;
-        }
-        aside a {
-            color: white;
-            text-decoration: none;
-            display: block;
-            padding: 8px 12px;
-            border-radius: 4px;
-            transition: background 0.2s;
-        }
-        aside a:hover {
-            background-color: rgba(255,255,255,0.15);
+            padding: 15px 12px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+            z-index: 100;
         }
 
-        /* Rechter Inhaltsbereich */
-        main {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            background: white;
+        #sidebar h2 {
+            font-size: 1.1rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid var(--primary);
         }
+
+        .btn-row { display: flex; gap: 6px; margin-bottom: 6px; width: 100%; }
+
+        .btn {
+            width: 100%; color: white; border: none; padding: 8px 6px; border-radius: 6px;
+            cursor: pointer; font-weight: bold; font-size: 0.8rem; display: flex;
+            align-items: center; justify-content: center; gap: 4px; text-align: center; text-decoration: none;
+            box-sizing: border-box;
+        }
+        .btn-primary { background-color: var(--primary); }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-secondary { background: #64748b; color: white; }
+        .btn-secondary:hover { background: #475569; }
+
+        .nav-list { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; width: 100%; }
+
+        .nav-item {
+            background: white; border: 1px solid var(--border-color); border-radius: 6px;
+            padding: 12px; cursor: pointer; transition: all 0.15s; border-left: 4px solid var(--accent);
+            text-decoration: none; color: #1e293b; display: block; box-sizing: border-box; width: 100%;
+        }
+        .nav-item:hover, .nav-item.active {
+            border-color: var(--primary); background: #f0f7ff; transform: translateX(2px);
+        }
+        .nav-item .item-title { font-weight: bold; font-size: 0.88rem; line-height: 1.25; }
+        .nav-item .item-sub { font-size: 0.75rem; color: #64748b; margin-top: 4px; }
+
+        /* HAUPTBEREICH */
+        #content-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; width: 100%; }
+
         header {
-            padding: 20px;
-            background-color: #ffffff;
-            border-bottom: 1px solid #ddd;
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: #333;
+            padding: 12px 20px; border-bottom: 1px solid var(--border-color);
+            display: flex; justify-content: space-between; align-items: center; background-color: #fafbfc;
         }
-        .content-frame {
-            flex-grow: 1;
+        .header-left { display: flex; align-items: center; gap: 10px; }
+        .menu-toggle-btn { display: none; background: white; border: 1px solid var(--border-color); border-radius: 6px; padding: 5px 10px; font-size: 1.1rem; cursor: pointer; }
+        .home-btn { display: inline-flex; align-items: center; justify-content: center; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 5px 10px; font-size: 0.85rem; font-weight: 600; color: var(--primary); text-decoration: none; transition: all 0.2s; }
+        .home-btn:hover { background: #f1f5f9; border-color: var(--accent); }
+        .breadcrumb { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+
+        #main-content { flex: 1; display: flex; flex-direction: column; background-color: #ffffff; overflow: hidden; }
+        
+        .iframe-container {
+            flex: 1;
             width: 100%;
+            height: 100%;
             border: none;
+        }
+
+        /* MOBIL-ANPASSUNGEN (RESPONSIVE DESIGN) */
+        @media (max-width: 768px) {
+            body { flex-direction: column; position: relative; }
+            header { padding: 8px 12px; }
+            .menu-toggle-btn { display: block; }
+            .breadcrumb { display: none; }
+            #sidebar { 
+                position: absolute; 
+                top: 48px; 
+                left: 0; 
+                width: 300px; 
+                height: calc(100vh - 48px); 
+                transform: translateX(-100%); 
+                box-shadow: 4px 0 10px rgba(0,0,0,0.1); 
+            }
+            #sidebar.open { transform: translateX(0); }
         }
     </style>
 </head>
 <body>
 
-    <!-- Linke Sidebar mit Navigation -->
-    <aside>
-        <h2>Navigation</h2>
-        <ul>
-            <li><a href="#">Startseite</a></li>
-            <li><a href="https://lsvsa.de/aktuelle-bildungsangebote/" target="ansichts-fenster">LSVSA Bildungsangebote</a></li>
-            <!-- Du kannst hier weitere Links hinzufügen, die im iFrame geladen werden -->
-            <li><a href="#">Über mich</a></li>
-        </ul>
-    </aside>
+    <!-- SIDEBAR LINKS -->
+    <div id="sidebar">
+        <h2>Bildung & Info</h2>
 
-    <!-- Rechter Hauptbereich -->
-    <main>
+        <div class="btn-row">
+            <a href="index.html" class="btn btn-secondary">🏠 Zur Startseite</a>
+        </div>
+
+        <div class="nav-list">
+            <a href="https://lsvsa.de/aktuelle-bildungsangebote/" target="ansichts-fenster" class="nav-item active" onclick="setActive(this)">
+                <div class="item-title">LSVSA Bildungsangebote</div>
+                <div class="item-sub">Aktuelle Lehrgänge & Termine</div>
+            </a>
+            <!-- Hier können bei Bedarf weitere Links ergänzt werden -->
+        </div>
+    </div>
+
+    <!-- HAUPTBEREICH -->
+    <div id="content-wrapper">
         <header>
-            LSVSA Kampfrichter-Termine
+            <div class="header-left">
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">☰</button>
+                <a href="index.html" class="home-btn" title="Zur Startseite">🏠 Home</a>
+                <div id="breadcrumb" class="breadcrumb">Portal / <b>Bildungsangebote & Termine</b></div>
+            </div>
+            <div>
+                <span style="color: var(--primary); font-weight: 600; font-size: 0.8rem;">LSVSA Portal</span>
+            </div>
         </header>
-        
-        <!-- Das iFrame, das standardmäßig die LSVSA-Seite anzeigt -->
-        <!-- target="ansichts-fenster" aus der Sidebar steuert dieses Fenster -->
-        <iframe name="ansichts-fenster" src="https://lsvsa.de/aktuelle-bildungsangebote/" class="content-frame"></iframe>
-    </main>
 
+        <div id="main-content">
+            <!-- Das iFrame bindet die LSVSA-Seite nahtlos im gleichen Design ein -->
+            <iframe name="ansichts-fenster" src="https://lsvsa.de/aktuelle-bildungsangebote/" class="iframe-container"></iframe>
+        </div>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+        }
+
+        function setActive(element) {
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            element.classList.add('active');
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+        }
+    </script>
 </body>
 </html>
